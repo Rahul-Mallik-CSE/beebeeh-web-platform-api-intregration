@@ -1,0 +1,138 @@
+/** @format */
+
+import { InstallationJob, TableColumn } from "@/types/AllTypes";
+
+export const installationColumns: TableColumn<InstallationJob>[] = [
+  {
+    header: "Job ID",
+    accessor: "jobId",
+    className: "font-medium",
+  },
+  {
+    header: "Client",
+    accessor: "client",
+  },
+  {
+    header: "Model",
+    accessor: "model",
+  },
+  {
+    header: "Serial",
+    accessor: "serial",
+  },
+  {
+    header: "Technician",
+    accessor: "technician",
+  },
+  {
+    header: "Scheduled",
+    accessor: "scheduled",
+  },
+  {
+    header: "Status",
+    accessor: "status",
+  },
+];
+
+export const installationJobsData: InstallationJob[] = [
+  {
+    id: "1",
+    jobId: "J 102",
+    client: "Zara Khan",
+    model: "CoolMaster X200",
+    serial: "CM5200-23344",
+    technician: "Malik khan",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "Assign",
+  },
+  {
+    id: "2",
+    jobId: "J 102",
+    client: "Emma Wilson",
+    model: "TurboChill Pro",
+    serial: "TCP90-56821",
+    technician: "Imroll Hussain",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "In Progress",
+  },
+  {
+    id: "3",
+    jobId: "J 102",
+    client: "Zara Khan",
+    model: "CoolMaster X200",
+    serial: "CM5200-23344",
+    technician: "Malik khan",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "Complete",
+  },
+  {
+    id: "4",
+    jobId: "J 102",
+    client: "Emma Wilson",
+    model: "TurboChill Pro",
+    serial: "TCP90-56821",
+    technician: "Imroll Hussain",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "In Progress",
+  },
+  {
+    id: "5",
+    jobId: "J 102",
+    client: "Zara Khan",
+    model: "CoolMaster X200",
+    serial: "CM5200-23344",
+    technician: "Malik khan",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "Complete",
+  },
+  {
+    id: "6",
+    jobId: "J 102",
+    client: "Zara Khan",
+    model: "CoolMaster X200",
+    serial: "CM5200-23344",
+    technician: "Malik khan",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "Assign",
+  },
+  {
+    id: "7",
+    jobId: "J 102",
+    client: "Emma Wilson",
+    model: "TurboChill Pro",
+    serial: "TCP90-56821",
+    technician: "Imroll Hussain",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "In Progress",
+  },
+  {
+    id: "8",
+    jobId: "J 102",
+    client: "Zara Khan",
+    model: "CoolMaster X200",
+    serial: "CM5200-23344",
+    technician: "Malik khan",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "Complete",
+  },
+  {
+    id: "9",
+    jobId: "J 102",
+    client: "Emma Wilson",
+    model: "TurboChill Pro",
+    serial: "TCP90-56821",
+    technician: "Imroll Hussain",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "In Progress",
+  },
+  {
+    id: "10",
+    jobId: "J 102",
+    client: "Zara Khan",
+    model: "CoolMaster X200",
+    serial: "CM5200-23344",
+    technician: "Malik khan",
+    scheduled: "24 Nov 2025, 2:30 PM",
+    status: "Assign",
+  },
+];
