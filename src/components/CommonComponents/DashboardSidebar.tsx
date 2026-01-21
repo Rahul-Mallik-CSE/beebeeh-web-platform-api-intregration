@@ -45,7 +45,7 @@ export default function DashboardSidebar() {
 
   const isCollapsed = state === "collapsed";
 
-  // Get user data from localStorage
+  //Get user data from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const userData = localStorage.getItem("user");
