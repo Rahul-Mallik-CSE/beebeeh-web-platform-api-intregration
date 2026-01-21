@@ -8,6 +8,7 @@ import DashboardSidebar from "@/components/CommonComponents/DashboardSidebar";
 import NavBar from "@/components/CommonComponents/NabBar";
 import { Provider } from "react-redux";
 import Providers from "@/redux/Providers";
+import { Bounce, ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,6 +42,19 @@ export default function RootLayout({
         className={` ${geistSans.variable} ${geistMono.variable} ${zillaSlab.variable} antialiased bg-[#f3f3f3] font-sans`}
         style={{ fontFamily: "var(--font-zilla-slab)" }}
       >
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Bounce}
+        />
         <Providers>
           <SidebarProvider>
             <DashboardSidebar />

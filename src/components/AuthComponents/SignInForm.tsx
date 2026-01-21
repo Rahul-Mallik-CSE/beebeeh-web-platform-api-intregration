@@ -30,7 +30,6 @@ export const SignInForm = () => {
 
         // Store user data in localStorage
         localStorage.setItem("user", JSON.stringify(response.data.user));
-   
 
         // Also save token in cookies for middleware
         await saveTokens(response.data.access_token, true);
@@ -178,6 +177,17 @@ export const SignInForm = () => {
         </svg>
         Log in with Google
       </Button>
+
+      {/* Sign Up Link */}
+      <p className="text-center text-sm text-gray-600 mt-6">
+        Don&apos;t have an account?{" "}
+        <Link
+          href="/sign-up"
+          className="text-[#9E2729] font-semibold hover:underline"
+        >
+          Sign Up
+        </Link>
+      </p>
     </div>
   );
 };
