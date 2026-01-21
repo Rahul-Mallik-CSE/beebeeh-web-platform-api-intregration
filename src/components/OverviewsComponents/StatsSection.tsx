@@ -6,7 +6,6 @@ import StatsCard from "./StatsCard";
 import { FaChartLine, FaClockRotateLeft } from "react-icons/fa6";
 import { PiSunHorizonFill } from "react-icons/pi";
 import { TbSettingsPlus } from "react-icons/tb";
-import { useGetDashboardQuery } from "@/redux/features/technicianFeatures/overViewAPI";
 import StatsCardLoadingView from "../LoadingComponents/StatsCardLoadingView";
 
 interface StatsSectionProps {
