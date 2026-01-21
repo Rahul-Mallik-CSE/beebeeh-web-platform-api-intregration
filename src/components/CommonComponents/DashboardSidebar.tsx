@@ -41,16 +41,26 @@ export default function DashboardSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [userRole, setUserRole] = useState<string>("");
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const isCollapsed = state === "collapsed";
 
   // Get user data from localStorage
   useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const user = JSON.parse(userData);
-      setUserRole(user.role);
+    if (typeof window !== "undefined") {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          setUserRole(user.role);
+          console.log("User role loaded:", user.role);
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          setUserRole("admin"); // fallback
+        }
+      } else {
+        setUserRole("admin"); // fallback if no user data
+      }
     }
   }, []);
 
@@ -148,8 +158,12 @@ export default function DashboardSidebar() {
   ];
 
   // Select navigation items based on user role
-  const navItems =
-    userRole === "technician" ? technicianNavItems : adminNavItems;
+  // If userRole is null (still loading), return empty array to avoid showing wrong nav
+  const navItems = !userRole
+    ? []
+    : userRole === "technician"
+      ? technicianNavItems
+      : adminNavItems;
 
   const handleLogout = async () => {
     // Clear all localStorage

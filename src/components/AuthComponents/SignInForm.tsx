@@ -30,6 +30,7 @@ export const SignInForm = () => {
 
         // Store user data in localStorage
         localStorage.setItem("user", JSON.stringify(response.data.user));
+   
 
         // Also save token in cookies for middleware
         await saveTokens(response.data.access_token, true);
