@@ -146,3 +146,28 @@ export interface TodaysJobsResponse {
   meta: TodaysJobsMeta;
   data: TodaysJob[];
 }
+
+// All Jobs API Types
+export interface AllJob {
+  job_id: string;
+  job_type: string;
+  client_name: string;
+  contact_number: string;
+  scheduled_time: string;
+  status: string;
+}
+
+export interface AllJobsMeta {
+  date: string;
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface AllJobsResponse {
+  success: boolean;
+  message: string;
+  meta: AllJobsMeta;
+  data: AllJob[];
+}
