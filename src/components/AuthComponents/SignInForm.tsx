@@ -7,19 +7,48 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/redux/features/authAPI";
+import { saveTokens } from "@/services/authService";
+
 export const SignInForm = () => {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [userRole, setUserRole] = useState("admin");
-  const handleSignIn = () => {
-    // Store user role in localStorage
-    localStorage.setItem("userRole", userRole);
-    console.log("User role set to:", userRole);
-    // Here you would typically handle form submission and authentication
-    // Use setTimeout to ensure localStorage is written before navigation
-    setTimeout(() => {
-      router.push("/overview");
-    }, 100);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [login, { isLoading, error }] = useLoginMutation();
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await login({ email, password }).unwrap();
+
+      if (response.success) {
+        // Store tokens in localStorage
+        localStorage.setItem("accessToken", response.data.access_token);
+        localStorage.setItem("refreshToken", response.data.refresh_token);
+
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+
+        // Also save token in cookies for middleware
+        await saveTokens(response.data.access_token, true);
+
+        console.log("Login successful:", response.data.user);
+
+        // Redirect based on role
+        if (response.data.user.role === "technician") {
+          router.push("/overviews");
+        } else {
+          router.push("/overview");
+        }
+      }
+    } catch (err: any) {
+      console.error("Login failed:", err);
+      alert(
+        err?.data?.message || "Login failed. Please check your credentials.",
+      );
+    }
   };
   return (
     <div className="relative z-10 w-full max-w-[90vw] sm:max-w-lg bg-white rounded-2xl shadow-lg py-6 sm:py-8 px-4 sm:px-6">
@@ -38,59 +67,78 @@ export const SignInForm = () => {
         Sign in to access your Beebeeh dashboard and continue your work.
       </p>
 
-      {/* Email Input */}
-      <div className="mb-4 sm:mb-5">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1.5 sm:mb-2">
-          Email Address
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email address"
-          className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
-        />
-      </div>
-
-      {/* Password Input */}
-      <div className="mb-2">
-        <div className="flex justify-between items-center mb-1.5 sm:mb-2">
-          <label className="block text-sm sm:text-base font-medium text-[#9E2729]">
-            Password
+      <form onSubmit={handleSignIn}>
+        {/* Email Input */}
+        <div className="mb-4 sm:mb-5">
+          <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1.5 sm:mb-2">
+            Email Address
           </label>
-          <Link
-            href="/reset-pass"
-            className="text-xs sm:text-sm text-[#9E2729] hover:underline"
-          >
-            Forgot Password?
-          </Link>
-        </div>
-        <div className="relative">
           <input
-            type={showPassword ? "text" : "password"}
-            placeholder="••••••••"
+            type="email"
+            placeholder="Enter your email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
             className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
-            ) : (
-              <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-            )}
-          </button>
         </div>
-      </div>
 
-      {/* Sign In Button */}
-      <Button
-        onClick={handleSignIn}
-        className="w-full bg-[#9E2729] hover:bg-[#7A3333] text-white font-semibold py-3 rounded-lg mt-6 mb-4 transition-colors"
-      >
-        Sign In
-      </Button>
+        {/* Password Input */}
+        <div className="mb-2">
+          <div className="flex justify-between items-center mb-1.5 sm:mb-2">
+            <label className="block text-sm sm:text-base font-medium text-[#9E2729]">
+              Password
+            </label>
+            <Link
+              href="/reset-pass"
+              className="text-xs sm:text-sm text-[#9E2729] hover:underline"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
+              ) : (
+                <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">
+              {(error as any)?.data?.message ||
+                "Login failed. Please try again."}
+            </p>
+          </div>
+        )}
+
+        {/* Sign In Button */}
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-[#9E2729] hover:bg-[#7A3333] text-white font-semibold py-3 rounded-lg mt-6 mb-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Signing in..." : "Sign In"}
+        </Button>
+      </form>
 
       {/* Divider */}
       <div className="flex items-center gap-3 mb-4">
@@ -100,7 +148,10 @@ export const SignInForm = () => {
       </div>
 
       {/* Google Login */}
-      <Button className="w-full border bg-white border-[#E8D5D8] text-gray-700 font-medium py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
+      <Button
+        type="button"
+        className="w-full border bg-white border-[#E8D5D8] text-gray-700 font-medium py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+      >
         <svg
           className="w-5 h-5"
           viewBox="0 0 24 24"

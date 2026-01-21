@@ -34,6 +34,7 @@ import { GiAutoRepair } from "react-icons/gi";
 import { BsBox } from "react-icons/bs";
 import { AiFillTool } from "react-icons/ai";
 import { GrUserWorker, GrVmMaintenance } from "react-icons/gr";
+import { logout } from "@/services/authService";
 
 export default function DashboardSidebar() {
   const { state } = useSidebar();
@@ -43,7 +44,15 @@ export default function DashboardSidebar() {
   const [userRole, setUserRole] = useState<string>("");
 
   const isCollapsed = state === "collapsed";
-  const role = localStorage.getItem("userRole");
+
+  // Get user data from localStorage
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      setUserRole(user.role);
+    }
+  }, []);
 
   // Admin navigation items
   const adminNavItems = [
@@ -139,16 +148,21 @@ export default function DashboardSidebar() {
   ];
 
   // Select navigation items based on user role
-  const navItems = role === "technician" ? technicianNavItems : adminNavItems;
+  const navItems =
+    userRole === "technician" ? technicianNavItems : adminNavItems;
 
-  const handleLogout = () => {
-    // Clear user role from localStorage
-    localStorage.removeItem("userRole");
-    router.push("/sign-in");
-    // Add your logout logic here (e.g., clear tokens, redirect, etc.)
+  const handleLogout = async () => {
+    // Clear all localStorage
+    localStorage.removeItem("user");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+
+    // Clear cookies
+    await logout();
+
     console.log("Logging out...");
     setIsLogoutModalOpen(false);
-    // Example: router.push('/login');
+    router.push("/sign-in");
   };
 
   // Add console.log to debug
