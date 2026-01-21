@@ -73,7 +73,9 @@ const NavBar = () => {
           </div>
           {/* Left side - Title */}
           <h1 className="text-sm sm:text-base md:text-lg lg:text-2xl 2xl:text-3xl font-bold text-gray-800 truncate">
-            Admin Dashboard
+            {user?.role === "admin"
+              ? "Admin Dashboard"
+              : "Technician Dashboard"}
           </h1>
         </div>
         {/* Right side - Notification, Profile */}
