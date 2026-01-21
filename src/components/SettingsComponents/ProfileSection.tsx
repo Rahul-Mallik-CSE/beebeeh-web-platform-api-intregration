@@ -245,6 +245,7 @@ const ProfileSection = () => {
           fullName: formData.fullName,
           contactNumber: formData.contactNumber,
           address: formData.address,
+          profileImage: formData.profileImage,
         }}
         onSave={handleSaveChanges}
       />

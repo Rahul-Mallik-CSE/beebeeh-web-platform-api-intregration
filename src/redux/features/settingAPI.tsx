@@ -12,7 +12,15 @@ const settingAPI = baseApi.injectEndpoints({
       }),
       providesTags: ["Profile"],
     }),
+    updateProfile: builder.mutation<ProfileResponse, FormData>({
+      query: (formData) => ({
+        url: `/api/auth/profile/`,
+        method: "PATCH",
+        body: formData,
+      }),
+      invalidatesTags: ["Profile"],
+    }),
   }),
 });
 
-export const { useGetProfileQuery } = settingAPI;
+export const { useGetProfileQuery, useUpdateProfileMutation } = settingAPI;
