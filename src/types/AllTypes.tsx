@@ -121,3 +121,28 @@ export interface DashboardResponse {
   message: string;
   data: DashboardData;
 }
+
+// Today's Jobs API Types
+export interface TodaysJob {
+  job_id: string;
+  job_type: string;
+  client_name: string;
+  contact_number: string;
+  ordered_by_time: string;
+  status: string;
+}
+
+export interface TodaysJobsMeta {
+  date: string;
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface TodaysJobsResponse {
+  success: boolean;
+  message: string;
+  meta: TodaysJobsMeta;
+  data: TodaysJob[];
+}
