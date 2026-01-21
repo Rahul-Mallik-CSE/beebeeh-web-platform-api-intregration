@@ -50,21 +50,6 @@ export const SignInForm = () => {
         />
       </div>
 
-      {/* User Role Select */}
-      <div className="mb-4 sm:mb-5">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1.5 sm:mb-2">
-          User Role
-        </label>
-        <select
-          value={userRole}
-          onChange={(e) => setUserRole(e.target.value)}
-          className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
-        >
-          <option value="admin">Admin</option>
-          <option value="technician">Technician</option>
-        </select>
-      </div>
-
       {/* Password Input */}
       <div className="mb-2">
         <div className="flex justify-between items-center mb-1.5 sm:mb-2">

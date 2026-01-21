@@ -6,6 +6,8 @@ import "./globals.css";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/CommonComponents/DashboardSidebar";
 import NavBar from "@/components/CommonComponents/NabBar";
+import { Provider } from "react-redux";
+import Providers from "@/redux/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,15 +41,17 @@ export default function RootLayout({
         className={` ${geistSans.variable} ${geistMono.variable} ${zillaSlab.variable} antialiased bg-[#f3f3f3] font-sans`}
         style={{ fontFamily: "var(--font-zilla-slab)" }}
       >
-        <SidebarProvider>
-          <DashboardSidebar />
-          <SidebarInset className="overflow-x-hidden">
-            <div className="bg-[#f3f3f3] min-h-screen w-full ">
-              <NavBar />
-              <div className="w-full overflow-x-hidden">{children}</div>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
+        <Providers>
+          <SidebarProvider>
+            <DashboardSidebar />
+            <SidebarInset className="overflow-x-hidden">
+              <div className="bg-[#f3f3f3] min-h-screen w-full ">
+                <NavBar />
+                <div className="w-full overflow-x-hidden">{children}</div>
+              </div>
+            </SidebarInset>
+          </SidebarProvider>
+        </Providers>
       </body>
     </html>
   );
