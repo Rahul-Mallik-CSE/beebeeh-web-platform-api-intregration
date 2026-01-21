@@ -1,15 +1,31 @@
 /** @format */
 
 "use client";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useVerifyOtpMutation } from "@/redux/features/authAPI";
+import { toast } from "react-toastify";
 
 const VerifyEmailForm = () => {
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
+  const [email, setEmail] = useState<string>("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
+
+  const [verifyOtp, { isLoading }] = useVerifyOtpMutation();
+
+  useEffect(() => {
+    // Get email from localStorage
+    const pendingEmail = localStorage.getItem("pendingVerificationEmail");
+    if (pendingEmail) {
+      setEmail(pendingEmail);
+    } else {
+      toast.error("No pending verification found");
+      router.push("/sign-up");
+    }
+  }, [router]);
 
   const handleChange = (index: number, value: string) => {
     if (value.length > 1) return;
@@ -26,7 +42,7 @@ const VerifyEmailForm = () => {
 
   const handleKeyDown = (
     index: number,
-    e: React.KeyboardEvent<HTMLInputElement>
+    e: React.KeyboardEvent<HTMLInputElement>,
   ) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -54,9 +70,40 @@ const VerifyEmailForm = () => {
       inputRefs.current[5]?.focus();
     }
   };
-  const handleEmailVerify = () => {
-    // Here you would typically validate the OTP and make an API call
-    router.push("/sign-in");
+
+  const handleEmailVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const otpString = otp.join("");
+
+    if (otpString.length !== 6) {
+      toast.error("Please enter complete OTP");
+      return;
+    }
+
+    if (!email) {
+      toast.error("Email not found");
+      return;
+    }
+
+    try {
+      const response = await verifyOtp({ email, otp: otpString }).unwrap();
+
+      if (response.success) {
+        toast.success("Email verified successfully!");
+
+        // Clear the pending email from localStorage
+        localStorage.removeItem("pendingVerificationEmail");
+
+        // Navigate to sign in page
+        router.push("/sign-in");
+      }
+    } catch (err: any) {
+      console.error("Verification failed:", err);
+      toast.error(
+        err?.data?.message || "Verification failed. Please try again.",
+      );
+    }
   };
 
   return (
@@ -77,29 +124,33 @@ const VerifyEmailForm = () => {
         Enter the OTP sent to your email
       </p>
 
-      {/* OTP Input Boxes */}
-      <div className="flex justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-        {otp.map((digit, index) => (
-          <input
-            key={index}
-            type="text"
-            maxLength={1}
-            value={digit}
-            onChange={(e) => handleChange(index, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(index, e)}
-            onPaste={handlePaste}
-            className="w-10 h-10 sm:w-12 sm:h-12 text-center text-lg sm:text-xl font-semibold border border-[#E8D5D8] rounded-lg bg-white text-gray-800 focus:outline-none focus:border-[#8B3A3A] focus:ring-2 focus:ring-[#8B3A3A]"
-          />
-        ))}
-      </div>
+      <form onSubmit={handleEmailVerify}>
+        {/* OTP Input Boxes */}
+        <div className="flex justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          {otp.map((digit, index) => (
+            <input
+              key={index}
+              ref={(el) => (inputRefs.current[index] = el)}
+              type="text"
+              maxLength={1}
+              value={digit}
+              onChange={(e) => handleChange(index, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(index, e)}
+              onPaste={handlePaste}
+              className="w-10 h-10 sm:w-12 sm:h-12 text-center text-lg sm:text-xl font-semibold border border-[#E8D5D8] rounded-lg bg-white text-gray-800 focus:outline-none focus:border-[#8B3A3A] focus:ring-2 focus:ring-[#8B3A3A]"
+            />
+          ))}
+        </div>
 
-      {/* Verify Button */}
-      <Button
-        onClick={handleEmailVerify}
-        className="w-full bg-[#9E2729] hover:bg-[#7A3333] text-white text-sm sm:text-base font-semibold py-2 sm:py-3 rounded-lg mb-3 sm:mb-4 transition-colors"
-      >
-        Verify
-      </Button>
+        {/* Verify Button */}
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-[#9E2729] hover:bg-[#7A3333] text-white text-sm sm:text-base font-semibold py-2 sm:py-3 rounded-lg mb-3 sm:mb-4 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Verifying..." : "Verify"}
+        </Button>
+      </form>
 
       {/* Resend Link */}
       <p className="text-center text-sm text-gray-600">

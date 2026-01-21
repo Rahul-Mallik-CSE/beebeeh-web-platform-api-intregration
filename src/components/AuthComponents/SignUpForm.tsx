@@ -6,16 +6,136 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSignupMutation } from "@/redux/features/authAPI";
+import { toast } from "react-toastify";
 
 const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
-  const handleSignUp = () => {
-    // Here you would typically validate the form and make an API call
-    // For now, we'll just navigate to the verify-email page
-    router.push("/verify-email");
+  // Form state
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    contact_number: "",
+    address: "",
+    password: "",
+    confirm_password: "",
+  });
+
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+  const [signup, { isLoading }] = useSignupMutation();
+
+  // Password validation
+  const validatePassword = (password: string): string[] => {
+    const errors: string[] = [];
+
+    if (password.length < 8) {
+      errors.push("Password must be at least 8 characters long");
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      errors.push("Password must contain at least one uppercase letter");
+    }
+
+    if (!/[a-z]/.test(password)) {
+      errors.push("Password must contain at least one lowercase letter");
+    }
+
+    if (!/[0-9]/.test(password)) {
+      errors.push("Password must contain at least one number");
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.push("Password must contain at least one special character");
+    }
+
+    if (/^\d+$/.test(password)) {
+      errors.push("Password cannot be entirely numeric");
+    }
+
+    // Check for common passwords
+    const commonPasswords = [
+      "password",
+      "12345678",
+      "qwerty",
+      "abc123",
+      "password123",
+    ];
+    if (commonPasswords.includes(password.toLowerCase())) {
+      errors.push("This password is too common");
+    }
+
+    return errors;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+
+    // Validate password in real-time
+    if (name === "password") {
+      const errors = validatePassword(value);
+      setPasswordErrors(errors);
+    }
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.full_name &&
+      formData.email &&
+      formData.contact_number &&
+      formData.address &&
+      formData.password &&
+      formData.confirm_password &&
+      passwordErrors.length === 0 &&
+      formData.password === formData.confirm_password
+    );
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validation
+    if (
+      !formData.full_name ||
+      !formData.email ||
+      !formData.contact_number ||
+      !formData.address ||
+      !formData.password ||
+      !formData.confirm_password
+    ) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (formData.password !== formData.confirm_password) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await signup(formData).unwrap();
+
+      if (response.success) {
+        toast.success("Signup successful! Please check your email for OTP");
+
+        // Store email in localStorage to use in verify page
+        localStorage.setItem("pendingVerificationEmail", formData.email);
+
+        // Navigate to verify email page
+        router.push("/verify-email");
+      }
+    } catch (err: any) {
+      console.error("Signup failed:", err);
+      toast.error(err?.data?.message || "Signup failed. Please try again.");
+    }
   };
 
   return (
@@ -36,113 +156,180 @@ const SignUpForm = () => {
         Get started with Beebeeh
       </p>
 
-      {/* Full Name Input */}
-      <div className="mb-2">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
-          Full Name
-        </label>
-        <input
-          type="text"
-          placeholder="Enter your full name"
-          className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
-        />
-      </div>
-
-      {/* Email Input */}
-      <div className="mb-2">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
-          Email Address
-        </label>
-        <input
-          type="email"
-          placeholder="Enter your email address"
-          className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
-        />
-      </div>
-
-      {/* Contact Number Input */}
-      <div className="mb-2">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
-          Contact Number
-        </label>
-        <input
-          type="tel"
-          placeholder="Enter your contact number"
-          className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
-        />
-      </div>
-
-      {/* Address Input */}
-      <div className="mb-2">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
-          Address
-        </label>
-        <input
-          type="text"
-          placeholder="Enter your address"
-          className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
-        />
-      </div>
-
-      {/* Password Input */}
-      <div className="mb-2">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
-          Password
-        </label>
-        <div className="relative">
+      <form onSubmit={handleSignUp}>
+        {/* Full Name Input */}
+        <div className="mb-2">
+          <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
+            Full Name
+          </label>
           <input
-            type={showPassword ? "text" : "password"}
-            placeholder="Create a password"
+            type="text"
+            name="full_name"
+            value={formData.full_name}
+            onChange={handleChange}
+            placeholder="Enter your full name"
+            required
             className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <EyeOff className="w-5 h-5" />
-            ) : (
-              <Eye className="w-5 h-5" />
-            )}
-          </button>
         </div>
-      </div>
 
-      {/* Confirm Password Input */}
-      <div className="mb-2">
-        <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
-          Confirm Password
-        </label>
-        <div className="relative">
+        {/* Email Input */}
+        <div className="mb-2">
+          <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
+            Email Address
+          </label>
           <input
-            type={showConfirmPassword ? "text" : "password"}
-            placeholder="Re-enter password"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email address"
+            required
             className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
           />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-          >
-            {showConfirmPassword ? (
-              <EyeOff className="w-5 h-5" />
-            ) : (
-              <Eye className="w-5 h-5" />
-            )}
-          </button>
         </div>
-      </div>
 
-      {/* Sign Up Button */}
-      <Button
-        onClick={handleSignUp}
-        className="w-full bg-[#9E2729] hover:bg-[#7A3333] text-white text-sm sm:text-base font-semibold py-2 sm:py-3 rounded-lg mt-4 sm:mt-6 mb-2 transition-colors"
-      >
-        Sign Up
-      </Button>
+        {/* Contact Number Input */}
+        <div className="mb-2">
+          <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
+            Contact Number
+          </label>
+          <input
+            type="tel"
+            name="contact_number"
+            value={formData.contact_number}
+            onChange={handleChange}
+            placeholder="Enter your contact number"
+            required
+            className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
+          />
+        </div>
+
+        {/* Address Input */}
+        <div className="mb-2">
+          <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
+            Address
+          </label>
+          <input
+            type="text"
+            name="address"
+            value={formData.address}
+            onChange={handleChange}
+            placeholder="Enter your address"
+            required
+            className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
+          />
+        </div>
+
+        {/* Password Input */}
+        <div className="mb-2">
+          <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Create a password"
+              required
+              className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+
+          {/* Password validation errors */}
+          {formData.password && passwordErrors.length > 0 && (
+            <div className="mt-2 space-y-1">
+              {passwordErrors.map((error, index) => (
+                <p
+                  key={index}
+                  className="text-xs text-red-600 flex items-center gap-1"
+                >
+                  <span className="text-red-600">•</span> {error}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {/* Password strength indicator */}
+          {formData.password && passwordErrors.length === 0 && (
+            <p className="mt-2 text-xs text-green-600 flex items-center gap-1">
+              <span className="text-green-600">✓</span> Password is strong
+            </p>
+          )}
+        </div>
+
+        {/* Confirm Password Input */}
+        <div className="mb-2">
+          <label className="block text-sm sm:text-base font-medium text-[#9E2729] mb-1">
+            Confirm Password
+          </label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirm_password"
+              value={formData.confirm_password}
+              onChange={handleChange}
+              placeholder="Re-enter password"
+              required
+              className="w-full px-3 py-1.5 sm:px-4 sm:py-2 text-sm sm:text-base border border-[#E8D5D8] rounded-lg bg-white text-gray-800 placeholder-gray-400 focus:outline-none focus:border-[#8B3A3A] focus:ring-1 focus:ring-[#8B3A3A]"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              aria-label={
+                showConfirmPassword ? "Hide password" : "Show password"
+              }
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+
+          {/* Password mismatch error */}
+          {formData.confirm_password &&
+            formData.password !== formData.confirm_password && (
+              <p className="mt-2 text-xs text-red-600 flex items-center gap-1">
+                <span className="text-red-600">•</span> Passwords do not match
+              </p>
+            )}
+
+          {/* Password match indicator */}
+          {formData.confirm_password &&
+            formData.password === formData.confirm_password &&
+            passwordErrors.length === 0 && (
+              <p className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                <span className="text-green-600">✓</span> Passwords match
+              </p>
+            )}
+        </div>
+
+        {/* Sign Up Button */}
+        <Button
+          type="submit"
+          disabled={isLoading || !isFormValid()}
+          className="w-full bg-[#9E2729] hover:bg-[#7A3333] text-white text-sm sm:text-base font-semibold py-2 sm:py-3 rounded-lg mt-4 sm:mt-6 mb-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? "Signing up..." : "Sign Up"}
+        </Button>
+      </form>
 
       {/* Divider */}
       <div className="flex items-center gap-2 sm:gap-3 mb-2">
@@ -152,7 +339,10 @@ const SignUpForm = () => {
       </div>
 
       {/* Google Sign Up */}
-      <Button className="w-full border bg-white border-[#E8D5D8] text-gray-700 text-sm sm:text-base font-medium py-2 sm:py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors">
+      <Button
+        type="button"
+        className="w-full border bg-white border-[#E8D5D8] text-gray-700 text-sm sm:text-base font-medium py-2 sm:py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
+      >
         <svg
           className="w-5 h-5"
           viewBox="0 0 24 24"

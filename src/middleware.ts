@@ -17,7 +17,8 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/forget-pass") ||
     request.nextUrl.pathname.startsWith("/reset-pass") ||
     request.nextUrl.pathname.startsWith("/verify-method") ||
-    request.nextUrl.pathname.startsWith("/verify-otp");
+    request.nextUrl.pathname.startsWith("/verify-otp") ||
+    request.nextUrl.pathname.startsWith("/verify-email");
 
   const isAccountSetupPage =
     request.nextUrl.pathname.startsWith("/account-setup");

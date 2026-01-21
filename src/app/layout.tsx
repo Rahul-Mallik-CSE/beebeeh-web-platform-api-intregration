@@ -3,10 +3,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Zilla_Slab } from "next/font/google";
 import "./globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/CommonComponents/DashboardSidebar";
 import NavBar from "@/components/CommonComponents/NabBar";
-import { Provider } from "react-redux";
 import Providers from "@/redux/Providers";
 import { Bounce, ToastContainer } from "react-toastify";
 
