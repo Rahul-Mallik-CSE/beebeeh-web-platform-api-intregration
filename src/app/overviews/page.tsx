@@ -4,10 +4,11 @@
 import OverviewTableSection from "@/components/OverviewsComponents/OverviewTableSection";
 import StatsSection from "@/components/OverviewsComponents/StatsSection";
 import { useGetDashboardQuery } from "@/redux/features/technicianFeatures/overViewAPI";
-import React from "react";
+import React, { useState } from "react";
 
 const OverviewPage = () => {
-  const { data, isLoading, error } = useGetDashboardQuery();
+  const [currentPage, setCurrentPage] = useState(1);
+  const { data, isLoading, error } = useGetDashboardQuery(currentPage);
 
   return (
     <div className="w-full p-4">
@@ -23,6 +24,8 @@ const OverviewPage = () => {
         <OverviewTableSection
           isLoading={isLoading}
           recentJobs={data?.data?.recent_jobs}
+          meta={data?.data?.meta}
+          onPageChange={setCurrentPage}
         />
       </div>
     </div>

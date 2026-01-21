@@ -45,7 +45,7 @@ export default function DashboardSidebar() {
 
   const isCollapsed = state === "collapsed";
 
-  //  Get user data from localStorage
+  // Get user data from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const userData = localStorage.getItem("user");
@@ -56,10 +56,10 @@ export default function DashboardSidebar() {
           console.log("User role loaded:", user.role);
         } catch (error) {
           console.error("Error parsing user data:", error);
-          setUserRole("admin"); // fallback
+          // fallback
         }
       } else {
-        setUserRole("admin"); // fallback if no user data
+        // fallback if no user data
       }
     }
   }, []);

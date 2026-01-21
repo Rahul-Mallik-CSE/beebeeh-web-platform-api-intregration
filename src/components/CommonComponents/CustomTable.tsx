@@ -32,8 +32,12 @@ interface CustomTableProps<T> {
   onAction?: (row: T) => void;
   itemsPerPage?: number;
   title?: string;
-
   additionalCount?: number;
+  // Server-side pagination props
+  serverSidePagination?: boolean;
+  currentPage?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
 }
 
 const CustomTable = <T extends Record<string, any>>({
@@ -42,9 +46,23 @@ const CustomTable = <T extends Record<string, any>>({
   onAction,
   itemsPerPage = 10,
   title,
+  serverSidePagination = false,
+  currentPage: externalCurrentPage,
+  totalPages: externalTotalPages,
+  onPageChange: externalOnPageChange,
 }: CustomTableProps<T>) => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [filterState, setFilterState] = useState<FilterState | null>(null);
+
+  // Use external pagination if provided, otherwise use internal
+  const currentPage =
+    serverSidePagination && externalCurrentPage
+      ? externalCurrentPage
+      : internalCurrentPage;
+  const handlePageChangeInternal =
+    serverSidePagination && externalOnPageChange
+      ? externalOnPageChange
+      : setInternalCurrentPage;
 
   // Helper function to get the data key from column header
   const getDataKeyFromHeader = (header: string): string => {
@@ -53,7 +71,7 @@ const CustomTable = <T extends Record<string, any>>({
       .map((word, index) =>
         index === 0
           ? word.toLowerCase()
-          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
       )
       .join("");
   };
@@ -79,7 +97,7 @@ const CustomTable = <T extends Record<string, any>>({
       // Apply status filter
       if (filterState.statusFilter) {
         const statusColumn = columns.find(
-          (col) => col.header.toLowerCase() === "status"
+          (col) => col.header.toLowerCase() === "status",
         );
         if (statusColumn) {
           const dataKey =
@@ -98,7 +116,7 @@ const CustomTable = <T extends Record<string, any>>({
         const idColumn = columns.find(
           (col) =>
             col.header.toLowerCase() === "id" ||
-            col.header.toLowerCase().includes("id")
+            col.header.toLowerCase().includes("id"),
         );
         if (idColumn) {
           const dataKey =
@@ -131,19 +149,46 @@ const CustomTable = <T extends Record<string, any>>({
     return result;
   }, [data, filterState, columns]);
 
-  const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentData = filteredAndSortedData.slice(startIndex, endIndex);
+  // For server-side pagination, use all filtered data (no slicing)
+  // For client-side pagination, slice the data
+  const totalPages =
+    serverSidePagination && externalTotalPages
+      ? externalTotalPages
+      : Math.ceil(filteredAndSortedData.length / itemsPerPage);
+
+  console.log("Pagination Debug:", {
+    serverSidePagination,
+    externalTotalPages,
+    externalCurrentPage,
+    totalPages,
+    currentPage,
+    dataLength: data.length,
+  });
+
+  const currentData = serverSidePagination
+    ? filteredAndSortedData
+    : filteredAndSortedData.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage,
+      );
 
   const handleApplyFilter = (newFilterState: FilterState) => {
     setFilterState(newFilterState);
-    setCurrentPage(1); // Reset to first page when filter is applied
+    // Reset to first page when filter is applied
+    if (serverSidePagination && externalOnPageChange) {
+      externalOnPageChange(1);
+    } else {
+      setInternalCurrentPage(1);
+    }
   };
 
   const handleClearFilter = () => {
     setFilterState(null);
-    setCurrentPage(1);
+    if (serverSidePagination && externalOnPageChange) {
+      externalOnPageChange(1);
+    } else {
+      setInternalCurrentPage(1);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -172,7 +217,7 @@ const CustomTable = <T extends Record<string, any>>({
         <div
           className={cn(
             "w-24 px-2  py-1 flex justify-center items-center rounded-md text-sm font-medium",
-            getStatusColor(value)
+            getStatusColor(value),
           )}
         >
           {value}
@@ -185,13 +230,20 @@ const CustomTable = <T extends Record<string, any>>({
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPage(page);
+      handlePageChangeInternal(page);
     }
   };
 
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
+
+    console.log(
+      "getPageNumbers - totalPages:",
+      totalPages,
+      "currentPage:",
+      currentPage,
+    );
 
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
@@ -217,6 +269,7 @@ const CustomTable = <T extends Record<string, any>>({
       }
     }
 
+    console.log("getPageNumbers - pages array:", pages);
     return pages;
   };
 
@@ -251,7 +304,7 @@ const CustomTable = <T extends Record<string, any>>({
                     key={index}
                     className={cn(
                       "font-semibold text-gray-700 text-xs sm:text-sm py-2 sm:py-3 whitespace-nowrap",
-                      column.className
+                      column.className,
                     )}
                   >
                     {column.header}
@@ -275,7 +328,7 @@ const CustomTable = <T extends Record<string, any>>({
                       key={colIndex}
                       className={cn(
                         "text-gray-700 py-3 sm:py-5 text-xs sm:text-sm whitespace-nowrap",
-                        column.className
+                        column.className,
                       )}
                     >
                       {renderCell(row, column)}
@@ -308,7 +361,7 @@ const CustomTable = <T extends Record<string, any>>({
                 "text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4",
                 currentPage === 1
                   ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
+                  : "cursor-pointer",
               )}
             />
           </PaginationItem>
@@ -324,7 +377,7 @@ const CustomTable = <T extends Record<string, any>>({
                   className={cn(
                     "cursor-pointer text-xs sm:text-sm h-8 sm:h-10 w-8 sm:w-10",
                     currentPage === page &&
-                      "bg-red-800 text-white hover:bg-red-700 hover:text-white"
+                      "bg-red-800 text-white hover:bg-red-700 hover:text-white",
                   )}
                 >
                   {page}
@@ -350,7 +403,7 @@ const CustomTable = <T extends Record<string, any>>({
                 "text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4",
                 currentPage === totalPages
                   ? "pointer-events-none opacity-50"
-                  : "cursor-pointer"
+                  : "cursor-pointer",
               )}
             />
           </PaginationItem>

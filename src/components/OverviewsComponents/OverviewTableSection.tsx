@@ -1,23 +1,29 @@
 /** @format */
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import CustomTable from "../CommonComponents/CustomTable";
 import { columns } from "@/data/UserAllData/AllData";
 import type { Job } from "@/types/UserAllTypes/AllTypes";
 import { useRouter } from "next/navigation";
 import TableLoadingView from "../LoadingComponents/TableLoadingView";
-import type { RecentJob } from "@/types/AllTypes";
+import type { RecentJob, DashboardMeta } from "@/types/AllTypes";
 
 interface OverviewTableSectionProps {
   isLoading?: boolean;
   recentJobs?: RecentJob[];
+  meta?: DashboardMeta;
+  onPageChange?: (page: number) => void;
 }
 
 const OverviewTableSection = ({
   isLoading,
   recentJobs,
+  meta,
+  onPageChange,
 }: OverviewTableSectionProps) => {
   const router = useRouter();
+
+  console.log("OverviewTableSection Meta:", meta);
 
   const handleAction = (job: Job) => {
     // Remove # from job ID for URL
@@ -54,6 +60,10 @@ const OverviewTableSection = ({
         onAction={handleAction}
         title="Recent Jobs"
         additionalCount={5}
+        serverSidePagination={true}
+        currentPage={meta?.page}
+        totalPages={meta?.total_pages}
+        onPageChange={onPageChange}
       />
     </div>
   );
