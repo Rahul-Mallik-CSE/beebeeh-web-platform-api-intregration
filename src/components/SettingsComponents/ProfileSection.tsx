@@ -1,24 +1,47 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Pencil, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ProfileEditModal from "./ProfileEditModal";
 import ResetPassModal from "./ResetPassModal";
+import { useGetProfileQuery } from "@/redux/features/settingAPI";
+import { getImageFullUrl } from "@/lib/utils";
 
 const ProfileSection = () => {
+  const { data, isLoading, error } = useGetProfileQuery();
+
   const [formData, setFormData] = useState({
-    fullName: "Malik Rahman Mihad",
-    email: "name@gmail.com",
-    contactNumber: "+1 345 824 9384",
-    address: "24 New Street, Los Angeles",
-    role: "Technician",
+    fullName: "",
+    email: "",
+    contactNumber: "",
+    address: "",
+    role: "",
     password: "************",
+    profileImage: null as string | null,
   });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isResetPassModalOpen, setIsResetPassModalOpen] = useState(false);
+
+  // Update form data when API data is loaded
+  useEffect(() => {
+    if (data?.data) {
+      setFormData({
+        fullName: data.data.full_name || "",
+        email: data.data.email || "",
+        contactNumber: data.data.contact_number || "",
+        address: data.data.address || "",
+        role: data.data.role || "",
+        password: "************",
+        profileImage:
+          data.data.technician_profile?.profile_image ||
+          data.data.profile_image ||
+          null,
+      });
+    }
+  }, [data]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -51,6 +74,33 @@ const ProfileSection = () => {
     // Add your password update logic here
   };
 
+  // Show loading skeleton while fetching data
+  if (isLoading) {
+    return (
+      <div className="space-y-4 sm:space-y-6 animate-pulse">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gray-200"></div>
+          <div className="space-y-2">
+            <div className="h-6 w-32 bg-gray-200 rounded"></div>
+            <div className="h-4 w-24 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="space-y-2">
+              <div className="h-4 w-24 bg-gray-200 rounded"></div>
+              <div className="h-10 w-full bg-gray-200 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const profileImageUrl = formData.profileImage
+    ? getImageFullUrl(formData.profileImage)
+    : "/logo.png";
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Profile Header */}
@@ -58,7 +108,7 @@ const ProfileSection = () => {
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-gray-200">
             <Image
-              src="/logo.png"
+              src={profileImageUrl}
               alt="Profile"
               width={80}
               height={80}

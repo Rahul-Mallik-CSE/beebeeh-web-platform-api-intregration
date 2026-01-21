@@ -171,3 +171,30 @@ export interface AllJobsResponse {
   meta: AllJobsMeta;
   data: AllJob[];
 }
+
+// Profile API Types
+export interface TechnicianProfile {
+  technician_id: string;
+  skills: string[];
+  total_jobs: number;
+  status: string;
+  profile_image: string | null;
+}
+
+export interface ProfileData {
+  id: string;
+  full_name: string;
+  email: string;
+  contact_number: string;
+  address: string;
+  role: string;
+  profile_image: string | null;
+  technician_profile: TechnicianProfile;
+}
+
+export interface ProfileResponse {
+  success: boolean;
+  message: string;
+  data: ProfileData;
+  requestId: string;
+}
