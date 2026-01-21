@@ -62,3 +62,62 @@ export interface Notification {
   time: string;
   type: NotificationType;
 }
+
+// Dashboard API Types
+export interface CardTrend {
+  change_pct: number;
+  direction: "up" | "down";
+  compare_text: string;
+}
+
+export interface DashboardCards {
+  todays_jobs: number;
+  completed_work: number;
+  pending_jobs: number;
+  total_this_month: number;
+}
+
+export interface CardTrends {
+  todays_jobs: CardTrend;
+  completed_work: CardTrend;
+  pending_jobs: CardTrend;
+  total_this_month: CardTrend;
+}
+
+export interface RecentJob {
+  job_pk: number | string;
+  job_id: string;
+  job_type: string;
+  client_name: string;
+  contact_number: string;
+  ordered_time: string;
+  status: string;
+}
+
+export interface DashboardMeta {
+  count: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface DashboardTechnician {
+  technician_id: string;
+  full_name: string;
+  email: string;
+  role: string;
+}
+
+export interface DashboardData {
+  cards: DashboardCards;
+  card_trends: CardTrends;
+  recent_jobs: RecentJob[];
+  meta: DashboardMeta;
+  technician: DashboardTechnician;
+}
+
+export interface DashboardResponse {
+  success: boolean;
+  message: string;
+  data: DashboardData;
+}
