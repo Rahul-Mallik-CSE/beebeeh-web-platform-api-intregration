@@ -22,11 +22,12 @@ const OverviewPage = () => {
   };
 
   const handleFilterChange = (newFilters: DashboardFilters) => {
-    setFilters((prev) => ({
-      ...prev,
+    // Replace filters entirely to allow undefined values to clear previous filters
+    setFilters({
+      page: newFilters.page || 1,
+      page_size: newFilters.page_size || 10,
       ...newFilters,
-      page: newFilters.page || 1, // Reset to page 1 on filter change
-    }));
+    });
   };
 
   return (

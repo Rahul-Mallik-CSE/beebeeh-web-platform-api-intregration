@@ -61,30 +61,29 @@ const OverviewTableSection = ({
 
     const filters: DashboardFilters = {
       page: 1, // Reset to first page on filter
+      page_size: 10,
     };
 
-    // Map ID sort to job_id_order
-    if (filterState.idSort) {
-      filters.job_id_order = filterState.idSort;
-    }
+    // Map ID sort to job_id_order (undefined clears it)
+    filters.job_id_order = filterState.idSort || undefined;
 
-    // Map status filter
-    if (filterState.statusFilter) {
-      filters.status = mapStatusToAPI(filterState.statusFilter);
-    }
+    // Map status filter - set undefined to clear when "All" is selected
+    filters.status = filterState.statusFilter
+      ? mapStatusToAPI(filterState.statusFilter)
+      : undefined;
 
-    // Map job type filter
-    if (filterState.jobTypeFilter) {
-      filters.job_type = mapJobTypeToAPI(filterState.jobTypeFilter);
-    }
+    // Map job type filter - set undefined to clear when "All" is selected
+    filters.job_type = filterState.jobTypeFilter
+      ? mapJobTypeToAPI(filterState.jobTypeFilter)
+      : undefined;
 
-    // Map column filters
-    filterState.columnFilters.forEach((filter) => {
-      if (filter.column === "clientName") {
-        filters.client_name = filter.value;
-      }
-    });
+    // Map column filters (undefined clears it)
+    const clientNameFilter = filterState.columnFilters.find(
+      (f) => f.column === "clientName",
+    );
+    filters.client_name = clientNameFilter?.value || undefined;
 
+    // Always call onFilterChange to update the API
     onFilterChange(filters);
   };
 

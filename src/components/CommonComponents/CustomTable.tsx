@@ -202,6 +202,7 @@ const CustomTable = <T extends Record<string, any>>({
       onFilterChange({
         idSort: null,
         statusFilter: "",
+        jobTypeFilter: "",
         columnFilters: [],
       });
     }
