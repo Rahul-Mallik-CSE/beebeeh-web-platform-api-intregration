@@ -22,6 +22,7 @@ const baseAPI = createApi({
     "User",
     "Auth",
     "Job",
+    "JobDetails",
     "Referral",
     "OperativeTrackers",
     "Payroll",

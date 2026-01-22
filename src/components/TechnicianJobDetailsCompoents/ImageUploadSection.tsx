@@ -1,8 +1,9 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { CloudUpload, X } from "lucide-react";
 import Image from "next/image";
+import { ImageUploadSection as ImageUploadData } from "@/types/JobDetailsTypes";
 
 interface UploadedFile {
   id: number;
@@ -16,11 +17,11 @@ interface UploadAreaProps {
   images: UploadedFile[];
   onFileUpload: (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => void;
   onDrop: (
     e: React.DragEvent<HTMLDivElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onRemove: (id: number, type: "before" | "after") => void;
@@ -112,17 +113,41 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   </div>
 );
 
-const ImageUploadSection = () => {
-  const [beforeImages, setBeforeImages] = useState<UploadedFile[]>([
-    { id: 1, name: "Installation potrait.jpg", size: "500kb" },
-  ]);
-  const [afterImages, setAfterImages] = useState<UploadedFile[]>([
-    { id: 1, name: "Installation potrait.jpg", size: "500kb" },
-  ]);
+interface ImageUploadSectionProps {
+  imageData: ImageUploadData;
+  jobId: string;
+}
+
+const ImageUploadSection = ({ imageData, jobId }: ImageUploadSectionProps) => {
+  const [beforeImages, setBeforeImages] = useState<UploadedFile[]>([]);
+  const [afterImages, setAfterImages] = useState<UploadedFile[]>([]);
+
+  // Initialize images from API data
+  useEffect(() => {
+    if (imageData.before_images) {
+      const formattedBeforeImages = imageData.before_images.map((img) => ({
+        id: img.id,
+        name: img.file.split("/").pop() || "image.jpg",
+        size: "Unknown",
+        preview: img.file,
+      }));
+      setBeforeImages(formattedBeforeImages);
+    }
+
+    if (imageData.after_images) {
+      const formattedAfterImages = imageData.after_images.map((img) => ({
+        id: img.id,
+        name: img.file.split("/").pop() || "image.jpg",
+        size: "Unknown",
+        preview: img.file,
+      }));
+      setAfterImages(formattedAfterImages);
+    }
+  }, [imageData]);
 
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => {
     const files = e.target.files;
     if (files) {
@@ -151,7 +176,7 @@ const ImageUploadSection = () => {
 
   const handleDrop = (
     e: React.DragEvent<HTMLDivElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => {
     e.preventDefault();
     const files = e.dataTransfer.files;

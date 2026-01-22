@@ -31,7 +31,7 @@ const OverviewTableSection = ({
 
   const handleAction = (job: Job) => {
     // Remove # from job ID for URL
-    const jobId = job.id.replace("#", "");
+    const jobId = job.id;
     router.push(`/overviews/${jobId}`);
   };
 

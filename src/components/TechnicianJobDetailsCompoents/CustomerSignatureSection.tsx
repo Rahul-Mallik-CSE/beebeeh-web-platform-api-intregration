@@ -1,13 +1,43 @@
 /** @format */
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import SignatureCanvas from "react-signature-canvas";
-const CustomerSignatureSection = () => {
+import { CustomerSignatureSection as SignatureData } from "@/types/JobDetailsTypes";
+import { format } from "date-fns";
+
+interface CustomerSignatureSectionProps {
+  signatureData: SignatureData;
+  clientName: string;
+  jobId: string;
+}
+
+const CustomerSignatureSection = ({
+  signatureData,
+  clientName,
+  jobId,
+}: CustomerSignatureSectionProps) => {
   const [signatureImage, setSignatureImage] = useState<string | null>(null);
   const [showCanvas, setShowCanvas] = useState(false);
   const sigCanvas = useRef<SignatureCanvas>(null);
+
+  // Initialize signature from API data
+  useEffect(() => {
+    if (signatureData.signature_media?.file) {
+      setSignatureImage(signatureData.signature_media.file);
+    }
+  }, [signatureData]);
+
+  const formatDateTime = (dateString: string | null) => {
+    if (!dateString) return "Not signed yet";
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd MMM yyyy, h:mm a");
+    } catch {
+      return dateString;
+    }
+  };
 
   const handleCollectClick = () => {
     setShowCanvas(true);
@@ -42,14 +72,14 @@ const CustomerSignatureSection = () => {
               <p className="text-gray-800 font-medium text-sm sm:text-base">
                 Client Name :
               </p>
-              <p className="text-gray-500 text-xs sm:text-sm">John Doe</p>
+              <p className="text-gray-500 text-xs sm:text-sm">{clientName}</p>
             </div>
             <div className="flex items-center justify-between py-1.5 sm:py-2">
               <p className="text-gray-800 font-medium text-sm sm:text-base">
                 Signature time :
               </p>
               <p className="text-gray-500 text-xs sm:text-sm">
-                24 Nov 2025, 2:30 PM
+                {formatDateTime(signatureData.signature_time)}
               </p>
             </div>
             <div className="flex items-center justify-between py-1.5 sm:py-2">
@@ -57,11 +87,16 @@ const CustomerSignatureSection = () => {
                 Signature Status :
               </p>
               <p
-                className={`font-medium text-xs sm:text-sm ${
-                  signatureImage ? "text-teal-500" : "text-red-500"
+                className={`font-medium text-xs sm:text-sm capitalize ${
+                  signatureData.signature_status === "complete" ||
+                  signatureImage
+                    ? "text-teal-500"
+                    : "text-red-500"
                 }`}
               >
-                {signatureImage ? "Complete" : "Incomplete"}
+                {signatureData.signature_status === "complete" || signatureImage
+                  ? "Complete"
+                  : "Pending"}
               </p>
             </div>
           </div>

@@ -11,6 +11,8 @@ import ImageUploadSection from "./ImageUploadSection";
 import ClientInfoSection from "./ClientInfoSection";
 import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
+import { useGetJobDetailsQuery } from "@/redux/features/technicianFeatures/jobDetailsAPI";
+import { JobStatus } from "@/types/JobDetailsTypes";
 
 interface JobDetailsPageProps {
   jobId: string;
@@ -18,6 +20,85 @@ interface JobDetailsPageProps {
 
 const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   const router = useRouter();
+  const { data, isLoading, isError } = useGetJobDetailsQuery(jobId);
+
+  // Get button configuration based on job status
+  const getButtonConfig = (status: JobStatus) => {
+    switch (status) {
+      case "assign":
+        return {
+          text: "Complete This Job",
+          className: "bg-red-800 hover:bg-red-700 text-white",
+          disabled: false,
+        };
+      case "complete":
+        return {
+          text: "Export",
+          className: "bg-green-600 hover:bg-green-700 text-white",
+          disabled: false,
+        };
+      case "cancel":
+        return {
+          text: "Cancelled",
+          className: "bg-gray-400 cursor-not-allowed text-white",
+          disabled: true,
+        };
+      default:
+        return {
+          text: "Start Job",
+          className: "bg-red-800 hover:bg-red-700 text-white",
+          disabled: false,
+        };
+    }
+  };
+
+  // Get status badge configuration
+  const getStatusBadge = (status: JobStatus) => {
+    switch (status) {
+      case "assign":
+        return {
+          text: "Pending",
+          className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
+        };
+      case "complete":
+        return {
+          text: "Completed",
+          className: "bg-green-500 hover:bg-green-600 text-white",
+        };
+      case "cancel":
+        return {
+          text: "Cancelled",
+          className: "bg-red-500 hover:bg-red-600 text-white",
+        };
+      default:
+        return {
+          text: "Pending",
+          className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
+        };
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg text-gray-600">Loading job details...</div>
+      </div>
+    );
+  }
+
+  if (isError || !data?.success) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg text-red-600">
+          Failed to load job details. Please try again.
+        </div>
+      </div>
+    );
+  }
+
+  const jobData = data.data;
+  const statusBadge = getStatusBadge(jobData.header_summary_card.status);
+  const buttonConfig = getButtonConfig(jobData.header_summary_card.status);
 
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
@@ -35,8 +116,10 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
           </span>
         </div>
 
-        <Button className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 text-sm sm:text-base font-medium px-3 sm:px-4 md:px-6 py-1.5 sm:py-2">
-          Pending
+        <Button
+          className={`${statusBadge.className} text-sm sm:text-base font-medium px-3 sm:px-4 md:px-6 py-1.5 sm:py-2`}
+        >
+          {statusBadge.text}
         </Button>
       </div>
 
@@ -44,29 +127,41 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-7 gap-4 sm:gap-6">
         {/* Left Column - 2/3 */}
         <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6">
-          <HeaderSummaryCard jobId={jobId} />
-          <ClientInfoSection />
-          <ProductDetailsSection />
+          <HeaderSummaryCard data={jobData.header_summary_card} />
+          <ClientInfoSection data={jobData.client_information_section} />
+          <ProductDetailsSection data={jobData.product_details_section} />
         </div>
         {/* Right Column - 1/3 */}
         <div className="lg:col-span-3 xl:col-span-5  space-y-4 sm:space-y-6">
-          <FrequentlyUsedParts />
-          <ChecklistSection />
-          <ImageUploadSection />
-          <CustomerSignatureSection />
+          <FrequentlyUsedParts parts={jobData.frequently_used_parts} />
+          <ChecklistSection checklist={jobData.checklist_section} />
+          <ImageUploadSection
+            imageData={jobData.image_upload_section}
+            jobId={jobId}
+          />
+          <CustomerSignatureSection
+            signatureData={jobData.customer_signature_section}
+            clientName={jobData.client_information_section.name}
+            jobId={jobId}
+          />
         </div>
       </div>
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
+        {jobData.header_summary_card.status !== "cancel" && (
+          <Button
+            variant="outline"
+            className="px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50"
+          >
+            Cancel Job
+          </Button>
+        )}
         <Button
-          variant="outline"
-          className="px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50"
+          className={`px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base ${buttonConfig.className}`}
+          disabled={buttonConfig.disabled}
         >
-          Cancel Job
-        </Button>
-        <Button className="px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white">
-          Start Job
+          {buttonConfig.text}
         </Button>
       </div>
     </div>
