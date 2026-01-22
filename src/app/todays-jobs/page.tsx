@@ -3,11 +3,31 @@
 "use client";
 import React, { useState } from "react";
 import TodaysJobsTableSection from "@/components/TodaysJobsComponents/TodaysJobsTableSection";
-import { useGetTodaysJobsQuery } from "@/redux/features/technicianFeatures/todaysJobsAPI";
+import {
+  useGetTodaysJobsQuery,
+  TodaysJobsFilters,
+} from "@/redux/features/technicianFeatures/todaysJobsAPI";
 
 const TodaysJobsPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error } = useGetTodaysJobsQuery(currentPage);
+  const [filters, setFilters] = useState<TodaysJobsFilters>({
+    page: 1,
+    page_size: 10,
+  });
+
+  const { data, isLoading, error } = useGetTodaysJobsQuery(filters);
+
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+  };
+
+  const handleFilterChange = (newFilters: TodaysJobsFilters) => {
+    // Replace filters entirely to allow undefined values to clear previous filters
+    setFilters({
+      page: newFilters.page || 1,
+      page_size: newFilters.page_size || 10,
+      ...newFilters,
+    });
+  };
 
   return (
     <div className="w-full p-4">
@@ -18,7 +38,8 @@ const TodaysJobsPage = () => {
             isLoading={isLoading}
             todaysJobs={data?.data}
             meta={data?.meta}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
+            onFilterChange={handleFilterChange}
           />
         </div>
       </div>

@@ -6,12 +6,15 @@ import { columns } from "@/data/AllData";
 import { Job, TodaysJob, TodaysJobsMeta } from "@/types/AllTypes";
 import { useRouter } from "next/navigation";
 import TableLoadingView from "../LoadingComponents/TableLoadingView";
+import { FilterState } from "../CommonComponents/FilterCard";
+import { TodaysJobsFilters } from "@/redux/features/technicianFeatures/todaysJobsAPI";
 
 interface TodaysJobsTableSectionProps {
   isLoading?: boolean;
   todaysJobs?: TodaysJob[];
   meta?: TodaysJobsMeta;
   onPageChange?: (page: number) => void;
+  onFilterChange?: (filters: TodaysJobsFilters) => void;
 }
 
 const TodaysJobsTableSection = ({
@@ -19,6 +22,7 @@ const TodaysJobsTableSection = ({
   todaysJobs,
   meta,
   onPageChange,
+  onFilterChange,
 }: TodaysJobsTableSectionProps) => {
   const router = useRouter();
 
@@ -26,6 +30,58 @@ const TodaysJobsTableSection = ({
     // Remove # from job ID for URL
     const jobId = job.id.replace("#", "");
     router.push(`/todays-jobs/${jobId}`);
+  };
+
+  // Map job type display to API value
+  const mapJobTypeToAPI = (jobType: string): string => {
+    const jobTypeMap: Record<string, string> = {
+      Installation: "Installation",
+      Repairing: "Repairing",
+      Maintenance: "Maintenance",
+    };
+    return jobTypeMap[jobType] || jobType;
+  };
+
+  // Map status display to API value
+  const mapStatusToAPI = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      Pending: "assign",
+      "In Progress": "in-progress",
+      Completed: "complete",
+      Cancelled: "cancel",
+    };
+    return statusMap[status] || status.toLowerCase();
+  };
+
+  const handleFilterChange = (filterState: FilterState) => {
+    if (!onFilterChange) return;
+
+    const filters: TodaysJobsFilters = {
+      page: 1, // Reset to first page on filter
+      page_size: 10,
+    };
+
+    // Map ID sort to job_id_order (undefined clears it)
+    filters.job_id_order = filterState.idSort || undefined;
+
+    // Map status filter - set undefined to clear when "All" is selected
+    filters.status = filterState.statusFilter
+      ? mapStatusToAPI(filterState.statusFilter)
+      : undefined;
+
+    // Map job type filter - set undefined to clear when "All" is selected
+    filters.job_type = filterState.jobTypeFilter
+      ? mapJobTypeToAPI(filterState.jobTypeFilter)
+      : undefined;
+
+    // Map column filters (undefined clears it)
+    const clientNameFilter = filterState.columnFilters.find(
+      (f) => f.column === "clientName",
+    );
+    filters.client_name = clientNameFilter?.value || undefined;
+
+    // Always call onFilterChange to update the API
+    onFilterChange(filters);
   };
 
   if (isLoading || !todaysJobs) {
@@ -53,6 +109,15 @@ const TodaysJobsTableSection = ({
       currentPage={meta?.page}
       totalPages={meta?.totalPages}
       onPageChange={onPageChange}
+      onFilterChange={handleFilterChange}
+      excludeFilterColumns={["Scheduled time"]}
+      predefinedStatusOptions={[
+        "Pending",
+        "In Progress",
+        "Completed",
+        "Cancelled",
+      ]}
+      predefinedJobTypeOptions={["Installation", "Repairing", "Maintenance"]}
     />
   );
 };
@@ -62,9 +127,9 @@ const formatStatus = (status: string): Job["status"] => {
   const statusMap: Record<string, Job["status"]> = {
     assign: "Pending",
     rescheduled: "Pending",
-    complete: "Complete",
+    complete: "Completed",
     "in-progress": "In Progress",
-    cancel: "Pending",
+    cancel: "Cancelled",
   };
 
   return statusMap[status.toLowerCase()] || "Pending";

@@ -2,12 +2,32 @@
 
 "use client";
 import AllJobsTableSection from "@/components/AllJobsComponents/AllJobsTableSection";
-import { useGetAllJobsQuery } from "@/redux/features/technicianFeatures/allJobsAPI";
+import {
+  useGetAllJobsQuery,
+  AllJobsFilters,
+} from "@/redux/features/technicianFeatures/allJobsAPI";
 import React, { useState } from "react";
 
 const AllJobsPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error } = useGetAllJobsQuery(currentPage);
+  const [filters, setFilters] = useState<AllJobsFilters>({
+    page: 1,
+    page_size: 10,
+  });
+
+  const { data, isLoading, error } = useGetAllJobsQuery(filters);
+
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+  };
+
+  const handleFilterChange = (newFilters: AllJobsFilters) => {
+    // Replace filters entirely to allow undefined values to clear previous filters
+    setFilters({
+      page: newFilters.page || 1,
+      page_size: newFilters.page_size || 10,
+      ...newFilters,
+    });
+  };
 
   return (
     <div className="w-full p-4">
@@ -18,7 +38,8 @@ const AllJobsPage = () => {
             isLoading={isLoading}
             allJobs={data?.data}
             meta={data?.meta}
-            onPageChange={setCurrentPage}
+            onPageChange={handlePageChange}
+            onFilterChange={handleFilterChange}
           />
         </div>
       </div>
