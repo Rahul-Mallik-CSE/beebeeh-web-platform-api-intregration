@@ -32,6 +32,7 @@ export type FilterState = {
   idSort: "asc" | "desc" | null;
   statusFilter: string;
   columnFilters: ColumnFilter[];
+  jobTypeFilter?: string; // Add job type filter
 };
 
 interface FilterCardProps<T> {
@@ -43,6 +44,9 @@ interface FilterCardProps<T> {
   onApplyFilter: (filterState: FilterState) => void;
   onClearFilter: () => void;
   currentFilter?: FilterState;
+  excludeColumns?: string[]; // Column headers to exclude from filtering
+  predefinedStatusOptions?: string[]; // Predefined status options
+  predefinedJobTypeOptions?: string[]; // Predefined job type options
 }
 
 const FilterCard = <T extends Record<string, any>>({
@@ -51,16 +55,22 @@ const FilterCard = <T extends Record<string, any>>({
   onApplyFilter,
   onClearFilter,
   currentFilter,
+  excludeColumns = [],
+  predefinedStatusOptions,
+  predefinedJobTypeOptions,
 }: FilterCardProps<T>) => {
   const [isOpen, setIsOpen] = useState(false);
   const [idSort, setIdSort] = useState<"asc" | "desc" | null>(
-    currentFilter?.idSort || null
+    currentFilter?.idSort || null,
   );
   const [statusFilter, setStatusFilter] = useState<string>(
-    currentFilter?.statusFilter || ""
+    currentFilter?.statusFilter || "",
+  );
+  const [jobTypeFilter, setJobTypeFilter] = useState<string>(
+    currentFilter?.jobTypeFilter || "",
   );
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>(
-    currentFilter?.columnFilters || []
+    currentFilter?.columnFilters || [],
   );
 
   // Helper function to get the data key from column header
@@ -72,7 +82,7 @@ const FilterCard = <T extends Record<string, any>>({
       .map((word, index) =>
         index === 0
           ? word.toLowerCase()
-          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase(),
       )
       .join("");
   };
@@ -90,16 +100,19 @@ const FilterCard = <T extends Record<string, any>>({
   const idColumn = allColumns.find(
     (col) =>
       col.header.toLowerCase() === "id" ||
-      col.header.toLowerCase().includes("id")
+      col.header.toLowerCase().includes("id"),
   );
 
   // Find Status column
   const statusColumn = allColumns.find(
-    (col) => col.header.toLowerCase() === "status"
+    (col) => col.header.toLowerCase() === "status",
   );
 
-  // Get unique status values from data
+  // Get unique status values from predefined options or data
   const statusOptions = useMemo(() => {
+    if (predefinedStatusOptions) {
+      return predefinedStatusOptions;
+    }
     if (!statusColumn) return [];
     const uniqueStatuses = new Set<string>();
     data.forEach((row) => {
@@ -109,12 +122,18 @@ const FilterCard = <T extends Record<string, any>>({
       }
     });
     return Array.from(uniqueStatuses).sort();
-  }, [data, statusColumn]);
+  }, [data, statusColumn, predefinedStatusOptions]);
 
-  // Get other columns (not ID, not Status)
+  // Get other columns (not ID, not Status, not excluded, not Job Type if predefined)
   const otherColumns = allColumns.filter(
     (col) =>
-      col.header !== idColumn?.header && col.header !== statusColumn?.header
+      col.header !== idColumn?.header &&
+      col.header !== statusColumn?.header &&
+      !excludeColumns.includes(col.header) &&
+      !(
+        predefinedJobTypeOptions &&
+        col.header.toLowerCase().includes("job type")
+      ),
   );
 
   const handleColumnFilterChange = (columnHeader: string, value: string) => {
@@ -123,7 +142,7 @@ const FilterCard = <T extends Record<string, any>>({
 
     const dataKey = column.dataKey;
     const existingIndex = columnFilters.findIndex(
-      (filter) => filter.column === dataKey
+      (filter) => filter.column === dataKey,
     );
 
     if (value.trim() === "") {
@@ -153,6 +172,7 @@ const FilterCard = <T extends Record<string, any>>({
     onApplyFilter({
       idSort,
       statusFilter,
+      jobTypeFilter,
       columnFilters,
     });
     setIsOpen(false);
@@ -161,13 +181,17 @@ const FilterCard = <T extends Record<string, any>>({
   const handleClearFilter = () => {
     setIdSort(null);
     setStatusFilter("");
+    setJobTypeFilter("");
     setColumnFilters([]);
     onClearFilter();
     setIsOpen(false);
   };
 
   const hasActiveFilters =
-    idSort !== null || statusFilter !== "" || columnFilters.length > 0;
+    idSort !== null ||
+    statusFilter !== "" ||
+    jobTypeFilter !== "" ||
+    columnFilters.length > 0;
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -177,14 +201,17 @@ const FilterCard = <T extends Record<string, any>>({
           size="sm"
           className={cn(
             "gap-2 relative",
-            hasActiveFilters && "border-red-800 text-red-800"
+            hasActiveFilters && "border-red-800 text-red-800",
           )}
         >
           <Filter className="w-4 h-4" />
           Filter
           {hasActiveFilters && (
             <span className="absolute -top-1 -right-1 bg-red-800 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {(idSort ? 1 : 0) + (statusFilter ? 1 : 0) + columnFilters.length}
+              {(idSort ? 1 : 0) +
+                (statusFilter ? 1 : 0) +
+                (jobTypeFilter ? 1 : 0) +
+                columnFilters.length}
             </span>
           )}
         </Button>
@@ -224,7 +251,7 @@ const FilterCard = <T extends Record<string, any>>({
                     className={cn(
                       "flex-1",
                       idSort === "asc" &&
-                        "bg-red-800 hover:bg-red-700 text-white"
+                        "bg-red-800 hover:bg-red-700 text-white",
                     )}
                   >
                     <ArrowUp className="w-4 h-4 mr-1" />
@@ -237,7 +264,7 @@ const FilterCard = <T extends Record<string, any>>({
                     className={cn(
                       "flex-1",
                       idSort === "desc" &&
-                        "bg-red-800 hover:bg-red-700 text-white"
+                        "bg-red-800 hover:bg-red-700 text-white",
                     )}
                   >
                     <ArrowDown className="w-4 h-4 mr-1" />
@@ -274,6 +301,34 @@ const FilterCard = <T extends Record<string, any>>({
               </div>
             )}
 
+            {/* Job Type Dropdown Section */}
+            {predefinedJobTypeOptions &&
+              predefinedJobTypeOptions.length > 0 && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Job Type
+                  </label>
+                  <Select
+                    value={jobTypeFilter || "all"}
+                    onValueChange={(value) =>
+                      setJobTypeFilter(value === "all" ? "" : value)
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select job type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Job Types</SelectItem>
+                      {predefinedJobTypeOptions.map((jobType) => (
+                        <SelectItem key={jobType} value={jobType}>
+                          {jobType}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
             {/* Other Columns Input Fields */}
             {otherColumns.length > 0 && (
               <div className="space-y-3">
@@ -290,7 +345,7 @@ const FilterCard = <T extends Record<string, any>>({
                         onChange={(e) =>
                           handleColumnFilterChange(
                             column.header,
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full"

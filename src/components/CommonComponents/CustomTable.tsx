@@ -38,6 +38,11 @@ interface CustomTableProps<T> {
   currentPage?: number;
   totalPages?: number;
   onPageChange?: (page: number) => void;
+  // Server-side filtering props
+  onFilterChange?: (filterState: FilterState) => void;
+  excludeFilterColumns?: string[];
+  predefinedStatusOptions?: string[];
+  predefinedJobTypeOptions?: string[];
 }
 
 const CustomTable = <T extends Record<string, any>>({
@@ -50,6 +55,10 @@ const CustomTable = <T extends Record<string, any>>({
   currentPage: externalCurrentPage,
   totalPages: externalTotalPages,
   onPageChange: externalOnPageChange,
+  onFilterChange,
+  excludeFilterColumns = [],
+  predefinedStatusOptions,
+  predefinedJobTypeOptions,
 }: CustomTableProps<T>) => {
   const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [filterState, setFilterState] = useState<FilterState | null>(null);
@@ -174,6 +183,10 @@ const CustomTable = <T extends Record<string, any>>({
 
   const handleApplyFilter = (newFilterState: FilterState) => {
     setFilterState(newFilterState);
+    // For server-side filtering, call the callback
+    if (onFilterChange) {
+      onFilterChange(newFilterState);
+    }
     // Reset to first page when filter is applied
     if (serverSidePagination && externalOnPageChange) {
       externalOnPageChange(1);
@@ -184,6 +197,14 @@ const CustomTable = <T extends Record<string, any>>({
 
   const handleClearFilter = () => {
     setFilterState(null);
+    // For server-side filtering, call the callback with null
+    if (onFilterChange) {
+      onFilterChange({
+        idSort: null,
+        statusFilter: "",
+        columnFilters: [],
+      });
+    }
     if (serverSidePagination && externalOnPageChange) {
       externalOnPageChange(1);
     } else {
@@ -290,6 +311,9 @@ const CustomTable = <T extends Record<string, any>>({
           onApplyFilter={handleApplyFilter}
           onClearFilter={handleClearFilter}
           currentFilter={filterState || undefined}
+          excludeColumns={excludeFilterColumns}
+          predefinedStatusOptions={predefinedStatusOptions}
+          predefinedJobTypeOptions={predefinedJobTypeOptions}
         />
       </div>
 

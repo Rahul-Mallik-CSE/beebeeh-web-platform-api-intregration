@@ -3,12 +3,31 @@
 "use client";
 import OverviewTableSection from "@/components/OverviewsComponents/OverviewTableSection";
 import StatsSection from "@/components/OverviewsComponents/StatsSection";
-import { useGetDashboardQuery } from "@/redux/features/technicianFeatures/overViewAPI";
+import {
+  useGetDashboardQuery,
+  DashboardFilters,
+} from "@/redux/features/technicianFeatures/overViewAPI";
 import React, { useState } from "react";
 
 const OverviewPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const { data, isLoading, error } = useGetDashboardQuery(currentPage);
+  const [filters, setFilters] = useState<DashboardFilters>({
+    page: 1,
+    page_size: 10,
+  });
+
+  const { data, isLoading, error } = useGetDashboardQuery(filters);
+
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+  };
+
+  const handleFilterChange = (newFilters: DashboardFilters) => {
+    setFilters((prev) => ({
+      ...prev,
+      ...newFilters,
+      page: newFilters.page || 1, // Reset to page 1 on filter change
+    }));
+  };
 
   return (
     <div className="w-full p-4">
@@ -25,7 +44,8 @@ const OverviewPage = () => {
           isLoading={isLoading}
           recentJobs={data?.data?.recent_jobs}
           meta={data?.data?.meta}
-          onPageChange={setCurrentPage}
+          onPageChange={handlePageChange}
+          onFilterChange={handleFilterChange}
         />
       </div>
     </div>
