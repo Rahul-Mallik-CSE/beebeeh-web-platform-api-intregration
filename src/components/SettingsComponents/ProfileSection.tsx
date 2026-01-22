@@ -8,10 +8,14 @@ import { Input } from "@/components/ui/input";
 import ProfileEditModal from "./ProfileEditModal";
 import ResetPassModal from "./ResetPassModal";
 import { useGetProfileQuery } from "@/redux/features/settingAPI";
+import { useChangePasswordMutation } from "@/redux/features/authAPI";
 import { getImageFullUrl } from "@/lib/utils";
+import { toast } from "react-toastify";
 
 const ProfileSection = () => {
   const { data, isLoading, error } = useGetProfileQuery();
+  const [changePassword, { isLoading: isChangingPassword }] =
+    useChangePasswordMutation();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -69,9 +73,24 @@ const ProfileSection = () => {
     setIsResetPassModalOpen(true);
   };
 
-  const handleUpdatePassword = (newPassword: string) => {
-    console.log("Password updated:", newPassword);
-    // Add your password update logic here
+  const handleUpdatePassword = async (data: {
+    new_password: string;
+    confirm_password: string;
+  }) => {
+    try {
+      const response = await changePassword(data).unwrap();
+      if (response.success) {
+        toast.success("Password changed successfully!");
+        setIsResetPassModalOpen(false);
+      } else {
+        toast.error(response.message || "Failed to change password");
+      }
+    } catch (err: any) {
+      console.error("Change password failed:", err);
+      toast.error(
+        err?.data?.message || "Failed to change password. Please try again.",
+      );
+    }
   };
 
   // Show loading skeleton while fetching data
@@ -255,6 +274,7 @@ const ProfileSection = () => {
         isOpen={isResetPassModalOpen}
         onClose={() => setIsResetPassModalOpen(false)}
         onUpdate={handleUpdatePassword}
+        isLoading={isChangingPassword}
       />
     </div>
   );
