@@ -27,7 +27,7 @@ const HeaderSummaryCard = ({ data }: HeaderSummaryCardProps) => {
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Job ID :
           </p>
-          <p className="text-gray-500 text-xs sm:text-sm">#{data.job_id}</p>
+          <p className="text-gray-500 text-xs sm:text-sm">{data.job_id}</p>
         </div>
         <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">

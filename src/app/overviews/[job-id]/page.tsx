@@ -4,19 +4,18 @@ import JobDetailsPage from "@/components/TechnicianJobDetailsCompoents/JobDetail
 import React from "react";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     "job-id": string;
-  };
+  }>;
 }
 
-const JobDetailsOverviewPage = ({ params }: PageProps) => {
-  const jobId = params["job-id"];
+const JobDetailsOverviewPage = async ({ params }: PageProps) => {
+  const { "job-id": jobId } = await params;
 
   return (
     <div className="w-full p-4">
       <div className="max-w-[2500px] rounded-2xl mx-auto space-y-4">
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          {" "}
           <JobDetailsPage jobId={jobId} />
         </div>
       </div>

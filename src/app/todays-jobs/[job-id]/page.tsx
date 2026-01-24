@@ -1,22 +1,21 @@
 /** @format */
 
 import React from "react";
-import JobDetailsPage from "@/components/JobDetailsComponents/JobDetailsPage";
+import JobDetailsPage from "@/components/TechnicianJobDetailsCompoents/JobDetailsPage";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     "job-id": string;
-  };
+  }>;
 }
 
-const AllJobsDetailsPage = ({ params }: PageProps) => {
-  const jobId = params["job-id"];
+const TodaysJobsDetailsPage = async ({ params }: PageProps) => {
+  const { "job-id": jobId } = await params;
 
   return (
     <div className="w-full p-4">
       <div className="max-w-[2500px] rounded-2xl mx-auto space-y-4">
         <div className="bg-white border border-gray-200 rounded-2xl p-6">
-          {" "}
           <JobDetailsPage jobId={jobId} />
         </div>
       </div>
@@ -24,4 +23,4 @@ const AllJobsDetailsPage = ({ params }: PageProps) => {
   );
 };
 
-export default AllJobsDetailsPage;
+export default TodaysJobsDetailsPage;

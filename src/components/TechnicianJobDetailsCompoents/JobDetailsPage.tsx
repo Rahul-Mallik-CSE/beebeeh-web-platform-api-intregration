@@ -22,6 +22,12 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   const router = useRouter();
   const { data, isLoading, isError } = useGetJobDetailsQuery(jobId);
 
+  // Debug logging
+  console.log("Job Details API Response:", data);
+  console.log("Job ID:", jobId);
+  console.log("Is Error:", isError);
+  console.log("Is Loading:", isLoading);
+
   // Get button configuration based on job status
   const getButtonConfig = (status: JobStatus) => {
     switch (status) {
@@ -86,7 +92,13 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
     );
   }
 
-  if (isError || !data?.success) {
+  if (isError || !data?.success || !data?.data) {
+    console.error("API Error or Invalid Data Structure:", {
+      isError,
+      success: data?.success,
+      hasData: !!data?.data,
+      fullData: data,
+    });
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-lg text-red-600">
@@ -97,6 +109,29 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   }
 
   const jobData = data.data;
+
+  // Check if this is the new detailed structure or old structure
+  const isDetailedStructure = !!jobData?.header_summary_card;
+
+  if (!isDetailedStructure) {
+    console.warn("Old/Different API structure detected:", jobData);
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-lg text-orange-600">
+          This job type uses a different data structure.
+          <br />
+          Job ID:{" "}
+          {jobData?.repair_id ||
+            jobData?.installation_id ||
+            jobData?.maintenance_id ||
+            "Unknown"}
+          <br />
+          Please update the API to return the standard job details structure.
+        </div>
+      </div>
+    );
+  }
+
   const statusBadge = getStatusBadge(jobData.header_summary_card.status);
   const buttonConfig = getButtonConfig(jobData.header_summary_card.status);
 

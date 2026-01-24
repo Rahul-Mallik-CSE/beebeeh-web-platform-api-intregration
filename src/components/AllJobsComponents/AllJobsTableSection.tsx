@@ -27,8 +27,8 @@ const AllJobsTableSection = ({
   const router = useRouter();
 
   const handleAction = (job: Job) => {
-    // Remove # from job ID for URL
-    const jobId = job.id.replace("#", "");
+    // Use job ID directly from API
+    const jobId = job.id;
     router.push(`/all-jobs/${jobId}`);
   };
 
@@ -90,7 +90,7 @@ const AllJobsTableSection = ({
 
   // Transform API data to match the table format
   const transformedJobs: Job[] = allJobs.map((job) => ({
-    id: `#${job.job_id}`,
+    id: job.job_id,
     jobType: job.job_type as any,
     clientName: job.client_name,
     contactNumber: job.contact_number,
