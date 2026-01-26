@@ -37,10 +37,10 @@ const FrequentlyUsedParts = ({ parts }: FrequentlyUsedPartsProps) => {
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
-                  Part Name
+                  Parts Name
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
-                  Part ID
+                  Parts ID
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
                   Unit

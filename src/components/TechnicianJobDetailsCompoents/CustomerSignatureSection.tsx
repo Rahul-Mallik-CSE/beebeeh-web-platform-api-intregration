@@ -31,7 +31,7 @@ const CustomerSignatureSection = ({
   }, [signatureData]);
 
   const formatDateTime = (dateString: string | null) => {
-    if (!dateString) return "Not signed yet";
+    if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
       return format(date, "dd MMM yyyy, h:mm a");
