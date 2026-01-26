@@ -2,7 +2,6 @@
   "buildCommand": "npm run build:ci",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "nodeVersion": "20.x",
   "env": {
     "NEXT_PUBLIC_API_BASE_URL": "https://l9vtwvjb-8001.inc1.devtunnels.ms"
   },
