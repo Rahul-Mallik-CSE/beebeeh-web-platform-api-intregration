@@ -37,98 +37,106 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   onDragOver,
   onRemove,
   isJobCompleted,
-}) => (
-  <div className="space-y-3 sm:space-y-4 min-h-[280px] sm:min-h-[326px]">
-    <p className="text-sm sm:text-base font-bold text-gray-800">
-      {type === "before" ? "Before Image" : "After Image"}
-    </p>
-    <div
-      className={`border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center transition-colors ${
-        !isJobCompleted ? "hover:border-blue-400 cursor-pointer" : ""
-      }`}
-      onDrop={!isJobCompleted ? (e) => onDrop(e, type) : undefined}
-      onDragOver={!isJobCompleted ? onDragOver : undefined}
-      onClick={
-        !isJobCompleted
-          ? () => document.getElementById(`file-${type}`)?.click()
-          : undefined
-      }
-    >
-      {images.length > 0 ? (
-        <div className=" w-full">
-          {images.map((file) => (
-            <div
-              key={file.id}
-              className="relative border border-gray-200 rounded-lg bg-white overflow-hidden  p-2"
-            >
-              <div className="w-full h-48 sm:h-56 bg-gray-100 rounded flex items-center justify-center overflow-hidden mx-auto">
-                <Image
-                  src={file.preview || "/logo.png"}
-                  alt="preview"
-                  width={600}
-                  height={600}
-                  className="w-full h-full object-cover rounded"
-                  unoptimized
-                />
+}) => {
+  // isJobCompleted is actually the inverse - true means upload is disabled
+  const isUploadEnabled = !isJobCompleted;
+  return (
+    <div className="space-y-3 sm:space-y-4 min-h-[280px] sm:min-h-[326px]">
+      <p className="text-sm sm:text-base font-bold text-gray-800">
+        {type === "before" ? "Before Image" : "After Image"}
+      </p>
+      <div
+        className={`border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center transition-colors ${
+          isUploadEnabled ? "hover:border-blue-400 cursor-pointer" : ""
+        }`}
+        onDrop={isUploadEnabled ? (e) => onDrop(e, type) : undefined}
+        onDragOver={isUploadEnabled ? onDragOver : undefined}
+        onClick={
+          isUploadEnabled
+            ? () => document.getElementById(`file-${type}`)?.click()
+            : undefined
+        }
+      >
+        {images.length > 0 ? (
+          <div className=" w-full">
+            {images.map((file) => (
+              <div
+                key={file.id}
+                className="relative border border-gray-200 rounded-lg bg-white overflow-hidden  p-2"
+              >
+                <div className="w-full h-48 sm:h-56 bg-gray-100 rounded flex items-center justify-center overflow-hidden mx-auto">
+                  <Image
+                    src={file.preview || "/logo.png"}
+                    alt="preview"
+                    width={600}
+                    height={600}
+                    className="w-full h-full object-cover rounded"
+                    unoptimized
+                  />
+                </div>
+                <p className="text-xs font-medium text-gray-700 truncate mt-1">
+                  {file.name}
+                </p>
+                {isUploadEnabled && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(file.id, type);
+                    }}
+                    className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                )}
               </div>
-              <p className="text-xs font-medium text-gray-700 truncate mt-1">
-                {file.name}
+            ))}
+          </div>
+        ) : (
+          isUploadEnabled && (
+            <>
+              <CloudUpload className="w-10 h-12 sm:w-12 sm:h-14 text-blue-500 mb-2 sm:mb-3" />
+              <p className="text-sm sm:text-base text-gray-700 text-center">
+                Drag your file(s) or{" "}
+                <span className="text-blue-600 font-medium">browse</span>
               </p>
-              {!isJobCompleted && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onRemove(file.id, type);
-                  }}
-                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center"
-                >
-                  <X className="w-3 h-3 text-white" />
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      ) : (
-        !isJobCompleted && (
-          <>
-            <CloudUpload className="w-10 h-12 sm:w-12 sm:h-14 text-blue-500 mb-2 sm:mb-3" />
-            <p className="text-sm sm:text-base text-gray-700 text-center">
-              Drag your file(s) or{" "}
-              <span className="text-blue-600 font-medium">browse</span>
-            </p>
-            <p className="text-xs sm:text-sm text-gray-400 mt-1.5 sm:mt-2 text-center">
-              Max 10 MB files are allowed
-            </p>
-          </>
-        )
-      )}
-      {!isJobCompleted && (
-        <input
-          id={`file-${type}`}
-          type="file"
-          multiple
-          accept=".jpg,.png,.svg"
-          className="hidden"
-          onChange={(e) => onFileUpload(e, type)}
-        />
-      )}
+              <p className="text-xs sm:text-sm text-gray-400 mt-1.5 sm:mt-2 text-center">
+                Max 10 MB files are allowed
+              </p>
+            </>
+          )
+        )}
+        {isUploadEnabled && (
+          <input
+            id={`file-${type}`}
+            type="file"
+            multiple
+            accept=".jpg,.png,.svg"
+            className="hidden"
+            onChange={(e) => onFileUpload(e, type)}
+          />
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface ImageUploadSectionProps {
   imageData: ImageUploadData;
   jobId: string;
-  isJobCompleted?: boolean;
+  jobStatus?: string;
 }
 
 const ImageUploadSection = ({
   imageData,
   jobId,
-  isJobCompleted = false,
+  jobStatus,
 }: ImageUploadSectionProps) => {
   const [beforeImages, setBeforeImages] = useState<UploadedFile[]>([]);
   const [afterImages, setAfterImages] = useState<UploadedFile[]>([]);
+
+  // Check if image upload should be enabled (only when job is in progress)
+  const isImageUploadEnabled =
+    jobStatus === "in_progress" || jobStatus === "In Progress";
 
   // Initialize images from API data
   useEffect(() => {
@@ -241,7 +249,7 @@ const ImageUploadSection = ({
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onRemove={removeFile}
-            isJobCompleted={isJobCompleted}
+            isJobCompleted={!isImageUploadEnabled}
           />
           <UploadArea
             type="after"
@@ -250,7 +258,7 @@ const ImageUploadSection = ({
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onRemove={removeFile}
-            isJobCompleted={isJobCompleted}
+            isJobCompleted={!isImageUploadEnabled}
           />
         </div>
       </div>

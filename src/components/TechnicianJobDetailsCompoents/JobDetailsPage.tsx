@@ -235,11 +235,13 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
           <ImageUploadSection
             imageData={jobData.image_upload_section}
             jobId={jobId}
+            jobStatus={jobData.header_summary_card.status}
           />
           <CustomerSignatureSection
             signatureData={jobData.customer_signature_section}
             clientName={jobData.client_information_section.name}
             jobId={jobId}
+            jobStatus={jobData.header_summary_card.status}
           />
         </div>
       </div>

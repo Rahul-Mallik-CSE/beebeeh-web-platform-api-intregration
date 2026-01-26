@@ -12,16 +12,22 @@ interface CustomerSignatureSectionProps {
   signatureData: SignatureData;
   clientName: string;
   jobId: string;
+  jobStatus?: string;
 }
 
 const CustomerSignatureSection = ({
   signatureData,
   clientName,
   jobId,
+  jobStatus,
 }: CustomerSignatureSectionProps) => {
   const [signatureImage, setSignatureImage] = useState<string | null>(null);
   const [showCanvas, setShowCanvas] = useState(false);
   const sigCanvas = useRef<SignatureCanvas>(null);
+
+  // Check if signature collection should be enabled (only when job is in progress)
+  const isSignatureEnabled =
+    jobStatus === "in_progress" || jobStatus === "In Progress";
 
   // Initialize signature from API data
   useEffect(() => {
@@ -124,6 +130,7 @@ const CustomerSignatureSection = ({
                 <Button
                   onClick={handleCollectClick}
                   className="w-full bg-[#5C3D2E] hover:bg-[#4A2F22] text-white rounded-lg"
+                  disabled={!isSignatureEnabled}
                 >
                   Collect
                 </Button>
