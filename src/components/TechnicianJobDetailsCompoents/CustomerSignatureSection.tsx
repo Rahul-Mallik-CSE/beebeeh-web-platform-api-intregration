@@ -8,11 +8,21 @@ import { CustomerSignatureSection as SignatureData } from "@/types/JobDetailsTyp
 import { format } from "date-fns";
 import { getImageFullUrl } from "@/lib/utils";
 
+// Extend Window interface
+declare global {
+  interface Window {
+    getSignatureCanvas?: () => SignatureCanvas | null;
+    getSignatureValidation?: () => boolean;
+    getSignatureBlob?: () => Blob | null;
+  }
+}
+
 interface CustomerSignatureSectionProps {
   signatureData: SignatureData;
   clientName: string;
   jobId: string;
   jobStatus?: string;
+  showValidationError?: boolean;
 }
 
 const CustomerSignatureSection = ({
@@ -20,14 +30,31 @@ const CustomerSignatureSection = ({
   clientName,
   jobId,
   jobStatus,
+  showValidationError,
 }: CustomerSignatureSectionProps) => {
   const [signatureImage, setSignatureImage] = useState<string | null>(null);
+  const [signatureBlob, setSignatureBlob] = useState<Blob | null>(null);
   const [showCanvas, setShowCanvas] = useState(false);
   const sigCanvas = useRef<SignatureCanvas>(null);
 
   // Check if signature collection should be enabled (only when job is in progress)
   const isSignatureEnabled =
     jobStatus === "in_progress" || jobStatus === "In Progress";
+
+  // Expose signature canvas globally
+  useEffect(() => {
+    window.getSignatureCanvas = () => sigCanvas.current;
+  }, []);
+
+  // Expose validation function
+  useEffect(() => {
+    window.getSignatureValidation = () => !!signatureImage;
+  }, [signatureImage]);
+
+  // Expose signature blob function
+  useEffect(() => {
+    window.getSignatureBlob = () => signatureBlob;
+  }, [signatureBlob]);
 
   // Initialize signature from API data
   useEffect(() => {
@@ -52,12 +79,26 @@ const CustomerSignatureSection = ({
 
   const handleClear = () => {
     sigCanvas.current?.clear();
+    setSignatureImage(null);
+    setSignatureBlob(null);
   };
 
   const handleSave = () => {
     if (sigCanvas.current) {
       const dataURL = sigCanvas.current.toDataURL();
       setSignatureImage(dataURL);
+
+      // Convert canvas to blob and store it
+      sigCanvas.current.getTrimmedCanvas().toBlob(
+        (blob: Blob | null) => {
+          if (blob) {
+            setSignatureBlob(blob);
+          }
+        },
+        "image/jpeg",
+        0.9,
+      );
+
       setShowCanvas(false);
     }
   };
@@ -71,7 +112,13 @@ const CustomerSignatureSection = ({
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
         Customer Signature Section:
       </h3>
-      <div className="border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6">
+      <div
+        className={`border rounded-2xl p-3 sm:p-4 md:p-6 transition-colors ${
+          showValidationError && !signatureImage
+            ? "border-red-500 border-2"
+            : "border-gray-200"
+        }`}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Left side - Client info */}
           <div className="space-y-3 sm:space-y-4">

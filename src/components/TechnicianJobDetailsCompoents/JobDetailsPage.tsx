@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { JobStatus } from "@/types/JobDetailsTypes";
 import {
   useStartJobMutation,
   useCancelJobMutation,
+  useCompleteJobMutation,
 } from "@/redux/features/technicianFeatures/jobDetailsAPI";
 import { toast } from "react-toastify";
 
@@ -28,6 +29,11 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   const { data, isLoading, isError } = useGetJobDetailsQuery(jobId);
   const [startJob, { isLoading: isStartingJob }] = useStartJobMutation();
   const [cancelJob, { isLoading: isCancellingJob }] = useCancelJobMutation();
+  const [completeJob, { isLoading: isCompletingJob }] =
+    useCompleteJobMutation();
+
+  // Validation error state
+  const [showValidationError, setShowValidationError] = useState(false);
 
   // Debug logging
   console.log("Job Details API Response:", data);
@@ -54,6 +60,77 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
     } catch (error) {
       console.error("Failed to cancel job:", error);
       toast.error("Failed to cancel job. Please try again.");
+    }
+  };
+
+  // Handle complete job
+  const handleCompleteJob = async () => {
+    // Get validation functions
+    const getImageValidation = (window as any).getImageValidation;
+    const getSignatureValidation = (window as any).getSignatureValidation;
+
+    if (!getImageValidation || !getSignatureValidation) {
+      toast.error(
+        "Validation functions not available. Please refresh the page.",
+      );
+      return;
+    }
+
+    const { hasBefore, hasAfter } = getImageValidation();
+    const hasSig = getSignatureValidation();
+
+    // Validate all required media
+    if (!hasBefore || !hasAfter || !hasSig) {
+      setShowValidationError(true);
+      toast.error(
+        "Please upload signature, before image, and after image to complete the job.",
+      );
+      return;
+    }
+
+    setShowValidationError(false);
+
+    try {
+      // Get the uploaded images and signature from global functions
+      const getUploadedImages = (window as any).getUploadedImages;
+      const getSignatureBlob = (window as any).getSignatureBlob;
+
+      if (!getUploadedImages || !getSignatureBlob) {
+        toast.error("Failed to retrieve uploaded media. Please try again.");
+        return;
+      }
+
+      const { beforeFiles, afterFiles } = getUploadedImages();
+      const signatureBlob = getSignatureBlob();
+
+      if (!beforeFiles?.[0] || !afterFiles?.[0] || !signatureBlob) {
+        toast.error(
+          "Please ensure all images and signature are properly captured.",
+        );
+        return;
+      }
+
+      // Create FormData
+      const formData = new FormData();
+
+      // Add signature
+      formData.append("kind", "signature");
+      formData.append("file", signatureBlob, "signature.jpg");
+
+      // Add before image
+      formData.append("kind", "before");
+      formData.append("file", beforeFiles[0]);
+
+      // Add after image
+      formData.append("kind", "after");
+      formData.append("file", afterFiles[0]);
+
+      // Call the API
+      await completeJob({ jobId, formData }).unwrap();
+      toast.success("Job completed successfully!");
+    } catch (error) {
+      console.error("Failed to complete job:", error);
+      toast.error("Failed to complete job. Please try again.");
     }
   };
 
@@ -95,8 +172,8 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             variant: "default" as const,
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white",
-            onClick: () => {}, // TODO: Implement complete job functionality
-            disabled: false,
+            onClick: handleCompleteJob,
+            disabled: isCompletingJob,
           },
         ];
       case "cancel":
@@ -236,12 +313,15 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             imageData={jobData.image_upload_section}
             jobId={jobId}
             jobStatus={jobData.header_summary_card.status}
+            showValidationError={showValidationError}
+            onGetImages={() => ({ beforeFiles: [], afterFiles: [] })}
           />
           <CustomerSignatureSection
             signatureData={jobData.customer_signature_section}
             clientName={jobData.client_information_section.name}
             jobId={jobId}
             jobStatus={jobData.header_summary_card.status}
+            showValidationError={showValidationError}
           />
         </div>
       </div>
@@ -261,7 +341,9 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
                 ? "Starting..."
                 : button.text === "Cancel Job"
                   ? "Cancelling..."
-                  : button.text
+                  : button.text === "Complete Job"
+                    ? "Completing..."
+                    : button.text
               : button.text}
           </Button>
         ))}

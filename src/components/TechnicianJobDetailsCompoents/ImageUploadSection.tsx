@@ -6,6 +6,14 @@ import Image from "next/image";
 import { ImageUploadSection as ImageUploadData } from "@/types/JobDetailsTypes";
 import { getImageFullUrl } from "@/lib/utils";
 
+// Extend Window interface
+declare global {
+  interface Window {
+    getUploadedImages?: () => { beforeFiles: File[]; afterFiles: File[] };
+    getImageValidation?: () => { hasBefore: boolean; hasAfter: boolean };
+  }
+}
+
 interface UploadedFile {
   id: number;
   name: string;
@@ -124,19 +132,40 @@ interface ImageUploadSectionProps {
   imageData: ImageUploadData;
   jobId: string;
   jobStatus?: string;
+  showValidationError?: boolean;
+  onGetImages?: () => { beforeFiles: File[]; afterFiles: File[] };
 }
 
 const ImageUploadSection = ({
   imageData,
   jobId,
   jobStatus,
+  showValidationError,
+  onGetImages,
 }: ImageUploadSectionProps) => {
   const [beforeImages, setBeforeImages] = useState<UploadedFile[]>([]);
   const [afterImages, setAfterImages] = useState<UploadedFile[]>([]);
+  const [beforeFiles, setBeforeFiles] = useState<File[]>([]);
+  const [afterFiles, setAfterFiles] = useState<File[]>([]);
 
   // Check if image upload should be enabled (only when job is in progress)
   const isImageUploadEnabled =
     jobStatus === "in_progress" || jobStatus === "In Progress";
+
+  // Expose function to get files
+  useEffect(() => {
+    if (onGetImages) {
+      window.getUploadedImages = () => ({ beforeFiles, afterFiles });
+    }
+  }, [beforeFiles, afterFiles, onGetImages]);
+
+  // Expose validation function
+  useEffect(() => {
+    window.getImageValidation = () => ({
+      hasBefore: beforeImages.length > 0,
+      hasAfter: afterImages.length > 0,
+    });
+  }, [beforeImages, afterImages]);
 
   // Initialize images from API data
   useEffect(() => {
@@ -167,9 +196,16 @@ const ImageUploadSection = ({
   ) => {
     const files = e.target.files;
     if (files) {
-      const newFiles: UploadedFile[] = [];
+      const filesArray = Array.from(files);
 
-      Array.from(files).forEach((file, index) => {
+      // Store actual files
+      if (type === "before") {
+        setBeforeFiles(filesArray);
+      } else {
+        setAfterFiles(filesArray);
+      }
+
+      filesArray.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = (event) => {
           const newFile: UploadedFile = {
@@ -197,7 +233,16 @@ const ImageUploadSection = ({
     e.preventDefault();
     const files = e.dataTransfer.files;
     if (files) {
-      Array.from(files).forEach((file, index) => {
+      const filesArray = Array.from(files);
+
+      // Store actual files
+      if (type === "before") {
+        setBeforeFiles(filesArray);
+      } else {
+        setAfterFiles(filesArray);
+      }
+
+      filesArray.forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = (event) => {
           const newFile: UploadedFile = {
@@ -240,7 +285,14 @@ const ImageUploadSection = ({
           Only support .jpg, .png and .svg files.
         </p>
       </div>
-      <div className="border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6">
+      <div
+        className={`border rounded-2xl p-3 sm:p-4 md:p-6 transition-colors ${
+          showValidationError &&
+          (beforeImages.length === 0 || afterImages.length === 0)
+            ? "border-red-500 border-2"
+            : "border-gray-200"
+        }`}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 ">
           <UploadArea
             type="before"
