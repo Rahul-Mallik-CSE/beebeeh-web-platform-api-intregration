@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAddPartMutation } from "@/redux/features/technicianFeatures/jobDetailsAPI";
+import {
+  useAddPartMutation,
+  useAutocompletePartsQuery,
+} from "@/redux/features/technicianFeatures/jobDetailsAPI";
 import { toast } from "react-toastify";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface AddPartsModalProps {
   isOpen: boolean;
@@ -28,7 +33,29 @@ const AddPartsModal = ({ isOpen, onClose, jobId }: AddPartsModalProps) => {
     quantity_used: "",
   });
 
+  // Autocomplete states
+  const [partIdQuery, setPartIdQuery] = useState("");
+  const [partNameQuery, setPartNameQuery] = useState("");
+  const [showPartIdDropdown, setShowPartIdDropdown] = useState(false);
+  const [showPartNameDropdown, setShowPartNameDropdown] = useState(false);
+  const [selectedPartId, setSelectedPartId] = useState<string | null>(null);
+  const [selectedPartName, setSelectedPartName] = useState<string | null>(null);
+
+  const partIdRef = useRef<HTMLInputElement>(null);
+  const partNameRef = useRef<HTMLInputElement>(null);
+
   const [addPart, { isLoading }] = useAddPartMutation();
+
+  // Autocomplete queries with debouncing
+  const { data: partIdSuggestions, isFetching: isFetchingPartId } =
+    useAutocompletePartsQuery(partIdQuery, {
+      skip: partIdQuery.length < 2,
+    });
+
+  const { data: partNameSuggestions, isFetching: isFetchingPartName } =
+    useAutocompletePartsQuery(partNameQuery, {
+      skip: partNameQuery.length < 2,
+    });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,7 +63,73 @@ const AddPartsModal = ({ isOpen, onClose, jobId }: AddPartsModalProps) => {
       ...prev,
       [name]: value,
     }));
+
+    // Handle autocomplete queries
+    if (name === "part_id") {
+      setPartIdQuery(value);
+      setSelectedPartId(null);
+      setShowPartIdDropdown(value.length >= 2);
+      if (selectedPartName && value !== selectedPartId) {
+        setSelectedPartName(null);
+        setFormData((prev) => ({ ...prev, part_name: "" }));
+      }
+    } else if (name === "part_name") {
+      setPartNameQuery(value);
+      setSelectedPartName(null);
+      setShowPartNameDropdown(value.length >= 2);
+      if (selectedPartId && value !== selectedPartName) {
+        setSelectedPartId(null);
+        setFormData((prev) => ({ ...prev, part_id: "" }));
+      }
+    }
   };
+
+  const handlePartIdSelect = (part: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      part_id: part.part_id,
+      part_name: part.part_name,
+    }));
+    setSelectedPartId(part.part_id);
+    setSelectedPartName(part.part_name);
+    setPartIdQuery("");
+    setShowPartIdDropdown(false);
+  };
+
+  const handlePartNameSelect = (part: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      part_id: part.part_id,
+      part_name: part.part_name,
+    }));
+    setSelectedPartId(part.part_id);
+    setSelectedPartName(part.part_name);
+    setPartNameQuery("");
+    setShowPartNameDropdown(false);
+  };
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        partIdRef.current &&
+        !partIdRef.current.contains(event.target as Node)
+      ) {
+        setShowPartIdDropdown(false);
+      }
+      if (
+        partNameRef.current &&
+        !partNameRef.current.contains(event.target as Node)
+      ) {
+        setShowPartNameDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,6 +180,12 @@ const AddPartsModal = ({ isOpen, onClose, jobId }: AddPartsModalProps) => {
       part_name: "",
       quantity_used: "",
     });
+    setPartIdQuery("");
+    setPartNameQuery("");
+    setShowPartIdDropdown(false);
+    setShowPartNameDropdown(false);
+    setSelectedPartId(null);
+    setSelectedPartName(null);
     onClose();
   };
 
@@ -105,29 +204,87 @@ const AddPartsModal = ({ isOpen, onClose, jobId }: AddPartsModalProps) => {
               <Label htmlFor="part_id" className="text-right">
                 Part ID
               </Label>
-              <Input
-                id="part_id"
-                name="part_id"
-                value={formData.part_id}
-                onChange={handleInputChange}
-                placeholder="e.g., Pr-204"
-                className="col-span-3"
-                required
-              />
+              <div className="col-span-3 relative" ref={partIdRef}>
+                <Input
+                  id="part_id"
+                  name="part_id"
+                  value={formData.part_id}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Pr-204"
+                  className="w-full"
+                  required
+                />
+                {showPartIdDropdown && partIdSuggestions?.data && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {isFetchingPartId ? (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        Searching...
+                      </div>
+                    ) : partIdSuggestions.data.length > 0 ? (
+                      partIdSuggestions.data.map((part) => (
+                        <div
+                          key={part.part_id}
+                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                          onClick={() => handlePartIdSelect(part)}
+                        >
+                          <div className="font-medium">{part.part_id}</div>
+                          <div className="text-gray-500 text-xs">
+                            {part.part_name} • {part.stock_quantity} {part.unit}{" "}
+                            in stock
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        No parts found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="part_name" className="text-right">
                 Part Name
               </Label>
-              <Input
-                id="part_name"
-                name="part_name"
-                value={formData.part_name}
-                onChange={handleInputChange}
-                placeholder="e.g., Filter A22"
-                className="col-span-3"
-                required
-              />
+              <div className="col-span-3 relative" ref={partNameRef}>
+                <Input
+                  id="part_name"
+                  name="part_name"
+                  value={formData.part_name}
+                  onChange={handleInputChange}
+                  placeholder="e.g., Filter A22"
+                  className="w-full"
+                  required
+                />
+                {showPartNameDropdown && partNameSuggestions?.data && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {isFetchingPartName ? (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        Searching...
+                      </div>
+                    ) : partNameSuggestions.data.length > 0 ? (
+                      partNameSuggestions.data.map((part) => (
+                        <div
+                          key={part.part_id}
+                          className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                          onClick={() => handlePartNameSelect(part)}
+                        >
+                          <div className="font-medium">{part.part_name}</div>
+                          <div className="text-gray-500 text-xs">
+                            {part.part_id} • {part.stock_quantity} {part.unit}{" "}
+                            in stock
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-3 py-2 text-sm text-gray-500">
+                        No parts found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="quantity_used" className="text-right">

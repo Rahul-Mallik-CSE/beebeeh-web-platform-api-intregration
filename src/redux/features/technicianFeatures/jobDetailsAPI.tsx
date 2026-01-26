@@ -9,6 +9,26 @@ interface AddPartRequest {
   quantity_used: number;
 }
 
+interface AutocompletePart {
+  part_id: string;
+  part_name: string;
+  unit: string;
+  stock_quantity: number;
+}
+
+interface AutocompleteResponse {
+  success: boolean;
+  message: string;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: AutocompletePart[];
+  requestId: string;
+}
+
 const jobDetailsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getJobDetails: builder.query<JobDetailsResponse, string>({
@@ -61,6 +81,13 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         { type: "JobDetails", id: jobId },
       ],
     }),
+    autocompleteParts: builder.query<AutocompleteResponse, string>({
+      query: (query) => ({
+        url: `/api/autocomplete/parts/`,
+        method: "GET",
+        params: { q: query },
+      }),
+    }),
   }),
 });
 
@@ -70,4 +97,5 @@ export const {
   useStartJobMutation,
   useCancelJobMutation,
   useCompleteJobMutation,
+  useAutocompletePartsQuery,
 } = jobDetailsAPI;
