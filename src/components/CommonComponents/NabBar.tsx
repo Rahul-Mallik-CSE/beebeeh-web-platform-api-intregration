@@ -15,6 +15,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import LogoutModal from "./LogOutModal";
 import { SidebarTrigger } from "../ui/sidebar";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/redux/store";
+import { logout as logoutAction } from "@/redux/features/authSlice";
 import { logout } from "@/services/authService";
 
 interface User {
@@ -30,21 +33,15 @@ interface User {
 const NavBar = () => {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
 
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
+  // Get user from Redux store
+  const { user, isLoading } = useSelector((state: RootState) => state.auth);
 
   const handleLogout = async () => {
-    // Clear all localStorage
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    // Dispatch logout action (this will clear Redux state and localStorage)
+    dispatch(logoutAction());
 
     // Clear cookies
     await logout();

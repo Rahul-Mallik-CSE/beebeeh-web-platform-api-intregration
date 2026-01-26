@@ -8,10 +8,13 @@ import { Button } from "../ui/button";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLoginMutation } from "@/redux/features/authAPI";
+import { setCredentials } from "@/redux/features/authSlice";
+import { useDispatch } from "react-redux";
 import { saveTokens } from "@/services/authService";
 
 export const SignInForm = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -24,12 +27,14 @@ export const SignInForm = () => {
       const response = await login({ email, password }).unwrap();
 
       if (response.success) {
-        // Store tokens in localStorage
-        localStorage.setItem("accessToken", response.data.access_token);
-        localStorage.setItem("refreshToken", response.data.refresh_token);
-
-        // Store user data in localStorage
-        localStorage.setItem("user", JSON.stringify(response.data.user));
+        // Dispatch to Redux store (this will also save to localStorage)
+        dispatch(
+          setCredentials({
+            user: response.data.user,
+            accessToken: response.data.access_token,
+            refreshToken: response.data.refresh_token,
+          }),
+        );
 
         // Also save token in cookies for middleware
         await saveTokens(response.data.access_token, true);

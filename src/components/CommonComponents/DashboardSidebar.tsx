@@ -34,35 +34,23 @@ import { GiAutoRepair } from "react-icons/gi";
 import { BsBox } from "react-icons/bs";
 import { AiFillTool } from "react-icons/ai";
 import { GrUserWorker, GrVmMaintenance } from "react-icons/gr";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/redux/store";
+import { logout as logoutAction } from "@/redux/features/authSlice";
 import { logout } from "@/services/authService";
 
 export default function DashboardSidebar() {
   const { state } = useSidebar();
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
+
+  // Get user role from Redux store
+  const { user, isLoading } = useSelector((state: RootState) => state.auth);
+  const userRole = user?.role;
 
   const isCollapsed = state === "collapsed";
-
-  // Get user data from localStorage
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        try {
-          const user = JSON.parse(userData);
-          setUserRole(user.role);
-          console.log("User role loaded:", user.role);
-        } catch (error) {
-          console.error("Error parsing user data:", error);
-          // fallback
-        }
-      } else {
-        // fallback if no user data
-      }
-    }
-  }, []);
 
   // Admin navigation items
   const adminNavItems = [
@@ -166,10 +154,8 @@ export default function DashboardSidebar() {
       : adminNavItems;
 
   const handleLogout = async () => {
-    // Clear all localStorage
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    // Dispatch logout action (this will clear Redux state and localStorage)
+    dispatch(logoutAction());
 
     // Clear cookies
     await logout();

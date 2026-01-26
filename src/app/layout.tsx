@@ -8,6 +8,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/components/CommonComponents/DashboardSidebar";
 import NavBar from "@/components/CommonComponents/NabBar";
 import Providers from "@/redux/Providers";
+import AuthInitializer from "@/components/AuthInitializer";
 import { Bounce, ToastContainer } from "react-toastify";
 
 const geistSans = Geist({
@@ -56,6 +57,7 @@ export default function RootLayout({
           transition={Bounce}
         />
         <Providers>
+          <AuthInitializer />
           <SidebarProvider>
             <DashboardSidebar />
             <SidebarInset className="overflow-x-hidden">

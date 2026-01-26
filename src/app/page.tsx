@@ -3,20 +3,26 @@
 import LoadingScreen from "@/components/CommonComponents/LoadingScreen";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 
 export default function Home() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const user = localStorage.getItem("user");
-      const token = localStorage.getItem("accessToken");
+  // Get auth state from Redux
+  const {
+    user,
+    isAuthenticated,
+    isLoading: authLoading,
+  } = useSelector((state: RootState) => state.auth);
 
-      if (user && token) {
-        const userData = JSON.parse(user);
+  useEffect(() => {
+    // Wait for auth initialization to complete
+    if (!authLoading) {
+      if (isAuthenticated && user) {
         // Redirect based on role
-        if (userData.role === "technician") {
+        if (user.role === "technician") {
           router.push("/overviews");
         } else {
           router.push("/overview");
@@ -25,16 +31,11 @@ export default function Home() {
         // No auth, redirect to sign in
         router.push("/sign-in");
       }
-
       setIsLoading(false);
-    };
+    }
+  }, [authLoading, isAuthenticated, user, router]);
 
-    const timer = setTimeout(checkAuth, 1500);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return <LoadingScreen />;
   }
 
