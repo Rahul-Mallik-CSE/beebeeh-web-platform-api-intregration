@@ -192,7 +192,10 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
         </div>
         {/* Right Column - 1/3 */}
         <div className="lg:col-span-3 xl:col-span-5  space-y-4 sm:space-y-6">
-          <FrequentlyUsedParts parts={jobData.frequently_used_parts} />
+          <FrequentlyUsedParts
+            parts={jobData.frequently_used_parts}
+            jobId={jobId}
+          />
           <ChecklistSection checklist={jobData.checklist_section} />
           <ImageUploadSection
             imageData={jobData.image_upload_section}

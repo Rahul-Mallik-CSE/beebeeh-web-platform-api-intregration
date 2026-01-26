@@ -1,5 +1,5 @@
 /** @format */
-import React from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -11,12 +11,23 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "../ui/button";
 import { FrequentlyUsedPart } from "@/types/JobDetailsTypes";
+import AddPartsModal from "./AddPartsModal";
 
 interface FrequentlyUsedPartsProps {
   parts: FrequentlyUsedPart[];
+  jobId: string;
 }
 
-const FrequentlyUsedParts = ({ parts }: FrequentlyUsedPartsProps) => {
+const FrequentlyUsedParts = ({ parts, jobId }: FrequentlyUsedPartsProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleAddPartsClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
   return (
     <div className="bg-white">
       <div className="w-full flex justify-between">
@@ -27,6 +38,7 @@ const FrequentlyUsedParts = ({ parts }: FrequentlyUsedPartsProps) => {
           variant="ghost"
           size="sm"
           className="text-red-600 text-lg hover:text-red-700"
+          onClick={handleAddPartsClick}
         >
           Add Parts
         </Button>
@@ -42,9 +54,7 @@ const FrequentlyUsedParts = ({ parts }: FrequentlyUsedPartsProps) => {
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
                   Parts ID
                 </TableHead>
-                <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
-                  Unit
-                </TableHead>
+
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
                   Quantity Used
                 </TableHead>
@@ -60,9 +70,7 @@ const FrequentlyUsedParts = ({ parts }: FrequentlyUsedPartsProps) => {
                     <TableCell className="text-gray-700 text-xs sm:text-sm whitespace-nowrap">
                       {part.part_id}
                     </TableCell>
-                    <TableCell className="text-gray-700 text-xs sm:text-sm whitespace-nowrap">
-                      {part.unit}
-                    </TableCell>
+
                     <TableCell className="text-gray-700 text-xs sm:text-sm whitespace-nowrap">
                       {part.quantity_used}
                     </TableCell>
@@ -82,6 +90,11 @@ const FrequentlyUsedParts = ({ parts }: FrequentlyUsedPartsProps) => {
           </Table>
         </ScrollArea>
       </div>
+      <AddPartsModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        jobId={jobId}
+      />
     </div>
   );
 };
