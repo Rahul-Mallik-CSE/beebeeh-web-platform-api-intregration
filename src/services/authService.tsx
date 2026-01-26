@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 // Define a function to save the token in cookies
 export const saveTokens = async (
   token: string,
-  verified?: boolean
+  verified?: boolean,
 ): Promise<void> => {
   (await cookies()).set("token", token);
   if (verified !== undefined) {
