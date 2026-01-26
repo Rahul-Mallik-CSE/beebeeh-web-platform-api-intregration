@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "l9vtwvjb-8001.inc1.devtunnels.ms",
       },
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8001",
+        pathname: "/media/**",
+      },
     ],
   },
 };

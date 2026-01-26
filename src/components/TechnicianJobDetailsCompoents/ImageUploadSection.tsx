@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { CloudUpload, X } from "lucide-react";
 import Image from "next/image";
 import { ImageUploadSection as ImageUploadData } from "@/types/JobDetailsTypes";
+import { getImageFullUrl } from "@/lib/utils";
 
 interface UploadedFile {
   id: number;
@@ -78,6 +79,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
                   width={40}
                   height={40}
                   className="w-full h-full object-cover rounded"
+                  unoptimized
                 />
               ) : (
                 <Image
@@ -129,7 +131,7 @@ const ImageUploadSection = ({ imageData, jobId }: ImageUploadSectionProps) => {
         id: img.id,
         name: img.file.split("/").pop() || "image.jpg",
         size: "Unknown",
-        preview: img.file,
+        preview: getImageFullUrl(img.file),
       }));
       setBeforeImages(formattedBeforeImages);
     }
@@ -139,7 +141,7 @@ const ImageUploadSection = ({ imageData, jobId }: ImageUploadSectionProps) => {
         id: img.id,
         name: img.file.split("/").pop() || "image.jpg",
         size: "Unknown",
-        preview: img.file,
+        preview: getImageFullUrl(img.file),
       }));
       setAfterImages(formattedAfterImages);
     }

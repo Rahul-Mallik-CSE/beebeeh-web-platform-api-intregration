@@ -12,17 +12,21 @@ export const getImageFullUrl = (
 ): string => {
   if (!imagePath) return "";
 
-  // If it's already a full URL, return as is
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://l9vtwvjb-8001.inc1.devtunnels.ms";
+
+  // If it's already a full URL, return as is unless it's localhost dev URL
   if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+    if (imagePath.startsWith("http://localhost:8001")) {
+      return imagePath.replace("http://localhost:8001", baseUrl);
+    }
     return imagePath;
   }
 
-  // If it starts with /uploads, prepend the backend URL
+  // If it starts with /media, prepend the backend URL
   if (imagePath.startsWith("/media")) {
-    return `${
-      process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "https://l9vtwvjb-8001.inc1.devtunnels.ms"
-    }${imagePath}`;
+    return `${baseUrl}${imagePath}`;
   }
 
   // Otherwise return as is (for paths like /hero.jpg)

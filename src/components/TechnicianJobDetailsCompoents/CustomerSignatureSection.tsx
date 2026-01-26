@@ -6,6 +6,7 @@ import Image from "next/image";
 import SignatureCanvas from "react-signature-canvas";
 import { CustomerSignatureSection as SignatureData } from "@/types/JobDetailsTypes";
 import { format } from "date-fns";
+import { getImageFullUrl } from "@/lib/utils";
 
 interface CustomerSignatureSectionProps {
   signatureData: SignatureData;
@@ -25,7 +26,7 @@ const CustomerSignatureSection = ({
   // Initialize signature from API data
   useEffect(() => {
     if (signatureData.signature_media?.file) {
-      setSignatureImage(signatureData.signature_media.file);
+      setSignatureImage(getImageFullUrl(signatureData.signature_media.file));
     }
   }, [signatureData]);
 
@@ -113,6 +114,7 @@ const CustomerSignatureSection = ({
                       width={200}
                       height={64}
                       className="max-h-full max-w-full object-contain"
+                      unoptimized
                     />
                   ) : (
                     <p className="text-gray-400 text-sm">Signature area</p>
