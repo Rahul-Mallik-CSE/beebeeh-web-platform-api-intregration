@@ -173,6 +173,7 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
           <ImageUploadSection
             imageData={jobData.image_upload_section}
             jobId={jobId}
+            isJobCompleted={jobData.header_summary_card.status === "complete"}
           />
           <CustomerSignatureSection
             signatureData={jobData.customer_signature_section}

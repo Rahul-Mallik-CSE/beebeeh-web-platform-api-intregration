@@ -26,6 +26,7 @@ interface UploadAreaProps {
   ) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onRemove: (id: number, type: "before" | "after") => void;
+  isJobCompleted: boolean;
 }
 
 const UploadArea: React.FC<UploadAreaProps> = ({
@@ -35,92 +36,97 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   onDrop,
   onDragOver,
   onRemove,
+  isJobCompleted,
 }) => (
   <div className="space-y-3 sm:space-y-4 min-h-[280px] sm:min-h-[326px]">
     <p className="text-sm sm:text-base font-bold text-gray-800">
       {type === "before" ? "Before Image" : "After Image"}
     </p>
     <div
-      className="border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center hover:border-blue-400 transition-colors cursor-pointer "
-      onDrop={(e) => onDrop(e, type)}
-      onDragOver={onDragOver}
-      onClick={() => document.getElementById(`file-${type}`)?.click()}
+      className={`border-2 border-dashed border-gray-300 rounded-xl p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center transition-colors ${
+        !isJobCompleted ? "hover:border-blue-400 cursor-pointer" : ""
+      }`}
+      onDrop={!isJobCompleted ? (e) => onDrop(e, type) : undefined}
+      onDragOver={!isJobCompleted ? onDragOver : undefined}
+      onClick={
+        !isJobCompleted
+          ? () => document.getElementById(`file-${type}`)?.click()
+          : undefined
+      }
     >
-      <CloudUpload className="w-10 h-12 sm:w-12 sm:h-14 text-blue-500 mb-2 sm:mb-3" />
-      <p className="text-sm sm:text-base text-gray-700 text-center">
-        Drag your file(s) or{" "}
-        <span className="text-blue-600 font-medium">browse</span>
-      </p>
-      <p className="text-xs sm:text-sm text-gray-400 mt-1.5 sm:mt-2 text-center">
-        Max 10 MB files are allowed
-      </p>
-      <input
-        id={`file-${type}`}
-        type="file"
-        multiple
-        accept=".jpg,.png,.svg"
-        className="hidden"
-        onChange={(e) => onFileUpload(e, type)}
-      />
-    </div>
-
-    {images.length > 0 && (
-      <div className="space-y-1.5 sm:space-y-2">
-        {images.map((file) => (
-          <div
-            key={file.id}
-            className="border border-gray-200 rounded-lg p-2 sm:p-3 flex items-center gap-2 sm:gap-3 bg-white"
-          >
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-100 rounded flex items-center justify-center shrink-0 overflow-hidden">
-              {file.preview ? (
+      {images.length > 0 ? (
+        <div className=" w-full">
+          {images.map((file) => (
+            <div
+              key={file.id}
+              className="relative border border-gray-200 rounded-lg bg-white overflow-hidden  p-2"
+            >
+              <div className="w-full h-48 sm:h-56 bg-gray-100 rounded flex items-center justify-center overflow-hidden mx-auto">
                 <Image
-                  src={file.preview}
+                  src={file.preview || "/logo.png"}
                   alt="preview"
-                  width={40}
-                  height={40}
+                  width={600}
+                  height={600}
                   className="w-full h-full object-cover rounded"
                   unoptimized
                 />
-              ) : (
-                <Image
-                  src="/logo.png"
-                  alt="preview"
-                  width={40}
-                  height={40}
-                  className="rounded object-cover"
-                />
-              )}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm font-medium text-gray-700 truncate">
+              </div>
+              <p className="text-xs font-medium text-gray-700 truncate mt-1">
                 {file.name}
               </p>
-              <p className="text-[10px] sm:text-xs text-gray-400">
-                {file.size}
-              </p>
+              {!isJobCompleted && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(file.id, type);
+                  }}
+                  className="absolute top-1 right-1 w-5 h-5 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center"
+                >
+                  <X className="w-3 h-3 text-white" />
+                </button>
+              )}
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove(file.id, type);
-              }}
-              className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center shrink-0"
-            >
-              <X className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" />
-            </button>
-          </div>
-        ))}
-      </div>
-    )}
+          ))}
+        </div>
+      ) : (
+        !isJobCompleted && (
+          <>
+            <CloudUpload className="w-10 h-12 sm:w-12 sm:h-14 text-blue-500 mb-2 sm:mb-3" />
+            <p className="text-sm sm:text-base text-gray-700 text-center">
+              Drag your file(s) or{" "}
+              <span className="text-blue-600 font-medium">browse</span>
+            </p>
+            <p className="text-xs sm:text-sm text-gray-400 mt-1.5 sm:mt-2 text-center">
+              Max 10 MB files are allowed
+            </p>
+          </>
+        )
+      )}
+      {!isJobCompleted && (
+        <input
+          id={`file-${type}`}
+          type="file"
+          multiple
+          accept=".jpg,.png,.svg"
+          className="hidden"
+          onChange={(e) => onFileUpload(e, type)}
+        />
+      )}
+    </div>
   </div>
 );
 
 interface ImageUploadSectionProps {
   imageData: ImageUploadData;
   jobId: string;
+  isJobCompleted?: boolean;
 }
 
-const ImageUploadSection = ({ imageData, jobId }: ImageUploadSectionProps) => {
+const ImageUploadSection = ({
+  imageData,
+  jobId,
+  isJobCompleted = false,
+}: ImageUploadSectionProps) => {
   const [beforeImages, setBeforeImages] = useState<UploadedFile[]>([]);
   const [afterImages, setAfterImages] = useState<UploadedFile[]>([]);
 
@@ -235,6 +241,7 @@ const ImageUploadSection = ({ imageData, jobId }: ImageUploadSectionProps) => {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onRemove={removeFile}
+            isJobCompleted={isJobCompleted}
           />
           <UploadArea
             type="after"
@@ -243,6 +250,7 @@ const ImageUploadSection = ({ imageData, jobId }: ImageUploadSectionProps) => {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
             onRemove={removeFile}
+            isJobCompleted={isJobCompleted}
           />
         </div>
       </div>
