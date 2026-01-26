@@ -15,7 +15,7 @@ export interface DashboardFilters {
 const overViewAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDashboard: builder.query<DashboardResponse, DashboardFilters | void>({
-      query: (filters = {}) => {
+      query: (filters: DashboardFilters = {}) => {
         const {
           page = 1,
           page_size = 10,

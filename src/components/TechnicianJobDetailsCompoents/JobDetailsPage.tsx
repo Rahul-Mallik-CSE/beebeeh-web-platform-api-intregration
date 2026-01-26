@@ -183,11 +183,7 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
         <div className="text-lg text-orange-600">
           This job type uses a different data structure.
           <br />
-          Job ID:{" "}
-          {jobData?.repair_id ||
-            jobData?.installation_id ||
-            jobData?.maintenance_id ||
-            "Unknown"}
+          Job ID: {jobData?.header_summary_card?.job_id || "Unknown"}
           <br />
           Please update the API to return the standard job details structure.
         </div>

@@ -53,7 +53,7 @@ export const jobsData: Job[] = [
     clientName: "Zara Khan",
     contactNumber: "1235 021500 54 22",
     orderedByTime: "Dec 10, 2024: 10:30 am",
-    status: "Complete",
+    status: "Completed",
   },
   {
     id: "#CD1002",
@@ -77,7 +77,7 @@ export const jobsData: Job[] = [
     clientName: "Zara Khan",
     contactNumber: "1235 021500 54 22",
     orderedByTime: "Dec 10, 2024: 10:30 am",
-    status: "Complete",
+    status: "Completed",
   },
   {
     id: "#CD1002",
@@ -85,7 +85,7 @@ export const jobsData: Job[] = [
     clientName: "Zara Khan",
     contactNumber: "1235 021500 54 22",
     orderedByTime: "Dec 10, 2024: 10:30 am",
-    status: "Complete",
+    status: "Completed",
   },
   {
     id: "#CD1002",

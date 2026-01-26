@@ -15,7 +15,7 @@ export interface TodaysJobsFilters {
 const todaysJobsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getTodaysJobs: builder.query<TodaysJobsResponse, TodaysJobsFilters | void>({
-      query: (filters = {}) => {
+      query: (filters: TodaysJobsFilters = {}) => {
         const {
           page = 1,
           page_size = 10,

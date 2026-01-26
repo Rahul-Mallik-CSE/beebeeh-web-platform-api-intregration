@@ -33,6 +33,8 @@ const baseAPI = createApi({
     "Chat",
     "Notification",
     "Profile",
+    "AllJobs",
+    "TodaysJobs",
   ],
   endpoints: () => ({}),
 });

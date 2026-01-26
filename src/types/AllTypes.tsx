@@ -1,6 +1,11 @@
 /** @format */
 
-export type JobStatus = "Pending" | "In Progress" | "Complete";
+export type JobStatus =
+  | "Pending"
+  | "In Progress"
+  | "Completed"
+  | "Cancelled"
+  | "Rescheduled";
 
 export type JobType =
   | "Maintenance"

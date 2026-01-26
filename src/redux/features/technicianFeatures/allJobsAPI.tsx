@@ -15,7 +15,7 @@ export interface AllJobsFilters {
 const allJobsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllJobs: builder.query<AllJobsResponse, AllJobsFilters | void>({
-      query: (filters = {}) => {
+      query: (filters: AllJobsFilters = {}) => {
         const {
           page = 1,
           page_size = 10,
