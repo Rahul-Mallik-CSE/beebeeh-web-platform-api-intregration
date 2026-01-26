@@ -13,6 +13,11 @@ import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
 import { useGetJobDetailsQuery } from "@/redux/features/technicianFeatures/jobDetailsAPI";
 import { JobStatus } from "@/types/JobDetailsTypes";
+import {
+  useStartJobMutation,
+  useCancelJobMutation,
+} from "@/redux/features/technicianFeatures/jobDetailsAPI";
+import { toast } from "react-toastify";
 
 interface JobDetailsPageProps {
   jobId: string;
@@ -21,12 +26,36 @@ interface JobDetailsPageProps {
 const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   const router = useRouter();
   const { data, isLoading, isError } = useGetJobDetailsQuery(jobId);
+  const [startJob, { isLoading: isStartingJob }] = useStartJobMutation();
+  const [cancelJob, { isLoading: isCancellingJob }] = useCancelJobMutation();
 
   // Debug logging
   console.log("Job Details API Response:", data);
   console.log("Job ID:", jobId);
   console.log("Is Error:", isError);
   console.log("Is Loading:", isLoading);
+
+  // Handle start job
+  const handleStartJob = async () => {
+    try {
+      await startJob(jobId).unwrap();
+      toast.success("Job started successfully!");
+    } catch (error) {
+      console.error("Failed to start job:", error);
+      toast.error("Failed to start job. Please try again.");
+    }
+  };
+
+  // Handle cancel job
+  const handleCancelJob = async () => {
+    try {
+      await cancelJob(jobId).unwrap();
+      toast.success("Job cancelled successfully!");
+    } catch (error) {
+      console.error("Failed to cancel job:", error);
+      toast.error("Failed to cancel job. Please try again.");
+    }
+  };
 
   // Get action buttons configuration based on job status
   const getActionButtons = (status: JobStatus) => {
@@ -39,12 +68,16 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             variant: "outline" as const,
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50",
+            onClick: handleCancelJob,
+            disabled: isCancellingJob,
           },
           {
             text: "Start Job",
             variant: "default" as const,
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white",
+            onClick: handleStartJob,
+            disabled: isStartingJob,
           },
         ];
       case "in_progress":
@@ -54,12 +87,16 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             variant: "outline" as const,
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50",
+            onClick: handleCancelJob,
+            disabled: isCancellingJob,
           },
           {
             text: "Complete Job",
             variant: "default" as const,
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white",
+            onClick: () => {}, // TODO: Implement complete job functionality
+            disabled: false,
           },
         ];
       case "cancel":
@@ -70,6 +107,8 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             variant: "default" as const,
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-green-600 hover:bg-green-700 text-white",
+            onClick: () => {}, // TODO: Implement export functionality
+            disabled: false,
           },
         ];
       default:
@@ -216,8 +255,16 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             key={index}
             variant={button.variant}
             className={button.className}
+            onClick={button.onClick}
+            disabled={button.disabled}
           >
-            {button.text}
+            {button.disabled
+              ? button.text === "Start Job"
+                ? "Starting..."
+                : button.text === "Cancel Job"
+                  ? "Cancelling..."
+                  : button.text
+              : button.text}
           </Button>
         ))}
       </div>

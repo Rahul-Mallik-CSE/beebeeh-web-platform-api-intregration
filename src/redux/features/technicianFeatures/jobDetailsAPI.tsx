@@ -33,7 +33,30 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         { type: "JobDetails", id: jobId },
       ],
     }),
+    startJob: builder.mutation<void, string>({
+      query: (jobId) => ({
+        url: `/api/jobs/${jobId}/start/`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, jobId) => [
+        { type: "JobDetails", id: jobId },
+      ],
+    }),
+    cancelJob: builder.mutation<void, string>({
+      query: (jobId) => ({
+        url: `/api/jobs/${jobId}/cancel/`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, jobId) => [
+        { type: "JobDetails", id: jobId },
+      ],
+    }),
   }),
 });
 
-export const { useGetJobDetailsQuery, useAddPartMutation } = jobDetailsAPI;
+export const {
+  useGetJobDetailsQuery,
+  useAddPartMutation,
+  useStartJobMutation,
+  useCancelJobMutation,
+} = jobDetailsAPI;
