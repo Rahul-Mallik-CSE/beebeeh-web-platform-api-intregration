@@ -28,33 +28,52 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   console.log("Is Error:", isError);
   console.log("Is Loading:", isLoading);
 
-  // Get button configuration based on job status
-  const getButtonConfig = (status: JobStatus) => {
+  // Get action buttons configuration based on job status
+  const getActionButtons = (status: JobStatus) => {
     switch (status) {
       case "assign":
-        return {
-          text: "Complete This Job",
-          className: "bg-red-800 hover:bg-red-700 text-white",
-          disabled: false,
-        };
-      case "complete":
-        return {
-          text: "Export",
-          className: "bg-green-600 hover:bg-green-700 text-white",
-          disabled: false,
-        };
+      case "rescheduled":
+        return [
+          {
+            text: "Cancel Job",
+            variant: "outline" as const,
+            className:
+              "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50",
+          },
+          {
+            text: "Start Job",
+            variant: "default" as const,
+            className:
+              "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white",
+          },
+        ];
+      case "in_progress":
+        return [
+          {
+            text: "Cancel Job",
+            variant: "outline" as const,
+            className:
+              "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50",
+          },
+          {
+            text: "Complete Job",
+            variant: "default" as const,
+            className:
+              "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white",
+          },
+        ];
       case "cancel":
-        return {
-          text: "Cancelled",
-          className: "bg-gray-400 cursor-not-allowed text-white",
-          disabled: true,
-        };
+      case "complete":
+        return [
+          {
+            text: "Export",
+            variant: "default" as const,
+            className:
+              "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-green-600 hover:bg-green-700 text-white",
+          },
+        ];
       default:
-        return {
-          text: "Start Job",
-          className: "bg-red-800 hover:bg-red-700 text-white",
-          disabled: false,
-        };
+        return [];
     }
   };
 
@@ -66,6 +85,11 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
           text: "Pending",
           className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
         };
+      case "in_progress":
+        return {
+          text: "In Progress",
+          className: "bg-blue-500 hover:bg-blue-600 text-white",
+        };
       case "complete":
         return {
           text: "Completed",
@@ -76,9 +100,9 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
           text: "Cancelled",
           className: "bg-red-500 hover:bg-red-600 text-white",
         };
-      default:
+      case "rescheduled":
         return {
-          text: "Pending",
+          text: "Rescheduled",
           className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
         };
     }
@@ -133,7 +157,7 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   }
 
   const statusBadge = getStatusBadge(jobData.header_summary_card.status);
-  const buttonConfig = getButtonConfig(jobData.header_summary_card.status);
+  const actionButtons = getActionButtons(jobData.header_summary_card.status);
 
   return (
     <div className="space-y-4 sm:space-y-6 px-2 sm:px-0">
@@ -173,7 +197,6 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
           <ImageUploadSection
             imageData={jobData.image_upload_section}
             jobId={jobId}
-            isJobCompleted={jobData.header_summary_card.status === "complete"}
           />
           <CustomerSignatureSection
             signatureData={jobData.customer_signature_section}
@@ -185,20 +208,15 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
-        {jobData.header_summary_card.status !== "cancel" && (
+        {actionButtons.map((button, index) => (
           <Button
-            variant="outline"
-            className="px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50"
+            key={index}
+            variant={button.variant}
+            className={button.className}
           >
-            Cancel Job
+            {button.text}
           </Button>
-        )}
-        <Button
-          className={`px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base ${buttonConfig.className}`}
-          disabled={buttonConfig.disabled}
-        >
-          {buttonConfig.text}
-        </Button>
+        ))}
       </div>
     </div>
   );

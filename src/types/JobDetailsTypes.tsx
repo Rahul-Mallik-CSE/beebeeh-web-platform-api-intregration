@@ -1,6 +1,11 @@
 /** @format */
 
-export type JobStatus = "assign" | "complete" | "cancel";
+export type JobStatus =
+  | "assign"
+  | "complete"
+  | "cancel"
+  | "in_progress"
+  | "rescheduled";
 export type JobPriority = "high" | "medium" | "low";
 export type ClientType = "commercial" | "residential";
 export type ChecklistStatus = "done" | "doing" | "cancel" | "pending";

@@ -49,9 +49,10 @@ const OverviewTableSection = ({
   const mapStatusToAPI = (status: string): string => {
     const statusMap: Record<string, string> = {
       Pending: "assign",
-      "In Progress": "in-progress",
+      "In Progress": "in_progress",
       Completed: "complete",
       Cancelled: "cancel",
+      Rescheduled: "rescheduled",
     };
     return statusMap[status] || status.toLowerCase();
   };
@@ -127,6 +128,7 @@ const OverviewTableSection = ({
           "In Progress",
           "Completed",
           "Cancelled",
+          "Rescheduled",
         ]}
         predefinedJobTypeOptions={["Installation", "Repairing", "Maintenance"]}
       />
@@ -138,9 +140,9 @@ const OverviewTableSection = ({
 const formatStatus = (status: string): Job["status"] => {
   const statusMap: Record<string, Job["status"]> = {
     assign: "Pending",
-    rescheduled: "Pending",
+    rescheduled: "Rescheduled",
     complete: "Completed",
-    "in-progress": "In Progress",
+    in_progress: "In Progress",
     cancel: "Cancelled",
   };
 

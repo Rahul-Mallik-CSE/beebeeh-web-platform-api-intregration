@@ -116,6 +116,7 @@ const AllJobsTableSection = ({
         "In Progress",
         "Completed",
         "Cancelled",
+        "Rescheduled",
       ]}
       predefinedJobTypeOptions={["Installation", "Repairing", "Maintenance"]}
     />
@@ -126,9 +127,9 @@ const AllJobsTableSection = ({
 const formatStatus = (status: string): Job["status"] => {
   const statusMap: Record<string, Job["status"]> = {
     assign: "Pending",
-    rescheduled: "Pending",
+    rescheduled: "Rescheduled",
     complete: "Completed",
-    "in-progress": "In Progress",
+    in_progress: "In Progress",
     cancel: "Cancelled",
   };
 
