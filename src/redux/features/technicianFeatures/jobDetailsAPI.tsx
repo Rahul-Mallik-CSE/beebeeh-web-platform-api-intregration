@@ -29,6 +29,25 @@ interface AutocompleteResponse {
   requestId: string;
 }
 
+interface NotificationPayload {
+  job_type?: string;
+  action?: string;
+  job_id?: string;
+  object_id?: string;
+  status?: string;
+  scheduled_date?: string;
+  scheduled_time?: string;
+}
+
+interface WebSocketNotification {
+  id: string;
+  type: string;
+  message: string;
+  payload: NotificationPayload;
+  created_at: string;
+  is_read: boolean;
+}
+
 const jobDetailsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getJobDetails: builder.query<JobDetailsResponse, string>({

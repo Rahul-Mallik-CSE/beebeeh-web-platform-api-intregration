@@ -59,13 +59,32 @@ export interface TableColumn<T> {
   className?: string;
 }
 
-export type NotificationType = "schedule" | "admin" | "report" | "checklist";
+export type NotificationType =
+  | "schedule"
+  | "admin"
+  | "report"
+  | "checklist"
+  | "job_assigned";
+
+export interface NotificationPayload {
+  job_type?: string;
+  action?: string;
+  job_id?: string;
+  object_id?: string;
+  status?: string;
+  scheduled_date?: string;
+  scheduled_time?: string;
+}
 
 export interface Notification {
   id: string;
-  title: string;
-  time: string;
   type: NotificationType;
+  message: string;
+  payload: NotificationPayload;
+  created_at: string;
+  is_read: boolean;
+  time?: string; // For backward compatibility
+  title?: string; // For backward compatibility
 }
 
 // Dashboard API Types
