@@ -69,7 +69,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setFormData({
       ...formData,
@@ -78,6 +78,27 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
   };
 
   const handleSubmit = async () => {
+    // Validation: Check if all required fields are filled
+    if (
+      !formData.firstName.trim() ||
+      !formData.lastName.trim() ||
+      !formData.email.trim() ||
+      !formData.address.trim() ||
+      !formData.town.trim() ||
+      !formData.contactNumber.trim() ||
+      !formData.type.trim()
+    ) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error("Please enter a valid email address.");
+      return;
+    }
+
     try {
       // Create FormData object
       const formDataToSend = new FormData();
@@ -89,26 +110,28 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
       formDataToSend.append("contact_number", formData.contactNumber);
       formDataToSend.append("client_type", formData.type);
       formDataToSend.append("is_active", "true");
-      
+
       if (profileImageFile) {
         formDataToSend.append("profile_image", profileImageFile);
       }
 
       // Call the API
       await addClient(formDataToSend).unwrap();
-      
+
       // Show success message
       toast.success("Client added successfully!");
-      
+
       // Call parent onSave callback if needed
       onSave({ ...formData, profileImage: profileImage || undefined });
-      
+
       // Reset and close
       handleReset();
       onClose();
     } catch (error: any) {
       // Show error message
-      toast.error(error?.data?.message || "Failed to add client. Please try again.");
+      toast.error(
+        error?.data?.message || "Failed to add client. Please try again.",
+      );
     }
   };
 
