@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import AddTechnicianModal from "./AddTechnicianModal";
 
 const TechniciansTableSection = () => {
   const router = useRouter();
@@ -25,7 +26,7 @@ const TechniciansTableSection = () => {
       technician.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       technician.techId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       technician.skills.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      technician.status.toLowerCase().includes(searchQuery.toLowerCase())
+      technician.status.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleViewTechnician = (technician: Technician) => {
@@ -94,6 +95,13 @@ const TechniciansTableSection = () => {
           itemsPerPage={10}
         />
       </div>
+
+      {/* Add Technician Modal */}
+      <AddTechnicianModal
+        open={isAddTechnicianModalOpen}
+        onOpenChange={setIsAddTechnicianModalOpen}
+        onSave={handleAddTechnician}
+      />
     </div>
   );
 };
