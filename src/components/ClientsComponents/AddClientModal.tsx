@@ -257,13 +257,13 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
                   placeholder="Enter address"
                   className="h-9 sm:h-10 pr-16 text-sm"
                 />
-                <button
+                {/* <button
                   type="button"
                   className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   <MapPin className="w-3.5 h-3.5" />
                   <span>Map</span>
-                </button>
+                </button> */}
               </div>
             </div>
 

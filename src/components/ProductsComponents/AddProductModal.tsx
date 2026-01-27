@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAddProductMutation } from "@/redux/features/adminFeatures/productsAPI";
+import { toast } from "react-toastify";
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -38,15 +40,79 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     partsQuantity: "",
     stockQuantity: "",
   });
+  const [addProduct, { isLoading }] = useAddProductMutation();
 
   const handleChange = (field: keyof ProductFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
-    if (formData.modelName.trim()) {
+  const handleSave = async () => {
+    // Validation: Check if all required fields are filled
+    if (
+      !formData.modelName.trim() ||
+      !formData.alias.trim() ||
+      !formData.frequencyDomestic.trim() ||
+      !formData.frequencyCommercial.trim() ||
+      !formData.partsQuantity.trim() ||
+      !formData.stockQuantity.trim()
+    ) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    const freqDom = parseInt(formData.frequencyDomestic);
+    if (isNaN(freqDom) || freqDom <= 0) {
+      toast.error("Frequency Domestic must be a positive number.");
+      return;
+    }
+
+    const freqCom = parseInt(formData.frequencyCommercial);
+    if (isNaN(freqCom) || freqCom <= 0) {
+      toast.error("Frequency Commercial must be a positive number.");
+      return;
+    }
+
+    const partsQty = parseInt(formData.partsQuantity);
+    if (isNaN(partsQty) || partsQty < 0) {
+      toast.error("Parts Quantity must be a non-negative number.");
+      return;
+    }
+
+    const stockQty = parseInt(formData.stockQuantity);
+    if (isNaN(stockQty) || stockQty < 0) {
+      toast.error("Stock Quantity must be a non-negative number.");
+      return;
+    }
+
+    try {
+      // Prepare the payload
+      const productData = {
+        model_name: formData.modelName,
+        alias: formData.alias,
+        frequency_domestic_month: freqDom,
+        frequency_commercial_month: freqCom,
+        parts_quantity: partsQty,
+        stock_quantity: stockQty,
+        maintenance_frequency_month: freqDom, // Using domestic frequency as default
+        is_active: true,
+      };
+
+      // Call the API
+      await addProduct(productData).unwrap();
+
+      // Show success message
+      toast.success("Product added successfully!");
+
+      // Call parent onSave callback
       onSave(formData);
+
+      // Reset and close
       handleCancel();
+    } catch (error: any) {
+      // Show error message
+      toast.error(
+        error?.data?.message || "Failed to add product. Please try again.",
+      );
     }
   };
 
@@ -97,7 +163,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               className="text-[11px] xs:text-xs sm:text-lg font-medium text-gray-700"
             >
               Alias{" "}
-              <span className="text-gray-500 font-normal">(optional)</span>
             </label>
             <Input
               id="alias"
@@ -120,7 +185,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             </label>
             <Input
               id="frequencyDomestic"
-              type="text"
+              type="number"
               placeholder="enter frequency domestic month number"
               value={formData.frequencyDomestic}
               onChange={(e) =>
@@ -141,7 +206,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             </label>
             <Input
               id="frequencyCommercial"
-              type="text"
+              type="number"
               placeholder="enter frequency commercial month number"
               value={formData.frequencyCommercial}
               onChange={(e) =>
@@ -161,7 +226,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             </label>
             <Input
               id="partsQuantity"
-              type="text"
+              type="number"
               placeholder="Enter how many parts come with this product"
               value={formData.partsQuantity}
               onChange={(e) => handleChange("partsQuantity", e.target.value)}
@@ -179,7 +244,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             </label>
             <Input
               id="stockQuantity"
-              type="text"
+              type="number"
               placeholder="enter stock number"
               value={formData.stockQuantity}
               onChange={(e) => handleChange("stockQuantity", e.target.value)}
@@ -198,9 +263,10 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
             </Button>
             <Button
               onClick={handleSave}
-              className="flex-1 h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm bg-red-800 hover:bg-red-700 text-white"
+              disabled={isLoading}
+              className="flex-1 h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm bg-red-800 hover:bg-red-700 text-white disabled:opacity-50"
             >
-              Save
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
