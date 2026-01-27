@@ -85,6 +85,8 @@ export interface Notification {
   is_read: boolean;
   time?: string; // For backward compatibility
   title?: string; // For backward compatibility
+  icon_key?: string; // From API
+  time_ago?: string; // From API
 }
 
 // Dashboard API Types

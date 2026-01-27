@@ -1,29 +1,7 @@
 /** @format */
 
 import baseApi from "../api/baseAPI";
-
-export interface NotificationPayload {
-  job_type?: string;
-  action?: string;
-  job_id?: string;
-  object_id?: string;
-  status?: string;
-  scheduled_date?: string;
-  scheduled_time?: string;
-  due_date?: string;
-  problem_type?: string;
-}
-
-export interface Notification {
-  id: string;
-  type: string;
-  icon_key: string;
-  message: string;
-  payload: NotificationPayload;
-  is_read: boolean;
-  created_at: string;
-  time_ago: string;
-}
+import { Notification } from "@/types/AllTypes";
 
 export interface NotificationsResponse {
   success: boolean;
