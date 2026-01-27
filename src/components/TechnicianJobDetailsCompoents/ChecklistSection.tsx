@@ -12,15 +12,29 @@ import {
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChecklistItem } from "@/types/JobDetailsTypes";
+import { useUpdateChecklistItemMutation } from "@/redux/features/technicianFeatures/jobDetailsAPI";
+import { toast } from "react-toastify";
 
 interface ChecklistSectionProps {
   checklist: ChecklistItem[];
+  jobId: string;
 }
 
-const ChecklistSection = ({
-  checklist: initialChecklist,
-}: ChecklistSectionProps) => {
-  const [checklist, setChecklist] = useState(initialChecklist);
+const ChecklistSection = ({ checklist, jobId }: ChecklistSectionProps) => {
+  const [updateChecklistItem] = useUpdateChecklistItemMutation();
+
+  const handleUpdateStatus = async (checklistId: number, status: string) => {
+    try {
+      await updateChecklistItem({
+        jobId,
+        checklistId: checklistId.toString(),
+        status,
+      }).unwrap();
+      toast.success(`Checklist item ${status} successfully!`);
+    } catch (error) {
+      toast.error("Failed to update checklist item.");
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -81,10 +95,20 @@ const ChecklistSection = ({
                     <TableCell>
                       {item.status.toLowerCase() === "pending" ? (
                         <div className="flex justify-center gap-1 sm:gap-2">
-                          <button className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-green-50 text-green-500">
+                          <button
+                            onClick={() =>
+                              handleUpdateStatus(item.step, "done")
+                            }
+                            className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-green-50 text-green-500"
+                          >
                             <Check className="w-4 h-4 sm:w-5 sm:h-5" />
                           </button>
-                          <button className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-red-50 text-red-500">
+                          <button
+                            onClick={() =>
+                              handleUpdateStatus(item.step, "cancel")
+                            }
+                            className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-red-50 text-red-500"
+                          >
                             <X className="w-4 h-4 sm:w-5 sm:h-5" />
                           </button>
                         </div>

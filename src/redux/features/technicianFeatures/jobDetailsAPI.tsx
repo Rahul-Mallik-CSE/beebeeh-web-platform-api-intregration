@@ -107,6 +107,19 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         params: { q: query },
       }),
     }),
+    updateChecklistItem: builder.mutation<
+      void,
+      { jobId: string; checklistId: string; status: string }
+    >({
+      query: ({ jobId, checklistId, status }) => ({
+        url: `/api/jobs/${jobId}/checklist/${checklistId}/`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: (result, error, { jobId }) => [
+        { type: "JobDetails", id: jobId },
+      ],
+    }),
   }),
 });
 
@@ -117,4 +130,5 @@ export const {
   useCancelJobMutation,
   useCompleteJobMutation,
   useAutocompletePartsQuery,
+  useUpdateChecklistItemMutation,
 } = jobDetailsAPI;

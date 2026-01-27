@@ -487,7 +487,10 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             parts={jobData.frequently_used_parts}
             jobId={jobId}
           />
-          <ChecklistSection checklist={jobData.checklist_section} />
+          <ChecklistSection
+            checklist={jobData.checklist_section}
+            jobId={jobId}
+          />
           <ImageUploadSection
             imageData={jobData.image_upload_section}
             jobId={jobId}
