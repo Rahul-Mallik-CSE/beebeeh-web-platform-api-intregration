@@ -115,14 +115,17 @@ const NavBar = () => {
               <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600 hidden sm:block" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 mt-2">
-              <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => router.push("/settings")}
+                className="flex items-center gap-3 px-4 py-3 cursor-pointer"
+              >
                 <UserCog className="w-5 h-5 text-blue-500" />
                 <span className="text-base">Manage Account</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
+              {/* <DropdownMenuItem className="flex items-center gap-3 px-4 py-3 cursor-pointer">
                 <Key className="w-5 h-5 text-pink-500" />
                 <span className="text-base">Change Password</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem
                 onClick={() => setIsLogoutModalOpen(true)}
                 className="flex items-center gap-3 px-4 py-3 cursor-pointer"
