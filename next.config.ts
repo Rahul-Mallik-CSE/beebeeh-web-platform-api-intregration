@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
         pathname: "/media/**",
       },
     ],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
   },
 };
 
