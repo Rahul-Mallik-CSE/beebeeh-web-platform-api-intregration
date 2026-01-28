@@ -18,6 +18,34 @@ interface CustomerSignatureSectionProps {
 }
 
 const CustomerSignatureSection = ({ data }: CustomerSignatureSectionProps) => {
+  const [showCanvas, setShowCanvas] = useState(false);
+  const [signatureImage, setSignatureImage] = useState<string | null>(null);
+  const sigCanvas = useRef<SignatureCanvas>(null);
+
+  const handleCollectClick = () => {
+    setShowCanvas(true);
+  };
+
+  const handleClear = () => {
+    if (sigCanvas.current) {
+      sigCanvas.current.clear();
+    }
+  };
+
+  const handleCancel = () => {
+    setShowCanvas(false);
+    if (sigCanvas.current) {
+      sigCanvas.current.clear();
+    }
+  };
+
+  const handleSave = () => {
+    if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
+      const dataURL = sigCanvas.current.toDataURL();
+      setSignatureImage(dataURL);
+      setShowCanvas(false);
+    }
+  };
   return (
     <div className="bg-white">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">

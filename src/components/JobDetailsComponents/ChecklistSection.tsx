@@ -41,6 +41,14 @@ const ChecklistSection = ({ data }: ChecklistSectionProps) => {
     }
   };
 
+  const updateStatus = (index: number, newStatus: string) => {
+    setChecklist((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, status: newStatus } : item,
+      ),
+    );
+  };
+
   return (
     <div className="bg-white">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">

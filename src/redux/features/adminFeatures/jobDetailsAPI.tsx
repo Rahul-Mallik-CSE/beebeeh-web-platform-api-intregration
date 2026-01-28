@@ -100,7 +100,34 @@ const jobDetailsAPI = baseApi.injectEndpoints({
       }),
       providesTags: ["JobDetails"],
     }),
+    cancelJob: builder.mutation({
+      query: (job_id: string) => ({
+        url: `/api/admin/job-cancel/?job_id=${job_id}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["JobDetails"],
+    }),
+    rescheduleJob: builder.mutation({
+      query: ({
+        job_id,
+        scheduled_date,
+        scheduled_time,
+      }: {
+        job_id: string;
+        scheduled_date: string;
+        scheduled_time: string;
+      }) => ({
+        url: `/api/admin/job-reschedule/?job_id=${job_id}`,
+        method: "POST",
+        body: { scheduled_date, scheduled_time },
+      }),
+      invalidatesTags: ["JobDetails"],
+    }),
   }),
 });
 
-export const { useGetJobDetailsQuery } = jobDetailsAPI;
+export const {
+  useGetJobDetailsQuery,
+  useCancelJobMutation,
+  useRescheduleJobMutation,
+} = jobDetailsAPI;
