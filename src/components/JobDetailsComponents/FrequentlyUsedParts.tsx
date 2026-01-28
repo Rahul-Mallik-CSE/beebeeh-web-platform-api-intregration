@@ -13,29 +13,9 @@ import { FrequentlyUsedPart } from "@/redux/features/adminFeatures/jobDetailsAPI
 
 interface FrequentlyUsedPartsProps {
   data?: FrequentlyUsedPart[];
-  isLoading?: boolean;
 }
 
-const FrequentlyUsedParts = ({ data, isLoading }: FrequentlyUsedPartsProps) => {
-  if (isLoading) {
-    return (
-      <div className="bg-white">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
-          Frequently Used Parts:
-        </h3>
-        <div className="rounded-2xl border border-gray-200">
-          <div className="animate-pulse p-6">
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+const FrequentlyUsedParts = ({ data }: FrequentlyUsedPartsProps) => {
   return (
     <div className="bg-white">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">

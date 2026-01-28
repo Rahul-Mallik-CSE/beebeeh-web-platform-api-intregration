@@ -182,31 +182,6 @@ const ImageUploadSection = ({
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-white">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
-          Image Upload Section:
-        </h3>
-        <div className="border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6">
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-32 bg-gray-200 rounded"></div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                <div className="h-32 bg-gray-200 rounded"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-white">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">

@@ -66,6 +66,114 @@ const JobDetailsPage = ({
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="w-full p-4">
+        <div className="max-w-625 mx-auto space-y-4 sm:space-y-6">
+          {/* Header Skeleton */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex gap-1.5 sm:gap-2 items-center">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 sm:h-8 bg-gray-200 rounded animate-pulse w-32 sm:w-40"></div>
+            </div>
+            <div className="w-20 sm:w-24 h-8 sm:h-10 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+
+          {/* Main Content Grid Skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-7 gap-4 sm:gap-6">
+            {/* Left Column */}
+            <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6">
+              <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4">
+                <div className="h-5 bg-gray-200 rounded animate-pulse mb-3 w-3/4"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between items-center py-2"
+                    >
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4">
+                <div className="h-5 bg-gray-200 rounded animate-pulse mb-3 w-3/4"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between items-center py-2"
+                    >
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4">
+                <div className="h-5 bg-gray-200 rounded animate-pulse mb-3 w-3/4"></div>
+                <div className="space-y-3">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between items-center py-2"
+                    >
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="lg:col-span-3 xl:col-span-5 space-y-4 sm:space-y-6">
+              <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4">
+                <div className="h-5 bg-gray-200 rounded animate-pulse mb-3 w-3/4"></div>
+                <div className="h-48 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4">
+                <div className="h-5 bg-gray-200 rounded animate-pulse mb-3 w-3/4"></div>
+                <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4">
+                <div className="h-5 bg-gray-200 rounded animate-pulse mb-3 w-3/4"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-32 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+              <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4">
+                <div className="h-5 bg-gray-200 rounded animate-pulse mb-3 w-3/4"></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between items-center py-2"
+                      >
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
+                        <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-16 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons Skeleton */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
+            <div className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gray-200 rounded animate-pulse"></div>
+            <div className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const jobData = data?.data;
   const jobStatus = jobData?.header_summary.status;
 
@@ -125,29 +233,14 @@ const JobDetailsPage = ({
       <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-7 gap-4 sm:gap-6">
         {/* Left Column - 2/3 */}
         <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6">
-          <HeaderSummaryCard
-            data={jobData?.header_summary}
-            isLoading={isLoading}
-          />
-          <ClientInfoSection
-            data={jobData?.client_information}
-            isLoading={isLoading}
-          />
-          <ProductDetailsSection
-            data={jobData?.product_details}
-            isLoading={isLoading}
-          />
+          <HeaderSummaryCard data={jobData?.header_summary} />
+          <ClientInfoSection data={jobData?.client_information} />
+          <ProductDetailsSection data={jobData?.product_details} />
         </div>
         {/* Right Column - 1/3 */}
         <div className="lg:col-span-3 xl:col-span-5 space-y-4 sm:space-y-6">
-          <FrequentlyUsedParts
-            data={jobData?.frequently_used_parts}
-            isLoading={isLoading}
-          />
-          <ChecklistSection
-            data={jobData?.checklist_section}
-            isLoading={isLoading}
-          />
+          <FrequentlyUsedParts data={jobData?.frequently_used_parts} />
+          <ChecklistSection data={jobData?.checklist_section} />
           {showImageUpload && !isOverview && <ImageUploadSection />}
           {isOverview && staticImages && (
             <div className="bg-white">
@@ -211,16 +304,10 @@ const JobDetailsPage = ({
             </div>
           )}
           {showImageUpload && isOverview && jobData?.image_section && (
-            <ImageUploadSection
-              data={jobData.image_section}
-              isLoading={isLoading}
-            />
+            <ImageUploadSection data={jobData.image_section} />
           )}
           {showSignature && !isOverview && (
-            <CustomerSignatureSection
-              data={jobData?.customer_signature}
-              isLoading={isLoading}
-            />
+            <CustomerSignatureSection data={jobData?.customer_signature} />
           )}
           {isOverview && staticImages?.signatureImage && (
             <div className="bg-white">
@@ -291,10 +378,7 @@ const JobDetailsPage = ({
             </div>
           )}
           {showSignature && isOverview && jobData?.customer_signature && (
-            <CustomerSignatureSection
-              data={jobData.customer_signature}
-              isLoading={isLoading}
-            />
+            <CustomerSignatureSection data={jobData.customer_signature} />
           )}
         </div>
       </div>

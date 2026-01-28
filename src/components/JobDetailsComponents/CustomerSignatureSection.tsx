@@ -15,68 +15,9 @@ interface CustomerSignature {
 
 interface CustomerSignatureSectionProps {
   data?: CustomerSignature;
-  isLoading?: boolean;
 }
 
-const CustomerSignatureSection = ({
-  data,
-  isLoading,
-}: CustomerSignatureSectionProps) => {
-  const [signatureImage, setSignatureImage] = useState<string | null>(null);
-  const [showCanvas, setShowCanvas] = useState(false);
-  const sigCanvas = useRef<SignatureCanvas>(null);
-
-  const handleCollectClick = () => {
-    setShowCanvas(true);
-  };
-
-  const handleClear = () => {
-    sigCanvas.current?.clear();
-  };
-
-  const handleSave = () => {
-    if (sigCanvas.current) {
-      const dataURL = sigCanvas.current.toDataURL();
-      setSignatureImage(dataURL);
-      setShowCanvas(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setShowCanvas(false);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="bg-white">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
-          Customer Signature Section:
-        </h3>
-        <div className="border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-            <div className="space-y-3 sm:space-y-4">
-              <div className="flex items-center justify-between py-1.5 sm:py-2">
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
-              </div>
-              <div className="flex items-center justify-between py-1.5 sm:py-2">
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-20"></div>
-              </div>
-              <div className="flex items-center justify-between py-1.5 sm:py-2">
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
-              </div>
-            </div>
-            <div className="space-y-3 sm:space-y-4">
-              <div className="border-2 border-dashed border-gray-300 rounded-lg h-16 bg-gray-100 animate-pulse"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+const CustomerSignatureSection = ({ data }: CustomerSignatureSectionProps) => {
   return (
     <div className="bg-white">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">

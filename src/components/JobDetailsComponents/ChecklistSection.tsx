@@ -15,10 +15,9 @@ import { ChecklistItem } from "@/redux/features/adminFeatures/jobDetailsAPI";
 
 interface ChecklistSectionProps {
   data?: ChecklistItem[];
-  isLoading?: boolean;
 }
 
-const ChecklistSection = ({ data, isLoading }: ChecklistSectionProps) => {
+const ChecklistSection = ({ data }: ChecklistSectionProps) => {
   const [checklist, setChecklist] = useState<ChecklistItem[]>(data || []);
 
   React.useEffect(() => {
@@ -41,31 +40,6 @@ const ChecklistSection = ({ data, isLoading }: ChecklistSectionProps) => {
         return "text-gray-600";
     }
   };
-
-  const updateStatus = (index: number, newStatus: string) => {
-    const updatedChecklist = [...checklist];
-    updatedChecklist[index] = { ...updatedChecklist[index], status: newStatus };
-    setChecklist(updatedChecklist);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="bg-white">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
-          Checklist Section:
-        </h3>
-        <div className="rounded-2xl border border-gray-200">
-          <div className="animate-pulse p-6">
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-gray-200 rounded"></div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-white">
