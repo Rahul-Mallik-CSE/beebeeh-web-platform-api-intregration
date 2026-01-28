@@ -4,10 +4,22 @@ import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import SignatureCanvas from "react-signature-canvas";
+import { getImageFullUrl } from "@/lib/utils";
 
-const CustomerSignatureSection = () => {
-  const [signatureImage, setSignatureImage] = useState<string | null>(null);
+interface CustomerSignature {
+  client_name: string;
+  signature_time: string;
+  signature_status: string;
+  signature_files: string[];
+}
+
+interface CustomerSignatureSectionProps {
+  data?: CustomerSignature;
+}
+
+const CustomerSignatureSection = ({ data }: CustomerSignatureSectionProps) => {
   const [showCanvas, setShowCanvas] = useState(false);
+  const [signatureImage, setSignatureImage] = useState<string | null>(null);
   const sigCanvas = useRef<SignatureCanvas>(null);
 
   const handleCollectClick = () => {
@@ -15,21 +27,25 @@ const CustomerSignatureSection = () => {
   };
 
   const handleClear = () => {
-    sigCanvas.current?.clear();
-  };
-
-  const handleSave = () => {
     if (sigCanvas.current) {
-      const dataURL = sigCanvas.current.toDataURL();
-      setSignatureImage(dataURL);
-      setShowCanvas(false);
+      sigCanvas.current.clear();
     }
   };
 
   const handleCancel = () => {
     setShowCanvas(false);
+    if (sigCanvas.current) {
+      sigCanvas.current.clear();
+    }
   };
 
+  const handleSave = () => {
+    if (sigCanvas.current && !sigCanvas.current.isEmpty()) {
+      const dataURL = sigCanvas.current.toDataURL();
+      setSignatureImage(dataURL);
+      setShowCanvas(false);
+    }
+  };
   return (
     <div className="bg-white">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
@@ -43,14 +59,18 @@ const CustomerSignatureSection = () => {
               <p className="text-gray-800 font-medium text-sm sm:text-base">
                 Client Name :
               </p>
-              <p className="text-gray-500 text-xs sm:text-sm">John Doe</p>
+              <p className="text-gray-500 text-xs sm:text-sm">
+                {data?.client_name || "N/A"}
+              </p>
             </div>
             <div className="flex items-center justify-between py-1.5 sm:py-2">
               <p className="text-gray-800 font-medium text-sm sm:text-base">
                 Signature time :
               </p>
               <p className="text-gray-500 text-xs sm:text-sm">
-                24 Nov 2025, 2:30 PM
+                {data?.signature_time
+                  ? new Date(data.signature_time).toLocaleString()
+                  : "N/A"}
               </p>
             </div>
             <div className="flex items-center justify-between py-1.5 sm:py-2">
@@ -59,10 +79,14 @@ const CustomerSignatureSection = () => {
               </p>
               <p
                 className={`font-medium text-xs sm:text-sm ${
-                  signatureImage ? "text-teal-500" : "text-red-500"
+                  data?.signature_status === "complete"
+                    ? "text-teal-500"
+                    : "text-red-500"
                 }`}
               >
-                {signatureImage ? "Complete" : "Incomplete"}
+                {data?.signature_status === "complete"
+                  ? "Complete"
+                  : "Incomplete"}
               </p>
             </div>
           </div>
@@ -72,7 +96,15 @@ const CustomerSignatureSection = () => {
             {!showCanvas ? (
               <>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg h-16 flex items-center justify-center">
-                  {signatureImage ? (
+                  {data?.signature_files && data.signature_files.length > 0 ? (
+                    <Image
+                      src={getImageFullUrl(data.signature_files[0])}
+                      alt="Customer signature"
+                      width={200}
+                      height={64}
+                      className="max-h-full max-w-full object-contain"
+                    />
+                  ) : signatureImage ? (
                     <Image
                       src={signatureImage}
                       alt="Customer signature"

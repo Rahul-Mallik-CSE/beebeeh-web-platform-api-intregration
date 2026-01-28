@@ -11,45 +11,20 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ChecklistItem } from "@/redux/features/adminFeatures/jobDetailsAPI";
 
-const ChecklistSection = () => {
-  const [checklist, setChecklist] = useState([
-    {
-      id: 1,
-      step: 1,
-      partCode: "Check water inlet",
-      status: "Done",
-      action: true,
-    },
-    {
-      id: 2,
-      step: 2,
-      partCode: "Install main filter",
-      status: "Done",
-      action: false,
-    },
-    {
-      id: 3,
-      step: 3,
-      partCode: "Install sediment filter",
-      status: "Cancel",
-      action: false,
-    },
-    {
-      id: 4,
-      step: 4,
-      partCode: "Test water flow",
-      status: "Pending",
-      action: false,
-    },
-    {
-      id: 5,
-      step: 4,
-      partCode: "Clean area",
-      status: "Pending",
-      action: false,
-    },
-  ]);
+interface ChecklistSectionProps {
+  data?: ChecklistItem[];
+}
+
+const ChecklistSection = ({ data }: ChecklistSectionProps) => {
+  const [checklist, setChecklist] = useState<ChecklistItem[]>(data || []);
+
+  React.useEffect(() => {
+    if (data) {
+      setChecklist(data);
+    }
+  }, [data]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -66,6 +41,14 @@ const ChecklistSection = () => {
     }
   };
 
+  const updateStatus = (index: number, newStatus: string) => {
+    setChecklist((prev) =>
+      prev.map((item, i) =>
+        i === index ? { ...item, status: newStatus } : item,
+      ),
+    );
+  };
+
   return (
     <div className="bg-white">
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
@@ -80,7 +63,7 @@ const ChecklistSection = () => {
                   Step
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm">
-                  Part Code
+                  Task
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm">
                   Status
@@ -91,39 +74,57 @@ const ChecklistSection = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {checklist.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="text-gray-700 text-xs sm:text-sm">
-                    {item.step}
-                  </TableCell>
-                  <TableCell className="text-gray-700 text-xs sm:text-sm">
-                    {item.partCode}
-                  </TableCell>
+              {checklist && checklist.length > 0 ? (
+                checklist.map((item, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="text-gray-700 text-xs sm:text-sm">
+                      {item.step}
+                    </TableCell>
+                    <TableCell className="text-gray-700 text-xs sm:text-sm">
+                      {item.task}
+                    </TableCell>
+                    <TableCell
+                      className={`font-medium text-xs sm:text-sm ${getStatusColor(
+                        item.status,
+                      )}`}
+                    >
+                      {item.status.charAt(0).toUpperCase() +
+                        item.status.slice(1)}
+                    </TableCell>
+                    <TableCell>
+                      {item.status.toLowerCase() === "pending" ? (
+                        <div className="flex justify-center gap-1 sm:gap-2">
+                          <button
+                            className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-green-50 text-green-500"
+                            onClick={() => updateStatus(index, "done")}
+                          >
+                            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
+                          </button>
+                          <button
+                            className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-red-50 text-red-500"
+                            onClick={() => updateStatus(index, "cancel")}
+                          >
+                            <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-center text-gray-400 text-xs sm:text-sm">
+                          ---
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
                   <TableCell
-                    className={`font-medium text-xs sm:text-sm ${getStatusColor(
-                      item.status
-                    )}`}
+                    colSpan={4}
+                    className="text-center text-gray-500 text-xs sm:text-sm py-4"
                   >
-                    {item.status}
-                  </TableCell>
-                  <TableCell>
-                    {item.status.toLowerCase() === "pending" ? (
-                      <div className="flex justify-center gap-1 sm:gap-2">
-                        <button className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-green-50 text-green-500">
-                          <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                        <button className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-red-50 text-red-500">
-                          <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex justify-center text-gray-400 text-xs sm:text-sm">
-                        ---
-                      </div>
-                    )}
+                    No checklist data available
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </ScrollArea>
