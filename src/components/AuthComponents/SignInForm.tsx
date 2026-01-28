@@ -11,6 +11,7 @@ import { useLoginMutation } from "@/redux/features/authAPI";
 import { setCredentials } from "@/redux/features/authSlice";
 import { useDispatch } from "react-redux";
 import { saveTokens } from "@/services/authService";
+import { toast } from "react-toastify";
 
 export const SignInForm = () => {
   const router = useRouter();
@@ -50,9 +51,7 @@ export const SignInForm = () => {
       }
     } catch (err: any) {
       console.error("Login failed:", err);
-      alert(
-        err?.data?.message || "Login failed. Please check your credentials.",
-      );
+      toast.error("Login failed. Please check your credentials.");
     }
   };
   return (

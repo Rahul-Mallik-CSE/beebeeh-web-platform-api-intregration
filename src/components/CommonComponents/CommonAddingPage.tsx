@@ -1,7 +1,7 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
-import { ArrowLeft, Lock } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { ArrowLeft, Lock, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "../ui/textarea";
+import { toast } from "react-toastify";
+import {
+  useAutocompleteClientsQuery,
+  useAutocompleteProductsQuery,
+  useAutocompleteTechniciansQuery,
+  useAddInstallationMutation,
+  ClientAutocompleteItem,
+  ProductAutocompleteItem,
+  TechnicianAutocompleteItem,
+} from "@/redux/features/adminFeatures/installationAPI";
 
 interface CommonAddingPageProps {
   title: string;
@@ -30,12 +40,14 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
   // Determine if this is a repairs page or maintenance page
   const isRepairs = title.toLowerCase().includes("repair");
   const isMaintenance = title.toLowerCase().includes("maintenance");
+  const isInstallation = title.toLowerCase().includes("installation");
 
   const [formData, setFormData] = useState({
     clientId: "",
     searchClient: "",
     clientName: "",
     productId: "",
+    searchProduct: "",
     productModel: "",
     serialNumber: "",
     date: "",
@@ -43,19 +55,224 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
     maintenanceFrequency: "",
     priority: "",
     technicianId: "",
+    searchTechnician: "",
     technicianName: "",
     problemType: "",
     problemDescription: "",
     notes: "",
   });
 
+  // Autocomplete states
+  const [showClientDropdown, setShowClientDropdown] = useState(false);
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const [showTechnicianDropdown, setShowTechnicianDropdown] = useState(false);
+
+  // Refs for dropdowns
+  const clientDropdownRef = useRef<HTMLDivElement>(null);
+  const productDropdownRef = useRef<HTMLDivElement>(null);
+  const technicianDropdownRef = useRef<HTMLDivElement>(null);
+
+  // API hooks
+  const {
+    data: clientData,
+    isFetching: clientFetching,
+    error: clientError,
+  } = useAutocompleteClientsQuery(
+    { q: formData.searchClient },
+    { skip: formData.searchClient.length < 2 },
+  );
+  const {
+    data: productData,
+    isFetching: productFetching,
+    error: productError,
+  } = useAutocompleteProductsQuery(
+    { q: formData.searchProduct },
+    { skip: formData.searchProduct.length < 2 },
+  );
+  const {
+    data: technicianData,
+    isFetching: technicianFetching,
+    error: technicianError,
+  } = useAutocompleteTechniciansQuery(
+    { q: formData.searchTechnician },
+    { skip: formData.searchTechnician.length < 2 },
+  );
+
+  const [addInstallation, { isLoading: isSubmitting }] =
+    useAddInstallationMutation();
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        clientDropdownRef.current &&
+        !clientDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowClientDropdown(false);
+      }
+      if (
+        productDropdownRef.current &&
+        !productDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowProductDropdown(false);
+      }
+      if (
+        technicianDropdownRef.current &&
+        !technicianDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowTechnicianDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+
+    // Show dropdowns when typing
+    if (field === "searchClient" && value.length >= 2) {
+      setShowClientDropdown(true);
+    } else if (field === "searchClient") {
+      setShowClientDropdown(false);
+    }
+
+    if (field === "searchProduct" && value.length >= 2) {
+      setShowProductDropdown(true);
+    } else if (field === "searchProduct") {
+      setShowProductDropdown(false);
+    }
+
+    if (field === "searchTechnician" && value.length >= 2) {
+      setShowTechnicianDropdown(true);
+    } else if (field === "searchTechnician") {
+      setShowTechnicianDropdown(false);
+    }
   };
 
-  const handleSubmit = () => {
-    if (onSubmit) {
-      onSubmit(formData);
+  const handleClientSelect = (client: ClientAutocompleteItem) => {
+    setFormData((prev) => ({
+      ...prev,
+      clientId: client.client_id,
+      clientName: client.name,
+      searchClient: client.client_id,
+    }));
+    setShowClientDropdown(false);
+  };
+
+  const handleProductSelect = (product: ProductAutocompleteItem) => {
+    setFormData((prev) => ({
+      ...prev,
+      productId: product.product_id,
+      productModel: product.model_name,
+      searchProduct: product.product_id,
+    }));
+    setShowProductDropdown(false);
+  };
+
+  const handleTechnicianSelect = (technician: TechnicianAutocompleteItem) => {
+    setFormData((prev) => ({
+      ...prev,
+      technicianId: technician.technician_id,
+      technicianName: technician.name,
+      searchTechnician: technician.technician_id,
+    }));
+    setShowTechnicianDropdown(false);
+  };
+
+  const validateForm = () => {
+    if (isInstallation) {
+      if (!formData.clientId.trim()) {
+        toast.error("Please select a client.");
+        return false;
+      }
+      if (!formData.clientName.trim()) {
+        toast.error("Client name is required.");
+        return false;
+      }
+      if (!formData.productId.trim()) {
+        toast.error("Please select a product.");
+        return false;
+      }
+      if (!formData.productModel.trim()) {
+        toast.error("Product model is required.");
+        return false;
+      }
+      if (!formData.technicianId.trim()) {
+        toast.error("Please select a technician.");
+        return false;
+      }
+      if (!formData.technicianName.trim()) {
+        toast.error("Technician name is required.");
+        return false;
+      }
+      if (!formData.date) {
+        toast.error("Please select a date.");
+        return false;
+      }
+      if (!formData.time) {
+        toast.error("Please select a time.");
+        return false;
+      }
+      if (!formData.maintenanceFrequency.trim()) {
+        toast.error("Maintenance frequency is required.");
+        return false;
+      }
+      const freq = parseInt(formData.maintenanceFrequency);
+      if (isNaN(freq) || freq <= 0) {
+        toast.error("Maintenance frequency must be a positive number.");
+        return false;
+      }
+      if (!formData.priority) {
+        toast.error("Please select a priority.");
+        return false;
+      }
+      if (!formData.notes.trim()) {
+        toast.error("Notes are required.");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) return;
+
+    if (isInstallation) {
+      try {
+        const installationData = {
+          client_id: formData.clientId,
+          client_name: formData.clientName,
+          product_id: formData.productId,
+          model_name: formData.productModel,
+          technician_id: formData.technicianId,
+          technician_name: formData.technicianName,
+          scheduled_date: formData.date,
+          scheduled_time: formData.time,
+          maintenance_frequency_month: parseInt(formData.maintenanceFrequency),
+          priority: formData.priority as "low" | "medium" | "high",
+          notes: formData.notes,
+        };
+
+        await addInstallation(installationData).unwrap();
+        toast.success("Installation added successfully!");
+
+        if (onSubmit) {
+          onSubmit(formData);
+        } else {
+          router.push("/installation");
+        }
+      } catch (error: any) {
+        toast.error(
+          error?.data?.message ||
+            "Failed to add installation. Please try again.",
+        );
+      }
+    } else {
+      if (onSubmit) {
+        onSubmit(formData);
+      }
     }
   };
 
@@ -83,37 +300,51 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
       {/* Form Container */}
       <div>
         <div className="space-y-4 sm:space-y-6">
-          {/* Client ID - Only for maintenance */}
-          {isMaintenance && (
-            <div className="space-y-2">
-              <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-                Client id
-              </label>
-              <Input
-                type="text"
-                placeholder="Select client id"
-                value={formData.clientId}
-                onChange={(e) => handleChange("clientId", e.target.value)}
-                className="w-full"
-              />
-            </div>
-          )}
-
           {/* Search Client ID or Name - For non-maintenance */}
-          {!isMaintenance && (
-            <div className="space-y-2">
-              <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-                Search Client ID or Name
-              </label>
+
+          <div className="space-y-2 relative" ref={clientDropdownRef}>
+            <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
+              Search Client ID or Name
+            </label>
+            <div className="relative">
               <Input
                 type="text"
                 placeholder="Search client ID or client name"
                 value={formData.searchClient}
                 onChange={(e) => handleChange("searchClient", e.target.value)}
-                className="w-full"
+                className="w-full pr-10"
               />
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-          )}
+            {showClientDropdown && formData.searchClient.length >= 2 && (
+              <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                {clientFetching ? (
+                  <div className="px-4 py-2 text-sm text-gray-500">
+                    Loading...
+                  </div>
+                ) : clientData?.data?.length ? (
+                  clientData.data.map((client) => (
+                    <div
+                      key={client.client_id}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      onClick={() => handleClientSelect(client)}
+                    >
+                      <div className="font-medium">
+                        {client.client_id} - {client.name}
+                      </div>
+                      <div className="text-gray-500 text-xs">
+                        {client.contact_number}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-sm text-gray-500">
+                    No clients found
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Client Name */}
           <div className="space-y-2">
@@ -127,26 +358,58 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
                 value={formData.clientName}
                 onChange={(e) => handleChange("clientName", e.target.value)}
                 className="w-full pr-10"
+                disabled
               />
               <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
           </div>
 
           {/* Product ID or Model Name - Only for non-maintenance */}
-          {!isMaintenance && (
-            <div className="space-y-2">
-              <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-                Product ID or Model Name
-              </label>
+
+          <div className="space-y-2 relative" ref={productDropdownRef}>
+            <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
+              Product ID or Model Name
+            </label>
+            <div className="relative">
               <Input
                 type="text"
                 placeholder="Search product id or model name"
-                value={formData.productId}
-                onChange={(e) => handleChange("productId", e.target.value)}
-                className="w-full"
+                value={formData.searchProduct}
+                onChange={(e) => handleChange("searchProduct", e.target.value)}
+                className="w-full pr-10"
               />
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-          )}
+            {showProductDropdown && formData.searchProduct.length >= 2 && (
+              <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                {productFetching ? (
+                  <div className="px-4 py-2 text-sm text-gray-500">
+                    Loading...
+                  </div>
+                ) : productError ? (
+                  <div className="px-4 py-2 text-sm text-red-500">
+                    Error loading products
+                  </div>
+                ) : productData?.data?.length ? (
+                  productData.data.map((product) => (
+                    <div
+                      key={product.product_id}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                      onClick={() => handleProductSelect(product)}
+                    >
+                      <div className="font-medium">
+                        {product.product_id} - {product.model_name}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="px-4 py-2 text-sm text-gray-500">
+                    No products found
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Product Model Name */}
           <div className="space-y-2">
@@ -159,23 +422,6 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
                 placeholder="AutoComplete"
                 value={formData.productModel}
                 onChange={(e) => handleChange("productModel", e.target.value)}
-                className="w-full pr-10"
-              />
-              <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            </div>
-          </div>
-
-          {/* Serial Number */}
-          <div className="space-y-2">
-            <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-              Serial Number
-            </label>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="AutoComplete"
-                value={formData.serialNumber}
-                onChange={(e) => handleChange("serialNumber", e.target.value)}
                 className="w-full pr-10"
               />
               <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -221,7 +467,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
                 Maintenance Frequency
               </label>
               <Input
-                type="text"
+                type="number"
                 placeholder="enter maintenance frequency month"
                 value={formData.maintenanceFrequency}
                 onChange={(e) =>
@@ -248,31 +494,62 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
                 <SelectItem value="low">Low</SelectItem>
                 <SelectItem value="medium">Medium</SelectItem>
                 <SelectItem value="high">High</SelectItem>
-                <SelectItem value="urgent">Urgent</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          {/* Technician ID - Only for maintenance */}
-          {isMaintenance && (
-            <div className="space-y-2">
-              <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-                Technician ID
-              </label>
+          {/* Technician ID /Name */}
+          <div className="space-y-2 relative" ref={technicianDropdownRef}>
+            <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
+              Technician ID /Name
+            </label>
+            <div className="relative">
               <Input
                 type="text"
                 placeholder="Select technician id"
-                value={formData.technicianId}
-                onChange={(e) => handleChange("technicianId", e.target.value)}
-                className="w-full"
+                value={formData.searchTechnician}
+                onChange={(e) =>
+                  handleChange("searchTechnician", e.target.value)
+                }
+                className="w-full pr-10"
               />
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
-          )}
+            {showTechnicianDropdown &&
+              formData.searchTechnician.length >= 2 && (
+                <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                  {technicianFetching ? (
+                    <div className="px-4 py-2 text-sm text-gray-500">
+                      Loading...
+                    </div>
+                  ) : technicianData?.data?.length ? (
+                    technicianData.data.map((technician) => (
+                      <div
+                        key={technician.technician_id}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                        onClick={() => handleTechnicianSelect(technician)}
+                      >
+                        <div className="font-medium">
+                          {technician.technician_id} - {technician.name}
+                        </div>
+                        <div className="text-gray-500 text-xs">
+                          {technician.contact_number} • {technician.status}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="px-4 py-2 text-sm text-gray-500">
+                      No technicians found
+                    </div>
+                  )}
+                </div>
+              )}
+          </div>
 
           {/* Technician Name */}
           <div className="space-y-2">
             <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-              {isRepairs ? "Technician name and email" : "Technician name"}
+              Technician name
             </label>
             <div className="relative">
               <Input
@@ -281,6 +558,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
                 value={formData.technicianName}
                 onChange={(e) => handleChange("technicianName", e.target.value)}
                 className="w-full pr-10"
+                disabled
               />
               <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
@@ -328,7 +606,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
               onChange={(e) =>
                 handleChange(
                   isRepairs || isMaintenance ? "problemDescription" : "notes",
-                  e.target.value
+                  e.target.value,
                 )
               }
               className="w-full min-h-[100px] resize-none"
@@ -348,9 +626,10 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         </Button>
         <Button
           onClick={handleSubmit}
-          className="w-full sm:w-auto px-8 sm:px-12 py-2 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white"
+          disabled={isSubmitting}
+          className="w-full sm:w-auto px-8 sm:px-12 py-2 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white disabled:opacity-50"
         >
-          Create Job
+          {isSubmitting ? "Creating..." : "Create Job"}
         </Button>
       </div>
     </div>
