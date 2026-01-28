@@ -9,37 +9,32 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { FrequentlyUsedPart } from "@/redux/features/adminFeatures/jobDetailsAPI";
 
-const FrequentlyUsedParts = () => {
-  const parts = [
-    { partName: "O-Ring", partCode: "CF-010", stock: "High", stockRequired: 1 },
-    {
-      partName: "Sediment filter",
-      partCode: "CF-050",
-      stock: "High",
-      stockRequired: 5,
-    },
-    {
-      partName: "O-Ring",
-      partCode: "OR-112",
-      stock: "Medium",
-      stockRequired: 1,
-    },
-    { partName: "O-Ring", partCode: "CF-010", stock: "High", stockRequired: 1 },
-  ];
+interface FrequentlyUsedPartsProps {
+  data?: FrequentlyUsedPart[];
+  isLoading?: boolean;
+}
 
-  const getStockColor = (stock: string) => {
-    switch (stock.toLowerCase()) {
-      case "high":
-        return "text-green-600";
-      case "medium":
-        return "text-orange-600";
-      case "low":
-        return "text-red-600";
-      default:
-        return "text-gray-600";
-    }
-  };
+const FrequentlyUsedParts = ({ data, isLoading }: FrequentlyUsedPartsProps) => {
+  if (isLoading) {
+    return (
+      <div className="bg-white">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
+          Frequently Used Parts:
+        </h3>
+        <div className="rounded-2xl border border-gray-200">
+          <div className="animate-pulse p-6">
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-12 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white">
@@ -55,10 +50,7 @@ const FrequentlyUsedParts = () => {
                   Part Name
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm">
-                  Part Code
-                </TableHead>
-                <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm">
-                  Part Code
+                  Part ID
                 </TableHead>
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm">
                   Stock Required
@@ -66,26 +58,30 @@ const FrequentlyUsedParts = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {parts.map((part, index) => (
-                <TableRow key={index}>
-                  <TableCell className="text-gray-700 text-xs sm:text-sm">
-                    {part.partName}
-                  </TableCell>
-                  <TableCell className="text-gray-700 text-xs sm:text-sm">
-                    {part.partCode}
-                  </TableCell>
+              {data && data.length > 0 ? (
+                data.map((part, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="text-gray-700 text-xs sm:text-sm">
+                      {part.part_name}
+                    </TableCell>
+                    <TableCell className="text-gray-700 text-xs sm:text-sm">
+                      {part.part_id}
+                    </TableCell>
+                    <TableCell className="text-gray-700 text-xs sm:text-sm">
+                      {part.stock_required}
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
                   <TableCell
-                    className={`${getStockColor(
-                      part.stock
-                    )} text-xs sm:text-sm`}
+                    colSpan={3}
+                    className="text-center text-gray-500 text-xs sm:text-sm py-4"
                   >
-                    {part.stock}
-                  </TableCell>
-                  <TableCell className="text-gray-700 text-xs sm:text-sm">
-                    {part.stockRequired}
+                    No parts data available
                   </TableCell>
                 </TableRow>
-              ))}
+              )}
             </TableBody>
           </Table>
         </ScrollArea>

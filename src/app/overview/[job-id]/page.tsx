@@ -4,13 +4,14 @@ import React from "react";
 import JobDetailsPage from "@/components/JobDetailsComponents/JobDetailsPage";
 
 interface PageProps {
-  params: {
+  params: Promise<{
     "job-id": string;
-  };
+  }>;
 }
 
-const JobDetailsOverviewPage = ({ params }: PageProps) => {
-  const jobId = params["job-id"];
+const JobDetailsOverviewPage = async ({ params }: PageProps) => {
+  const resolvedParams = await params;
+  const jobId = resolvedParams["job-id"];
 
   return (
     <div className="w-full p-2 sm:p-4 overflow-x-hidden">

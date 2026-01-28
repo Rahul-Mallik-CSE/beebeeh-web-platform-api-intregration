@@ -20,7 +20,7 @@ const ClientsTableSections = () => {
       client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client.clientId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       client.town.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.type.toLowerCase().includes(searchQuery.toLowerCase())
+      client.type.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleViewClient = (client: Client) => {
@@ -67,7 +67,6 @@ const ClientsTableSections = () => {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
             <Input
               type="text"
               placeholder="Search"

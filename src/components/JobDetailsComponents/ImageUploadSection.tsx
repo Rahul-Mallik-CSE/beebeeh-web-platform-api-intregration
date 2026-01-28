@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { CloudUpload, X } from "lucide-react";
 import Image from "next/image";
+import { getImageFullUrl } from "@/lib/utils";
+import { ImageSection } from "@/redux/features/adminFeatures/jobDetailsAPI";
 
 interface UploadedFile {
   id: number;
@@ -16,11 +18,11 @@ interface UploadAreaProps {
   images: UploadedFile[];
   onFileUpload: (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => void;
   onDrop: (
     e: React.DragEvent<HTMLDivElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => void;
   onDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   onRemove: (id: number, type: "before" | "after") => void;
@@ -103,13 +105,19 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   </div>
 );
 
-const ImageUploadSection = () => {
+const ImageUploadSection = ({
+  data,
+  isLoading,
+}: {
+  data?: ImageSection;
+  isLoading?: boolean;
+}) => {
   const [beforeImages, setBeforeImages] = useState<UploadedFile[]>([]);
   const [afterImages, setAfterImages] = useState<UploadedFile[]>([]);
 
   const handleFileUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => {
     const files = e.target.files;
     if (files && files.length > 0) {
@@ -136,7 +144,7 @@ const ImageUploadSection = () => {
 
   const handleDrop = (
     e: React.DragEvent<HTMLDivElement>,
-    type: "before" | "after"
+    type: "before" | "after",
   ) => {
     e.preventDefault();
     const files = e.dataTransfer.files;
@@ -174,34 +182,89 @@ const ImageUploadSection = () => {
     }
   };
 
-  return (
-    <div className="bg-white">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2 sm:mb-3">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800">
+  if (isLoading) {
+    return (
+      <div className="bg-white">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
           Image Upload Section:
         </h3>
-        <p className="text-[10px] sm:text-xs text-gray-400">
-          Only support .jpg, .png and .svg files.
-        </p>
+        <div className="border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-32 bg-gray-200 rounded"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                <div className="h-32 bg-gray-200 rounded"></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="bg-white">
+      <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
+        Image Upload Section:
+      </h3>
       <div className="border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <UploadArea
-            type="before"
-            images={beforeImages}
-            onFileUpload={handleFileUpload}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onRemove={removeFile}
-          />
-          <UploadArea
-            type="after"
-            images={afterImages}
-            onFileUpload={handleFileUpload}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onRemove={removeFile}
-          />
+          {/* Before Images */}
+          <div className="space-y-3 sm:space-y-4">
+            <h4 className="text-sm sm:text-base font-medium text-gray-700">
+              Before Images:
+            </h4>
+            <div className="space-y-2">
+              {data?.before_images && data.before_images.length > 0 ? (
+                data.before_images.map((imageUrl, index) => (
+                  <div key={index} className="relative">
+                    <Image
+                      src={getImageFullUrl(imageUrl)}
+                      alt="Before work"
+                      width={300}
+                      height={200}
+                      className="w-full h-32 object-cover rounded-lg border"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center">
+                  <p className="text-gray-400 text-sm">No before images</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* After Images */}
+          <div className="space-y-3 sm:space-y-4">
+            <h4 className="text-sm sm:text-base font-medium text-gray-700">
+              After Images:
+            </h4>
+            <div className="space-y-2">
+              {data?.after_images && data.after_images.length > 0 ? (
+                data.after_images.map((imageUrl, index) => (
+                  <div key={index} className="relative">
+                    <Image
+                      src={getImageFullUrl(imageUrl)}
+                      alt="After work"
+                      width={300}
+                      height={200}
+                      className="w-full h-32 object-cover rounded-lg border"
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center">
+                  <p className="text-gray-400 text-sm">No after images</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

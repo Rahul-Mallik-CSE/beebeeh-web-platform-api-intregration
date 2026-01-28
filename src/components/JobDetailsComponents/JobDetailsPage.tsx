@@ -12,6 +12,7 @@ import ClientInfoSection from "./ClientInfoSection";
 import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
 import Image from "next/image";
+import { useGetJobDetailsQuery } from "@/redux/features/adminFeatures/jobDetailsAPI";
 
 interface JobDetailsPageProps {
   jobId: string;
@@ -34,6 +35,45 @@ const JobDetailsPage = ({
 }: JobDetailsPageProps) => {
   const router = useRouter();
 
+  const { data, isLoading, error } = useGetJobDetailsQuery({ job_id: jobId });
+
+  const handleCancel = () => {
+    // Handle cancel job
+    console.log("Cancel job:", jobId);
+  };
+
+  const handleReschedule = () => {
+    // Handle reschedule job
+    console.log("Reschedule job:", jobId);
+  };
+
+  const handleExportPDF = () => {
+    // Handle export PDF
+    console.log("Export PDF for job:", jobId);
+  };
+
+  if (error) {
+    return (
+      <div className="w-full p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            Error loading job details. Please try again later.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const jobData = data?.data;
+  const jobStatus = jobData?.header_summary.status;
+
+  // Determine which buttons to show based on status
+  const showRescheduleAndCancel = ["assign", "cancel", "rescheduled"].includes(
+    jobStatus || "",
+  );
+  const showCancelOnly = jobStatus === "in_progress";
+  const showExportPDF = jobStatus === "complete";
+
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
@@ -50,8 +90,32 @@ const JobDetailsPage = ({
           </span>
         </div>
 
-        <Button className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium px-3 sm:px-4 md:px-6 text-sm sm:text-base">
-          Pending
+        <Button
+          className={`px-3 sm:px-4 md:px-6 text-sm sm:text-base ${
+            jobStatus === "complete"
+              ? "bg-green-600 hover:bg-green-700"
+              : jobStatus === "in_progress"
+                ? "bg-blue-600 hover:bg-blue-700"
+                : jobStatus === "assign"
+                  ? "bg-yellow-600 hover:bg-yellow-700"
+                  : jobStatus === "cancel"
+                    ? "bg-red-600 hover:bg-red-700"
+                    : jobStatus === "rescheduled"
+                      ? "bg-orange-600 hover:bg-orange-700"
+                      : "bg-gray-600 hover:bg-gray-700"
+          }`}
+        >
+          {jobStatus === "complete"
+            ? "Complete"
+            : jobStatus === "in_progress"
+              ? "In Progress"
+              : jobStatus === "assign"
+                ? "Assign"
+                : jobStatus === "cancel"
+                  ? "Cancel"
+                  : jobStatus === "rescheduled"
+                    ? "Rescheduled"
+                    : "Unknown"}
         </Button>
       </div>
 
@@ -59,14 +123,29 @@ const JobDetailsPage = ({
       <div className="grid grid-cols-1 lg:grid-cols-5 xl:grid-cols-7 gap-4 sm:gap-6">
         {/* Left Column - 2/3 */}
         <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6">
-          <HeaderSummaryCard jobId={jobId} />
-          <ClientInfoSection />
-          <ProductDetailsSection />
+          <HeaderSummaryCard
+            data={jobData?.header_summary}
+            isLoading={isLoading}
+          />
+          <ClientInfoSection
+            data={jobData?.client_information}
+            isLoading={isLoading}
+          />
+          <ProductDetailsSection
+            data={jobData?.product_details}
+            isLoading={isLoading}
+          />
         </div>
         {/* Right Column - 1/3 */}
         <div className="lg:col-span-3 xl:col-span-5 space-y-4 sm:space-y-6">
-          <FrequentlyUsedParts />
-          <ChecklistSection />
+          <FrequentlyUsedParts
+            data={jobData?.frequently_used_parts}
+            isLoading={isLoading}
+          />
+          <ChecklistSection
+            data={jobData?.checklist_section}
+            isLoading={isLoading}
+          />
           {showImageUpload && !isOverview && <ImageUploadSection />}
           {isOverview && staticImages && (
             <div className="bg-white">
@@ -119,7 +198,18 @@ const JobDetailsPage = ({
               </div>
             </div>
           )}
-          {showSignature && !isOverview && <CustomerSignatureSection />}
+          {showImageUpload && isOverview && jobData?.image_section && (
+            <ImageUploadSection
+              data={jobData.image_section}
+              isLoading={isLoading}
+            />
+          )}
+          {showSignature && !isOverview && (
+            <CustomerSignatureSection
+              data={jobData?.customer_signature}
+              isLoading={isLoading}
+            />
+          )}
           {isOverview && staticImages?.signatureImage && (
             <div className="bg-white">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">
@@ -133,22 +223,34 @@ const JobDetailsPage = ({
                       <p className="text-gray-800 font-medium text-base">
                         Client Name :
                       </p>
-                      <p className="text-gray-500 text-sm">John Doe</p>
+                      <p className="text-gray-500 text-sm">
+                        {jobData?.customer_signature.client_name}
+                      </p>
                     </div>
                     <div className="flex items-center justify-between py-2">
                       <p className="text-gray-800 font-medium text-base">
                         Signature time :
                       </p>
                       <p className="text-gray-500 text-sm">
-                        24 Nov 2025, 2:30 PM
+                        {jobData?.customer_signature.signature_time}
                       </p>
                     </div>
                     <div className="flex items-center justify-between py-2">
                       <p className="text-gray-800 font-medium text-base">
                         Signature Status :
                       </p>
-                      <p className="font-medium text-sm text-teal-500">
-                        Complete
+                      <p
+                        className={`font-medium text-sm ${
+                          jobData?.customer_signature.signature_status ===
+                          "complete"
+                            ? "text-teal-500"
+                            : "text-red-500"
+                        }`}
+                      >
+                        {jobData?.customer_signature.signature_status ===
+                        "complete"
+                          ? "Complete"
+                          : "Incomplete"}
                       </p>
                     </div>
                   </div>
@@ -173,21 +275,52 @@ const JobDetailsPage = ({
               </div>
             </div>
           )}
+          {showSignature && isOverview && jobData?.customer_signature && (
+            <CustomerSignatureSection
+              data={jobData.customer_signature}
+              isLoading={isLoading}
+            />
+          )}
         </div>
       </div>
 
       {/* Action Buttons */}
       {isOverview ? (
         <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
-          <Button
-            variant="outline"
-            className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50"
-          >
-            Cancel Job
-          </Button>
-          <Button className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white">
-            Rescheduled
-          </Button>
+          {showRescheduleAndCancel && (
+            <>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50"
+                onClick={handleCancel}
+              >
+                Cancel Job
+              </Button>
+              <Button
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-orange-600 hover:bg-orange-700 text-white"
+                onClick={handleReschedule}
+              >
+                Rescheduled
+              </Button>
+            </>
+          )}
+          {showCancelOnly && (
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-800"
+              onClick={handleCancel}
+            >
+              Cancel Job
+            </Button>
+          )}
+          {showExportPDF && (
+            <Button
+              className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={handleExportPDF}
+            >
+              Export PDF
+            </Button>
+          )}
         </div>
       ) : (
         <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
