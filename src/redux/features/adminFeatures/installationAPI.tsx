@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** @format */
 
 import baseApi from "../../api/baseAPI";
@@ -57,8 +58,91 @@ export interface AddInstallationResponse {
   requestId: string;
 }
 
+// Get installations interfaces
+export interface InstallationClient {
+  id: string;
+  name: string;
+  contact_number: string;
+}
+
+export interface InstallationProduct {
+  id: string;
+  model_name: string;
+}
+
+export interface InstallationTechnician {
+  id: string;
+  name: string;
+}
+
+export interface Installation {
+  installation_id: string;
+  client: InstallationClient;
+  product: InstallationProduct;
+  technician: InstallationTechnician;
+  scheduled_date: string;
+  scheduled_time: string;
+  maintenance_frequency_month: number;
+  priority: "low" | "medium" | "high";
+  notes: string;
+  status: "assign" | "inprogress" | "completed";
+  created_at: string;
+}
+
+export interface InstallationsResponse {
+  success: boolean;
+  message: string;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: Installation[];
+  requestId: string;
+}
+
+export interface GetInstallationsParams {
+  order_dir?: "asc" | "desc";
+  job_id?: string;
+  client?: string;
+  model?: string;
+  technician?: string;
+  status?: "assign" | "inprogress" | "completed";
+  page?: number;
+  limit?: number;
+}
+
 const installationAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Get all installations
+    getInstallations: builder.query<
+      InstallationsResponse,
+      GetInstallationsParams | void
+    >({
+      query: (params) => {
+        const searchParams = new URLSearchParams();
+
+        if (params) {
+          if (params.order_dir)
+            searchParams.append("order_dir", params.order_dir);
+          if (params.job_id) searchParams.append("job_id", params.job_id);
+          if (params.client) searchParams.append("client", params.client);
+          if (params.model) searchParams.append("model", params.model);
+          if (params.technician)
+            searchParams.append("technician", params.technician);
+          if (params.status) searchParams.append("status", params.status);
+          if (params.page) searchParams.append("page", params.page.toString());
+          if (params.limit)
+            searchParams.append("limit", params.limit.toString());
+        }
+
+        const queryString = searchParams.toString();
+        return `/api/installations/${queryString ? `?${queryString}` : ""}`;
+      },
+      providesTags: ["Installation"],
+    }),
+
     // Autocomplete endpoints
     autocompleteClients: builder.query<
       AutocompleteResponse<ClientAutocompleteItem>,
@@ -108,6 +192,7 @@ const installationAPI = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetInstallationsQuery,
   useAutocompleteClientsQuery,
   useAutocompleteProductsQuery,
   useAutocompleteTechniciansQuery,

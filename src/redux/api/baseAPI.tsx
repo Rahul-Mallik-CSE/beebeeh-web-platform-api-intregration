@@ -37,6 +37,7 @@ const baseAPI = createApi({
     "TodaysJobs",
     "ReportModule",
     "Overview",
+    "Installation",
   ],
   endpoints: () => ({}),
 });

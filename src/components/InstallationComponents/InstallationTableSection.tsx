@@ -5,10 +5,11 @@ import { Search, Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CustomTable from "../CommonComponents/CustomTable";
-import { installationJobsData } from "@/data/InstallationData";
-import type { InstallationJob } from "@/types/AllTypes";
 import { useRouter } from "next/navigation";
 import AssignTechnicianModal from "../CommonComponents/AssignTechnicianModal";
+import { useGetInstallationsQuery } from "@/redux/features/adminFeatures/installationAPI";
+import type { Installation } from "@/redux/features/adminFeatures/installationAPI";
+import TableLoadingView from "../LoadingComponents/TableLoadingView";
 
 const InstallationTableSection = () => {
   const router = useRouter();
@@ -16,46 +17,70 @@ const InstallationTableSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string>("");
 
+  // Fetch installations from API
+  const {
+    data: installationsData,
+    isLoading,
+    error,
+  } = useGetInstallationsQuery();
+
   const handleAddInstallations = () => {
     router.push("/installation/add-installation");
   };
 
-  const filteredData = installationJobsData.filter(
+  // Transform API data to match table format
+  const transformedData =
+    installationsData?.data?.map((installation) => ({
+      id: installation.installation_id,
+      jobId: installation.installation_id,
+      client: installation.client.name,
+      model: installation.product.model_name,
+      serial: "-", // Serial is not provided in API response
+      technician: installation.technician.name,
+      scheduled: `${new Date(installation.scheduled_date).toLocaleDateString()} ${installation.scheduled_time}`,
+      status:
+        installation.status.charAt(0).toUpperCase() +
+        installation.status.slice(1),
+      priority: installation.priority,
+      notes: installation.notes,
+    })) || [];
+
+  const filteredData = transformedData.filter(
     (job) =>
       job.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.jobId.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.model.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.technician.toLowerCase().includes(searchQuery.toLowerCase())
+      job.technician.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const installationColumns = [
     {
       header: "Job ID",
-      accessor: "jobId" as keyof InstallationJob,
+      accessor: "jobId" as keyof (typeof transformedData)[0],
     },
     {
       header: "Client",
-      accessor: "client" as keyof InstallationJob,
+      accessor: "client" as keyof (typeof transformedData)[0],
     },
     {
       header: "Model",
-      accessor: "model" as keyof InstallationJob,
+      accessor: "model" as keyof (typeof transformedData)[0],
     },
     {
       header: "Technician",
-      accessor: "technician" as keyof InstallationJob,
+      accessor: "technician" as keyof (typeof transformedData)[0],
     },
     {
       header: "Scheduled",
-      accessor: "scheduled" as keyof InstallationJob,
+      accessor: "scheduled" as keyof (typeof transformedData)[0],
     },
     {
       header: "Status",
-      accessor: "status" as keyof InstallationJob,
+      accessor: "status" as keyof (typeof transformedData)[0],
     },
     {
       header: "Action",
-      accessor: (row: InstallationJob) => (
+      accessor: (row: (typeof transformedData)[0]) => (
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => router.push(`/installation/${row.jobId}`)}
@@ -80,6 +105,29 @@ const InstallationTableSection = () => {
     },
   ];
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="w-full space-y-4 sm:space-y-6 bg-white p-3 sm:p-4 md:p-6 rounded-2xl">
+        <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-800">
+          Installations
+        </h1>
+        <TableLoadingView />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="w-full space-y-4 sm:space-y-6 bg-white p-3 sm:p-4 md:p-6 rounded-2xl">
+        <div className="text-center text-red-600">
+          Error loading installations. Please try again later.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4 sm:space-y-6 bg-white p-3 sm:p-4 md:p-6 rounded-2xl">
       {/* Header with Search and Button */}
@@ -88,16 +136,6 @@ const InstallationTableSection = () => {
           Installations
         </h1>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-          <div className="relative w-40 sm:w-48 md:w-56 lg:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 w-full text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-            />
-          </div>
           <Button
             onClick={handleAddInstallations}
             className="bg-red-800 hover:bg-red-700 text-white px-3 sm:px-4 md:px-6 py-2 rounded-lg flex items-center gap-1.5 sm:gap-2 text-sm"
