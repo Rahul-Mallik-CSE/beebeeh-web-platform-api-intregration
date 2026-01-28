@@ -1,53 +1,160 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
+import { useState, useMemo } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { clientsData, clientsColumns } from "@/data/ClientsData";
-import { Client } from "@/types/ClientsTypes";
-import { Input } from "@/components/ui/input";
+import TableSkeleton from "@/components/CommonComponents/TableSkeleton";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddClientModal, { ClientFormData } from "./AddClientModal";
+import {
+  useGetClientsQuery,
+  useDeleteClientMutation,
+  ClientListItem,
+} from "@/redux/features/adminFeatures/clientsAPI";
+import { toast } from "react-toastify";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ClientsTableSections = () => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [searchFilters, setSearchFilters] = useState({
+    name: "",
+    town: "",
+    type: "",
+    client_id: "",
+    contact_number: "",
+    order: "" as "asc" | "desc" | "",
+  });
+  const [deleteClientId, setDeleteClientId] = useState<string | null>(null);
 
-  const filteredClients = clientsData.filter(
-    (client) =>
-      client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.clientId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.town.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      client.type.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  // Fetch clients with pagination and filters
+  const { data: clientsResponse, isLoading, error, refetch } = useGetClientsQuery({
+    page: currentPage,
+    limit: itemsPerPage,
+    ...Object.fromEntries(
+      Object.entries(searchFilters).filter(([_, value]) => value !== "")
+    ),
+  });
 
-  const handleViewClient = (client: Client) => {
-    router.push(`/clients/${client.clientId}`);
+  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
+
+  const handleViewClient = (client: ClientListItem) => {
+    router.push(`/clients/${client.client_id}`);
+  };
+
+  const handleDeleteClick = (clientId: string) => {
+    setDeleteClientId(clientId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteClientId) return;
+
+    try {
+      await deleteClient(deleteClientId).unwrap();
+      toast.success("Client deleted successfully!");
+      setDeleteClientId(null);
+      refetch();
+    } catch (error: any) {
+      const errorMessage =
+        error?.data?.message || "Failed to delete client. Please try again.";
+      toast.error(errorMessage);
+    }
   };
 
   const handleSaveClient = (data: ClientFormData) => {
-    console.log("Saving client:", data);
-    // Add your save logic here (e.g., API call)
+    // This is handled in AddClientModal, just close the modal
     setIsModalOpen(false);
+    refetch();
   };
 
-  const columnsWithActions = [
-    ...clientsColumns,
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Transform API data to table format
+  const tableData = useMemo(() => {
+    if (!clientsResponse?.data) return [];
+    return clientsResponse.data;
+  }, [clientsResponse]);
+
+  // Define table columns
+  const columns = [
+    {
+      header: "Client ID",
+      accessor: "client_id" as keyof ClientListItem,
+    },
+    {
+      header: "Name",
+      accessor: "name" as keyof ClientListItem,
+    },
+    {
+      header: "Type",
+      accessor: (row: ClientListItem) => (
+        <span className="capitalize">{row.client_type}</span>
+      ),
+    },
+    {
+      header: "Town",
+      accessor: "town" as keyof ClientListItem,
+    },
+    {
+      header: "Contact Number",
+      accessor: "contact_number" as keyof ClientListItem,
+    },
+    {
+      header: "Installations",
+      accessor: "installations" as keyof ClientListItem,
+    },
+    {
+      header: "Last Service",
+      accessor: (row: ClientListItem) => row.last_service || "N/A",
+    },
+    {
+      header: "Created",
+      accessor: "created" as keyof ClientListItem,
+    },
+    {
+      header: "Status",
+      accessor: (row: ClientListItem) => (
+        <span
+          className={`px-2 py-1 rounded-md text-xs font-medium ${
+            row.is_active
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-700"
+          }`}
+        >
+          {row.is_active ? "Active" : "Inactive"}
+        </span>
+      ),
+    },
     {
       header: "Action",
-      accessor: (row: Client) => (
+      accessor: (row: ClientListItem) => (
         <div className="flex items-center justify-end gap-1 sm:gap-2">
           <button
             onClick={() => handleViewClient(row)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
+            title="View Details"
           >
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
           <button
-            onClick={() => console.log("Delete", row.clientId)}
+            onClick={() => handleDeleteClick(row.client_id)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
+            title="Delete Client"
+            disabled={isDeleting}
           >
             <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
           </button>
@@ -57,6 +164,19 @@ const ClientsTableSections = () => {
     },
   ];
 
+  if (error) {
+    return (
+      <div className="w-full p-8 text-center">
+        <p className="text-red-600 mb-4">
+          Failed to load clients. Please try again.
+        </p>
+        <Button onClick={() => refetch()} variant="outline">
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* Header Section */}
@@ -65,16 +185,6 @@ const ClientsTableSections = () => {
           Clients
         </h2>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 w-40 sm:w-48 md:w-56 lg:w-64 text-sm"
-            />
-          </div>
           {/* Add Button */}
           <Button
             onClick={() => setIsModalOpen(true)}
@@ -88,11 +198,19 @@ const ClientsTableSections = () => {
 
       {/* Table */}
       <div className="bg-white rounded-lg">
-        <CustomTable
-          data={filteredClients}
-          columns={columnsWithActions}
-          itemsPerPage={10}
-        />
+        {isLoading ? (
+          <TableSkeleton rows={10} columns={9} />
+        ) : (
+          <CustomTable
+            data={tableData}
+            columns={columns}
+            itemsPerPage={itemsPerPage}
+            serverSidePagination={true}
+            currentPage={currentPage}
+            totalPages={clientsResponse?.meta?.totalPage || 1}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
 
       {/* Add Client Modal */}
@@ -101,6 +219,32 @@ const ClientsTableSections = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveClient}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={deleteClientId !== null}
+        onOpenChange={(open: boolean) => !open && setDeleteClientId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              client and remove their data from the system.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

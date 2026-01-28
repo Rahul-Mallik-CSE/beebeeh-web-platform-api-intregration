@@ -13,12 +13,16 @@ interface ClientDetailsSectionProps {
   client: ClientDetails;
   onEdit?: () => void;
   onDisable?: () => void;
+  isTogglingStatus?: boolean;
+  isActive?: boolean;
 }
 
 const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   client,
   onEdit,
   onDisable,
+  isTogglingStatus = false,
+  isActive = true,
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -88,15 +92,32 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
             <span className="sm:hidden">Edit</span>
           </Button>
 
-          {/* Disable Account Button */}
+          {/* Disable/Enable Account Button */}
           <Button
             onClick={onDisable}
             variant="outline"
+            disabled={isTogglingStatus}
             className="border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-none px-3 sm:px-4"
           >
             <MdBlockFlipped className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden lg:inline">Disable Account</span>
-            <span className="lg:hidden">Disable</span>
+            <span className="hidden lg:inline">
+              {isTogglingStatus
+                ? isActive
+                  ? "Disabling..."
+                  : "Enabling..."
+                : isActive
+                ? "Disable Account"
+                : "Enable Account"}
+            </span>
+            <span className="lg:hidden">
+              {isTogglingStatus
+                ? isActive
+                  ? "Disabling..."
+                  : "Enabling..."
+                : isActive
+                ? "Disable"
+                : "Enable"}
+            </span>
           </Button>
         </div>
       </div>
