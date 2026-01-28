@@ -26,8 +26,15 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
 
   const handleViewJob = (job: JobHistoryItem) => {
     // Navigate to job details based on job type
-    const jobType = job.type.toLowerCase();
-    router.push(`/${jobType}/${job.object_id}`);
+    let jobType = job.type.toLowerCase();
+
+    // Map job types to their respective route paths
+    // The repairs route is plural, while others are singular
+    if (jobType === "repairing" || jobType === "repair") {
+      jobType = "repairs";
+    }
+
+    router.push(`/${jobType}/${job.job_id}`);
   };
 
   // Filter data based on service status (if needed in future)

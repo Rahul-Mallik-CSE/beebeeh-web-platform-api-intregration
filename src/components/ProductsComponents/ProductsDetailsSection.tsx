@@ -1,15 +1,15 @@
 /** @format */
 "use client";
 import React from "react";
-import { ProductDetails } from "@/types/ProductsTypes";
+import { ProductDetailData } from "@/redux/features/adminFeatures/productsAPI";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Package } from "lucide-react";
 import { IoIosCard } from "react-icons/io";
 import { FaBox } from "react-icons/fa";
 import { GiAutoRepair } from "react-icons/gi";
 
 interface ProductsDetailsSectionProps {
-  product: ProductDetails;
+  product: ProductDetailData;
   onEdit: () => void;
   onView: () => void;
   onDelete: () => void;
@@ -21,17 +21,8 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
   onView,
   onDelete,
 }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Stock Out":
-        return "bg-red-100 text-red-700";
-      case "Low Stock":
-        return "bg-yellow-100 text-yellow-700";
-      case "In Stock":
-        return "bg-green-100 text-green-700";
-      default:
-        return "bg-gray-100 text-gray-700";
-    }
+  const getStatusColor = (isActive: boolean) => {
+    return isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700";
   };
 
   return (
@@ -39,21 +30,21 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
       {/* Product Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">
-            {product.modelName}
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 uppercase">
+            {product.model_name}
           </h1>
           <p className="text-[10px] xs:text-xs sm:text-sm text-gray-600 mt-1">
-            ID: {product.productId}
+            Product ID: {product.product_id}
           </p>
           <p className="text-[10px] xs:text-xs sm:text-sm text-gray-600 mt-0.5">
             Alias : {product.alias}
           </p>
           <span
             className={`inline-block px-2 sm:px-3 py-1 rounded-md text-xs font-medium mt-2 ${getStatusColor(
-              product.status
+              product.is_active
             )}`}
           >
-            {product.status}
+            {product.is_active ? "Active" : "Inactive"}
           </span>
         </div>
 
@@ -91,28 +82,28 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
         <StatCard
           icon={<IoIosCard className="w-5 h-5 sm:w-6 sm:h-6" />}
           title="Domestic Freq"
-          value={product.domesticFreq}
-          bgColor="bg-pink-200"
+          value={`${product.frequency_domestic_month} Months`}
+          bgColor="bg-pink-100"
           iconColor="text-pink-500"
         />
         <StatCard
           icon={<IoIosCard className="w-5 h-5 sm:w-6 sm:h-6" />}
           title="Commercial Freq"
-          value={product.commercialFreq}
+          value={`${product.frequency_commercial_month} Months`}
           bgColor="bg-green-100"
           iconColor="text-green-600"
         />
         <StatCard
           icon={<GiAutoRepair className="w-5 h-5 sm:w-6 sm:h-6" />}
-          title="Parts"
-          value={product.parts}
+          title="Parts Qty"
+          value={product.parts_quantity.toString()}
           bgColor="bg-[#E0E7FF]"
           iconColor="text-[#4f46e5]"
         />
         <StatCard
-          icon={<FaBox className="w-5 h-5 sm:w-6 sm:h-6" />}
-          title="Stock"
-          value={product.stock}
+          icon={<Package className="w-5 h-5 sm:w-6 sm:h-6" />}
+          title="Stock Qty"
+          value={product.stock_quantity.toString()}
           bgColor="bg-blue-100"
           iconColor="text-blue-600"
         />
@@ -135,18 +126,19 @@ const StatCard: React.FC<StatCardProps> = ({
   value,
   bgColor,
   iconColor,
+  // h-16
 }) => {
   return (
-    <div className="bg-gray-50  rounded-xl p-3 sm:p-4">
-      <div className="flex items-start gap-2 sm:gap-3">
+    <div className="bg-gray-50 rounded-xl p-3 sm:p-4 h-full">
+      <div className="flex items-center gap-2 sm:gap-3">
         <div
           className={`${bgColor} ${iconColor} p-2 sm:p-2.5 rounded-lg flex items-center justify-center shrink-0`}
         >
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-sm text-gray-600 mb-1">{title}</p>
-          <p className="text-sm sm:text-base font-medium text-gray-800 wrap-break-word">
+          <p className="text-xs sm:text-[13px] text-gray-500 font-medium mb-0.5">{title}</p>
+          <p className="text-sm sm:text-base font-bold text-gray-800 truncate">
             {value}
           </p>
         </div>

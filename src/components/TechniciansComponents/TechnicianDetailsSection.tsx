@@ -5,34 +5,35 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { MdBlockFlipped, MdEmail, MdLocalPhone } from "react-icons/md";
-import { TechnicianDetails } from "@/types/TechniciansTypes";
 import { FaMapMarkerAlt, FaWrench } from "react-icons/fa";
 import { FaStar } from "react-icons/fa6";
 import { TbSquareRoundedCheck } from "react-icons/tb";
 import { BsCalendar2Check } from "react-icons/bs";
-import { technicianDetailsData } from "@/data/TechniciansData";
 import { IoIosRadioButtonOn } from "react-icons/io";
+import { TechnicianDashboardData } from "@/redux/features/adminFeatures/technicianAPI";
 
 interface TechnicianDetailsSectionProps {
-  technician?: TechnicianDetails;
+  data: TechnicianDashboardData;
   onEdit?: () => void;
   onDisable?: () => void;
   onAssignJob?: () => void;
 }
 
 const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
-  technician = technicianDetailsData,
+  data,
   onEdit,
   onDisable,
   onAssignJob,
 }) => {
+  const { technician, stats } = data;
+
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Available":
+    switch (status.toLowerCase()) {
+      case "available":
         return "bg-emerald-100 text-emerald-700";
-      case "Unavailable":
+      case "unavailable":
         return "bg-red-100 text-red-700";
-      case "Busy":
+      case "busy":
         return "bg-yellow-100 text-yellow-700";
       default:
         return "bg-gray-100 text-gray-700";
@@ -47,16 +48,17 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
         <div className="flex items-center gap-3 sm:gap-4">
           {/* Profile Image */}
           <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-gradient-to-br from-pink-400 to-purple-500 shrink-0">
-            {technician.profileImage ? (
+            {technician.profile_image ? (
               <Image
-                src={technician.profileImage}
-                alt={technician.name}
+                src={technician.profile_image}
+                alt={technician.full_name}
                 fill
                 className="object-cover"
+                unoptimized
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
-                {technician.name
+                {technician.full_name
                   .split(" ")
                   .map((n) => n[0])
                   .join("")}
@@ -67,13 +69,13 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {/* Name and ID */}
           <div className="space-y-1">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
-              {technician.name}
+              {technician.full_name}
             </h2>
             <p className="text-xs sm:text-sm text-gray-600">
-              ID: {technician.techId}
+              ID: {technician.technician_id}
             </p>
             <div
-              className={`inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-sm text-xs font-medium ${getStatusColor(
+              className={`inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-sm text-xs font-medium capitalize ${getStatusColor(
                 technician.status
               )}`}
             >
@@ -101,8 +103,12 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
             className="border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-none px-3 sm:px-4"
           >
             <MdBlockFlipped className="w-3 h-3 sm:w-4 sm:h-4" />
-            <span className="hidden sm:inline">Disable Account</span>
-            <span className="sm:hidden">Disable</span>
+            <span className="hidden sm:inline">
+              {technician.is_active ? "Disable Account" : "Enable Account"}
+            </span>
+            <span className="sm:hidden">
+              {technician.is_active ? "Disable" : "Enable"}
+            </span>
           </Button>
 
           {/* Assign Job Button */}
@@ -122,7 +128,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {
             id: "phone",
             label: "Phone",
-            value: technician.contactNumber,
+            value: technician.contact_number,
             icon: MdLocalPhone,
             iconBgColor: "bg-blue-100",
             iconColor: "text-blue-600",
@@ -138,7 +144,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {
             id: "address",
             label: "Address",
-            value: technician.address,
+            value: technician.address + (technician.town ? `, ${technician.town}` : ""),
             icon: FaMapMarkerAlt,
             iconBgColor: "bg-green-100",
             iconColor: "text-green-600",
@@ -146,10 +152,10 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {
             id: "skills",
             label: "Skills",
-            value: technician.skills,
+            value: technician.skills.join(", ") || "No skills listed",
             icon: FaWrench,
-            iconBgColor: "bg-purple-100",
-            iconColor: "text-purple-600",
+            iconBgColor: "bg-amber-100",
+            iconColor: "text-amber-600",
           },
         ].map((card) => {
           const IconComponent = card.icon;
@@ -170,7 +176,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
                   {card.label}
                 </span>
               </div>
-              <p className="text-sm sm:text-base font-semibold text-gray-800 wrap-break-words">
+              <p className="text-sm sm:text-base font-semibold text-gray-800 wrap-break-words h-12 overflow-hidden line-clamp-2">
                 {card.value}
               </p>
             </div>
@@ -184,7 +190,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {
             id: "rating",
             label: "Rating",
-            value: technician.rating.toFixed(1),
+            value: stats.rating.toFixed(1),
             icon: FaStar,
             iconBgColor: "bg-yellow-100",
             iconColor: "text-yellow-600",
@@ -192,7 +198,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {
             id: "completedJobs",
             label: "Complete Job",
-            value: technician.completedJobs,
+            value: stats.completed_jobs,
             icon: TbSquareRoundedCheck,
             iconBgColor: "bg-teal-100",
             iconColor: "text-teal-600",
@@ -200,7 +206,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {
             id: "todaysJobs",
             label: "Today's Job",
-            value: technician.todaysJobs,
+            value: stats.todays_jobs,
             icon: BsCalendar2Check,
             iconBgColor: "bg-pink-100",
             iconColor: "text-pink-600",
@@ -210,7 +216,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
             label: "Status",
             value: (
               <span
-                className={`inline-flex items-center px-3 py-1 rounded-sm text-xs font-medium ${getStatusColor(
+                className={`inline-flex items-center px-3 py-1 rounded-sm text-xs font-medium capitalize ${getStatusColor(
                   technician.status
                 )}`}
               >
@@ -240,9 +246,9 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
                   {card.label}
                 </span>
               </div>
-              <p className="text-xl sm:text-2xl font-semibold text-gray-800">
+              <div className="text-xl sm:text-2xl font-semibold text-gray-800">
                 {card.value}
-              </p>
+              </div>
             </div>
           );
         })}

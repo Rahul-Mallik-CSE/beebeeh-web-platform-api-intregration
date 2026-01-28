@@ -1,51 +1,97 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { productsData, productsColumns } from "@/data/ProductsData";
-import { Product } from "@/types/ProductsTypes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddProductModal from "./AddProductModal";
+import { useGetProductsQuery, ProductListItem } from "@/redux/features/adminFeatures/productsAPI";
+import TableSkeleton from "../CommonComponents/TableSkeleton";
 
 const ProductsTableSection = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
 
-  const handleAddProduct = (productData: any) => {
-    console.log("Adding product:", productData);
-    // Add logic to save product
+  // Fetch products with search and pagination
+  const { data: productsResponse, isLoading, error, refetch } = useGetProductsQuery({
+    page: currentPage,
+    limit: 10,
+    model_name: searchQuery,
+  });
+
+  const handleAddProductSuccess = () => {
+    setIsAddProductModalOpen(false);
+    refetch();
   };
 
-  const filteredProducts = productsData.filter(
-    (product) =>
-      product.modelName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.productId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.alias.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const tableData = useMemo(() => {
+    if (!productsResponse?.data) return [];
+    return productsResponse.data;
+  }, [productsResponse]);
 
-  const handleViewProduct = (product: Product) => {
-    router.push(`/products/${product.id}`);
+  const handleViewProduct = (product: ProductListItem) => {
+    router.push(`/products/${product.product_id}`);
   };
 
-  const columnsWithActions = [
-    ...productsColumns,
+  const columns = [
+    {
+      header: "Product ID",
+      accessor: "product_id" as keyof ProductListItem,
+    },
+    {
+      header: "Model Name",
+      accessor: "model_name" as keyof ProductListItem,
+    },
+    {
+      header: "Alias",
+      accessor: "alias" as keyof ProductListItem,
+    },
+    {
+      header: "Domestic Freq (Mo)",
+      accessor: "frequency_domestic_month" as keyof ProductListItem,
+    },
+    {
+      header: "Commercial Freq (Mo)",
+      accessor: "frequency_commercial_month" as keyof ProductListItem,
+    },
+    {
+      header: "Parts Qty",
+      accessor: "parts_quantity" as keyof ProductListItem,
+    },
+    {
+      header: "Stock Qty",
+      accessor: "stock_quantity" as keyof ProductListItem,
+    },
+    {
+      header: "Status",
+      accessor: (row: ProductListItem) => {
+        const isActive = row.is_active;
+        return (
+          <span className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium ${isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+            {isActive ? "Active" : "Inactive"}
+          </span>
+        );
+      },
+    },
     {
       header: "Action",
-      accessor: (row: Product) => (
+      accessor: (row: ProductListItem) => (
         <div className="flex items-center justify-end gap-1 sm:gap-2">
           <button
             onClick={() => handleViewProduct(row)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
+            title="View Details"
           >
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
           <button
-            onClick={() => console.log("Delete", row.id)}
+            onClick={() => console.log("Delete", row.product_id)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
+            title="Delete Product"
           >
             <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
           </button>
@@ -54,6 +100,15 @@ const ProductsTableSection = () => {
       className: "text-right",
     },
   ];
+
+  if (error) {
+    return (
+      <div className="w-full p-8 text-center text-red-600">
+        <p>Failed to load products. Please try again.</p>
+        <Button onClick={() => refetch()} variant="outline" className="mt-4">Retry</Button>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-3 sm:space-y-4">
@@ -68,7 +123,7 @@ const ProductsTableSection = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
             <Input
               type="text"
-              placeholder="Search"
+              placeholder="Search by model name"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 sm:pl-10 w-40 sm:w-48 md:w-56 lg:w-64 text-sm"
@@ -80,25 +135,33 @@ const ProductsTableSection = () => {
             className="bg-red-800 hover:bg-red-700 text-white flex items-center gap-1.5 sm:gap-2 text-sm px-3 sm:px-4 py-2"
           >
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="whitespace-nowrap">Add New Product</span>
+            <span className="whitespace-nowrap font-bold">Add New Product</span>
           </Button>
         </div>
       </div>
 
       {/* Table */}
       <div className="bg-white rounded-lg">
-        <CustomTable
-          data={filteredProducts}
-          columns={columnsWithActions}
-          itemsPerPage={10}
-        />
+        {isLoading ? (
+          <TableSkeleton rows={10} columns={9} />
+        ) : (
+          <CustomTable
+            data={tableData}
+            columns={columns}
+            itemsPerPage={10}
+            serverSidePagination={true}
+            currentPage={currentPage}
+            totalPages={productsResponse?.meta?.totalPage || 1}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
+        )}
       </div>
 
       {/* Add Product Modal */}
       <AddProductModal
         isOpen={isAddProductModalOpen}
         onClose={() => setIsAddProductModalOpen(false)}
-        onSave={handleAddProduct}
+        onSave={handleAddProductSuccess}
       />
     </div>
   );
