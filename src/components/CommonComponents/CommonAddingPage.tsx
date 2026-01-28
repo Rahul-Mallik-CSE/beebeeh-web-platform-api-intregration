@@ -24,6 +24,7 @@ import {
   TechnicianAutocompleteItem,
 } from "@/redux/features/adminFeatures/installationAPI";
 import { useAddRepairMutation } from "@/redux/features/adminFeatures/repairsAPI";
+import { useAddMaintenanceMutation } from "@/redux/features/adminFeatures/maintenanceAPI";
 
 interface CommonAddingPageProps {
   title: string;
@@ -102,6 +103,8 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
   const [addInstallation, { isLoading: isSubmitting }] =
     useAddInstallationMutation();
   const [addRepair, { isLoading: isSubmittingRepair }] = useAddRepairMutation();
+  const [addMaintenance, { isLoading: isSubmittingMaintenance }] =
+    useAddMaintenanceMutation();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -279,6 +282,47 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         toast.error("Problem description is required.");
         return false;
       }
+    } else if (isMaintenance) {
+      if (!formData.clientId.trim()) {
+        toast.error("Please select a client.");
+        return false;
+      }
+      if (!formData.clientName.trim()) {
+        toast.error("Client name is required.");
+        return false;
+      }
+      if (!formData.productId.trim()) {
+        toast.error("Please select a product.");
+        return false;
+      }
+      if (!formData.productModel.trim()) {
+        toast.error("Product model is required.");
+        return false;
+      }
+      if (!formData.technicianId.trim()) {
+        toast.error("Please select a technician.");
+        return false;
+      }
+      if (!formData.technicianName.trim()) {
+        toast.error("Technician name is required.");
+        return false;
+      }
+      if (!formData.date) {
+        toast.error("Please select a date.");
+        return false;
+      }
+      if (!formData.time) {
+        toast.error("Please select a time.");
+        return false;
+      }
+      if (!formData.priority) {
+        toast.error("Please select a priority.");
+        return false;
+      }
+      if (!formData.problemDescription.trim()) {
+        toast.error("Problem description is required.");
+        return false;
+      }
     }
     return true;
   };
@@ -347,6 +391,35 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
       } catch (error: any) {
         toast.error(
           error?.data?.message || "Failed to add repair. Please try again.",
+        );
+      }
+    } else if (isMaintenance) {
+      try {
+        const maintenanceData = {
+          client_id: formData.clientId,
+          client_name: formData.clientName,
+          product_id: formData.productId,
+          model_name: formData.productModel,
+          technician_id: formData.technicianId,
+          technician_name: formData.technicianName,
+          scheduled_date: formData.date,
+          scheduled_time: formData.time,
+          priority: formData.priority as "low" | "medium" | "high",
+          problem_description: formData.problemDescription,
+        };
+
+        await addMaintenance(maintenanceData).unwrap();
+        toast.success("Maintenance added successfully!");
+
+        if (onSubmit) {
+          onSubmit(formData);
+        } else {
+          router.push("/maintenance");
+        }
+      } catch (error: any) {
+        toast.error(
+          error?.data?.message ||
+            "Failed to add maintenance. Please try again.",
         );
       }
     } else {
@@ -542,7 +615,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
           </div>
 
           {/* Maintenance Frequency - Only for non-repairs */}
-          {!isRepairs && (
+          {isInstallation && (
             <div className="space-y-2">
               <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
                 Maintenance Frequency
@@ -707,10 +780,14 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting || isSubmittingRepair}
+          disabled={
+            isSubmitting || isSubmittingRepair || isSubmittingMaintenance
+          }
           className="w-full sm:w-auto px-8 sm:px-12 py-2 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white disabled:opacity-50"
         >
-          {isSubmitting || isSubmittingRepair ? "Creating..." : "Create Job"}
+          {isSubmitting || isSubmittingRepair || isSubmittingMaintenance
+            ? "Creating..."
+            : "Create Job"}
         </Button>
       </div>
     </div>
