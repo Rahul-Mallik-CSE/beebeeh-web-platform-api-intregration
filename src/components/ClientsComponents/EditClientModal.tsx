@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,45 +16,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Camera, MapPin } from "lucide-react";
+import { Camera } from "lucide-react";
 import Image from "next/image";
-import { useAddClientMutation } from "@/redux/features/adminFeatures/clientsAPI";
-import { toast } from "react-toastify";
+import { ClientDetails } from "@/redux/features/adminFeatures/clientsAPI";
 
-interface AddClientModalProps {
+interface EditClientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: ClientFormData) => void;
+  onSave: (data: FormData) => void;
+  clientData: ClientDetails;
 }
 
-export interface ClientFormData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  address: string;
-  town: string;
-  contactNumber: string;
-  type: string;
-  profileImage?: string;
-}
-
-const AddClientModal: React.FC<AddClientModalProps> = ({
+const EditClientModal: React.FC<EditClientModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  clientData,
 }) => {
-  const [formData, setFormData] = useState<ClientFormData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    address: "",
-    town: "",
-    contactNumber: "",
-    type: "",
+  const [formData, setFormData] = useState({
+    first_name: clientData.first_name,
+    last_name: clientData.last_name,
+    email: clientData.email,
+    address: clientData.address,
+    town: clientData.town,
+    contact_number: clientData.contact_number,
+    client_type: clientData.client_type,
   });
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(
+    clientData.profile_image
+  );
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
-  const [addClient, { isLoading }] = useAddClientMutation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        first_name: clientData.first_name,
+        last_name: clientData.last_name,
+        email: clientData.email,
+        address: clientData.address,
+        town: clientData.town,
+        contact_number: clientData.contact_number,
+        client_type: clientData.client_type,
+      });
+      setProfileImage(clientData.profile_image);
+      setProfileImageFile(null);
+    }
+  }, [isOpen, clientData]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,7 +87,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setFormData({
       ...formData,
@@ -88,79 +96,45 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
   };
 
   const handleSubmit = async () => {
-    // Validation: Check if all required fields are filled
-    if (
-      !formData.firstName.trim() ||
-      !formData.lastName.trim() ||
-      !formData.email.trim() ||
-      !formData.address.trim() ||
-      !formData.town.trim() ||
-      !formData.contactNumber.trim() ||
-      !formData.type.trim()
-    ) {
-      toast.error("Please fill in all required fields.");
-      return;
-    }
-
-    // Basic email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      toast.error("Please enter a valid email address.");
-      return;
-    }
-
+    setIsSubmitting(true);
     try {
-      // Create FormData object
       const formDataToSend = new FormData();
-      formDataToSend.append("first_name", formData.firstName);
-      formDataToSend.append("last_name", formData.lastName);
-      formDataToSend.append("email", formData.email);
-      formDataToSend.append("address", formData.address);
-      formDataToSend.append("town", formData.town);
-      formDataToSend.append("contact_number", formData.contactNumber);
-      formDataToSend.append("client_type", formData.type.toUpperCase());
-      formDataToSend.append("is_active", "true");
+
+      // Only append changed fields
+      if (formData.first_name !== clientData.first_name) {
+        formDataToSend.append("first_name", formData.first_name);
+      }
+      if (formData.last_name !== clientData.last_name) {
+        formDataToSend.append("last_name", formData.last_name);
+      }
+      if (formData.email !== clientData.email) {
+        formDataToSend.append("email", formData.email);
+      }
+      if (formData.address !== clientData.address) {
+        formDataToSend.append("address", formData.address);
+      }
+      if (formData.town !== clientData.town) {
+        formDataToSend.append("town", formData.town);
+      }
+      if (formData.contact_number !== clientData.contact_number) {
+        formDataToSend.append("contact_number", formData.contact_number);
+      }
+      if (formData.client_type !== clientData.client_type) {
+        // Convert to uppercase as API expects uppercase values
+        formDataToSend.append("client_type", formData.client_type.toUpperCase());
+      }
 
       if (profileImageFile) {
         formDataToSend.append("profile_image", profileImageFile);
       }
 
-      // Call the API
-      await addClient(formDataToSend).unwrap();
-
-      // Show success message
-      toast.success("Client added successfully!");
-
-      // Call parent onSave callback if needed
-      onSave({ ...formData, profileImage: profileImage || undefined });
-
-      // Reset and close
-      handleReset();
-      onClose();
-    } catch (error: any) {
-      // Show error message
-      toast.error(
-        error?.data?.message || "Failed to add client. Please try again.",
-      );
+      await onSave(formDataToSend);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleReset = () => {
-    setFormData({
-      firstName: "",
-      lastName: "",
-      email: "",
-      address: "",
-      town: "",
-      contactNumber: "",
-      type: "",
-    });
-    setProfileImage(null);
-    setProfileImageFile(null);
-  };
-
   const handleCancel = () => {
-    handleReset();
     onClose();
   };
 
@@ -170,14 +144,14 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
         <div className="px-4 sm:px-6 py-6 sm:py-8 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="mb-2 sm:mb-4">
             <DialogTitle className="text-xl sm:text-2xl font-bold text-center text-gray-800">
-              Add Client
+              Edit Client
             </DialogTitle>
           </DialogHeader>
 
           {/* Profile Image Upload */}
           <div className="flex flex-col items-center mb-2 sm:mb-4">
             <label
-              htmlFor="profile-upload"
+              htmlFor="profile-upload-edit"
               className="relative cursor-pointer group"
             >
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200 group-hover:border-gray-300 transition-colors">
@@ -194,7 +168,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
                 )}
               </div>
               <input
-                id="profile-upload"
+                id="profile-upload-edit"
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
@@ -215,8 +189,8 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
               </label>
               <Input
                 type="text"
-                name="firstName"
-                value={formData.firstName}
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
                 placeholder="Enter first name"
                 className="h-9 sm:h-10 text-sm"
@@ -230,8 +204,8 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
               </label>
               <Input
                 type="text"
-                name="lastName"
-                value={formData.lastName}
+                name="last_name"
+                value={formData.last_name}
                 onChange={handleChange}
                 placeholder="Enter last name"
                 className="h-9 sm:h-10 text-sm"
@@ -258,23 +232,14 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
                 Address
               </label>
-              <div className="relative">
-                <Input
-                  type="text"
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  placeholder="Enter address"
-                  className="h-9 sm:h-10 pr-16 text-sm"
-                />
-                {/* <button
-                  type="button"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 transition-colors"
-                >
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>Map</span>
-                </button> */}
-              </div>
+              <Input
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                placeholder="Enter address"
+                className="h-9 sm:h-10 text-sm"
+              />
             </div>
 
             {/* Town */}
@@ -299,8 +264,8 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
               </label>
               <Input
                 type="tel"
-                name="contactNumber"
-                value={formData.contactNumber}
+                name="contact_number"
+                value={formData.contact_number}
                 onChange={handleChange}
                 placeholder="Enter contact number"
                 className="h-9 sm:h-10 text-sm"
@@ -313,9 +278,9 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
                 Type
               </label>
               <Select
-                value={formData.type}
+                value={formData.client_type}
                 onValueChange={(value) =>
-                  setFormData({ ...formData, type: value })
+                  setFormData({ ...formData, client_type: value })
                 }
               >
                 <SelectTrigger className="w-full h-9 sm:h-10 text-sm">
@@ -336,6 +301,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
               type="button"
               variant="outline"
               onClick={handleCancel}
+              disabled={isSubmitting}
               className="flex-1 h-9 sm:h-10 text-sm font-medium border-gray-300 hover:bg-gray-50"
             >
               Cancel
@@ -343,10 +309,10 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
             <Button
               type="button"
               onClick={handleSubmit}
-              disabled={isLoading}
+              disabled={isSubmitting}
               className="flex-1 h-9 sm:h-10 text-sm font-medium bg-red-800 hover:bg-red-700 text-white disabled:opacity-50"
             >
-              {isLoading ? "Saving..." : "Save"}
+              {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
@@ -355,4 +321,4 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
   );
 };
 
-export default AddClientModal;
+export default EditClientModal;

@@ -1,7 +1,6 @@
 /** @format */
 
 import ClientsTableSections from "@/components/ClientsComponents/ClientsTableSections";
-import React from "react";
 
 const ClientsPage = () => {
   return (
