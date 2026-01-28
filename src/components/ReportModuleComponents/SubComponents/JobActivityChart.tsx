@@ -31,7 +31,7 @@ const JobActivityChart: React.FC<JobActivityChartProps> = ({ data }) => {
   return (
     <div className="bg-transparent">
       <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#535F72] mb-3 sm:mb-4">
-        Jobs Activity
+        Weekly Jobs Activity
       </h2>
       <div className="bg-white rounded-2xl py-4 sm:py-6 shadow-sm px-2 sm:px-0">
         <ResponsiveContainer width="100%" height={280}>
@@ -52,8 +52,8 @@ const JobActivityChart: React.FC<JobActivityChartProps> = ({ data }) => {
               tick={{ fill: "#9CA3AF", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
-              domain={[0, 600]}
-              ticks={[0, 100, 200, 300, 400, 500, 600]}
+              domain={[0, 50]}
+              ticks={[0, 10, 20, 30, 40, 50]}
               tickMargin={10}
             />
             <Legend
