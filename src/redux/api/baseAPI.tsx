@@ -38,6 +38,7 @@ const baseAPI = createApi({
     "ReportModule",
     "Overview",
     "Client",
+    "Technician",
   ],
   endpoints: () => ({}),
 });

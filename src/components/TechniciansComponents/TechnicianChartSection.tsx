@@ -7,39 +7,41 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from "recharts";
+import { TechnicianDashboardData } from "@/redux/features/adminFeatures/technicianAPI";
 
-const TechnicianChartSection: React.FC = () => {
-  // Weekly performance data (example). Replace with real data as needed.
-  const weeklyData = [
-    { day: "Mon", value: 120 },
-    { day: "Tue", value: 95 },
-    { day: "Wed", value: 130 },
-    { day: "Thu", value: 80 },
-    { day: "Fri", value: 105 },
-    { day: "Sat", value: 125 },
-    { day: "Sun", value: 100 },
-  ];
+interface TechnicianChartSectionProps {
+  data: TechnicianDashboardData;
+}
 
-  // Job type distribution data - matches the 560 total shown in image
+const TechnicianChartSection: React.FC<TechnicianChartSectionProps> = ({ data }) => {
+  const { performance_analytics, stats } = data;
+
+  // Transform weekly bars to recharts format
+  const weeklyData = performance_analytics.bars.map((bar) => ({
+    day: bar.day,
+    value: bar.installations + bar.repairs + bar.maintenances,
+    // Store original values for potential use in tooltip
+    installations: bar.installations,
+    repairs: bar.repairs,
+    maintenances: bar.maintenances,
+  }));
+
+  // Job type distribution data for Pie Chart
   const jobTypeData = [
-    { name: "Installations", value: 280 },
-    { name: "Repair", value: 180 },
-    { name: "Retention", value: 100 },
-  ];
+    { name: "Installations", value: stats.job_type_distribution_this_week.installations },
+    { name: "Repairs", value: stats.job_type_distribution_this_week.repairs },
+    { name: "Maintenances", value: stats.job_type_distribution_this_week.maintenances },
+  ].filter(item => item.value > 0);
 
   const COLORS = ["#b91c1c", "#6b4423", "#4a90c9"];
 
-  // Use technician details for summary data
-
   return (
-    <div className="bg-white flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
+    <div className="bg-white flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch pt-4">
       {/* Left Section: Performance Analytics */}
       <div className="flex-1 min-w-0 border border-gray-200 rounded-lg p-4 sm:p-6">
         <h3 className="text-sm sm:text-base font-semibold text-slate-700 mb-4 sm:mb-6">
@@ -68,20 +70,19 @@ const TechnicianChartSection: React.FC = () => {
                 tick={{ fontSize: 11, fill: "#6b7280" }}
                 axisLine={false}
                 tickLine={false}
-                domain={[0, 170]}
               />
 
               <Bar
                 dataKey="value"
                 fill="#d1d5db"
                 radius={[6, 6, 6, 6]}
-                isAnimationActive={false}
+                isAnimationActive={true}
                 maxBarSize={20}
               >
                 {weeklyData.map((entry, index) => (
                   <Cell
                     key={`cell-${index}`}
-                    fill={index === 2 ? "#b91c1c" : "#d1d5db"}
+                    fill={entry.value > 0 ? "#b91c1c" : "#d1d5db"}
                   />
                 ))}
               </Bar>
@@ -105,7 +106,7 @@ const TechnicianChartSection: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={jobTypeData}
+                  data={jobTypeData.length > 0 ? jobTypeData : [{ name: "None", value: 1 }]}
                   innerRadius={55}
                   outerRadius={85}
                   startAngle={90}
@@ -113,12 +114,16 @@ const TechnicianChartSection: React.FC = () => {
                   dataKey="value"
                   strokeWidth={0}
                 >
-                  {jobTypeData.map((entry, index) => (
-                    <Cell
-                      key={`slice-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
+                  {jobTypeData.length > 0 ? (
+                    jobTypeData.map((entry, index) => (
+                      <Cell
+                        key={`slice-${index}`}
+                        fill={COLORS[index % COLORS.length]}
+                      />
+                    ))
+                  ) : (
+                    <Cell fill="#f3f4f6" />
+                  )}
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
@@ -127,24 +132,28 @@ const TechnicianChartSection: React.FC = () => {
           {/* Center Value */}
           <div className="absolute text-center pointer-events-none">
             <div className="text-3xl sm:text-4xl font-bold text-slate-800">
-              560
+              {stats.job_type_distribution_this_week.total}
             </div>
+            <div className="text-[10px] text-gray-400 uppercase">Total</div>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex  gap-2 sm:gap-3">
+        <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
           {jobTypeData.map((d, i) => (
-            <div key={d.name} className="flex items-center gap-3">
+            <div key={d.name} className="flex items-center gap-2">
               <span
-                style={{ backgroundColor: COLORS[i] }}
+                style={{ backgroundColor: COLORS[i % COLORS.length] }}
                 className="w-2.5 h-2.5 rounded-full shrink-0"
               />
-              <span className="text-xs sm:text-sm text-slate-600">
-                {d.name}
+              <span className="text-xs text-slate-600">
+                {d.name}: {d.value}
               </span>
             </div>
           ))}
+          {jobTypeData.length === 0 && (
+            <span className="text-xs text-slate-400 italic">No jobs this week</span>
+          )}
         </div>
       </div>
     </div>

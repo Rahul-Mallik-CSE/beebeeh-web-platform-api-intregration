@@ -3,17 +3,22 @@
 import TechnicianChartSection from "@/components/TechniciansComponents/TechnicianChartSection";
 import TechnicianDetailsSection from "@/components/TechniciansComponents/TechnicianDetailsSection";
 import TechnicianDetailsTableSection from "@/components/TechniciansComponents/TechnicianDetailsTableSection";
+import TechnicianDetailsSkeleton from "@/components/TechniciansComponents/TechnicianDetailsSkeleton";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Eye } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import React, { useState } from "react";
 import AssignJobModal from "@/components/CommonComponents/AssignJobModal";
+import { useGetTechnicianDashboardQuery } from "@/redux/features/adminFeatures/technicianAPI";
 
 const TechnicianDetailsPage = () => {
   const router = useRouter();
   const params = useParams();
   const technicianId = params["technician-id"] as string;
   const [isAssignJobModalOpen, setIsAssignJobModalOpen] = useState(false);
+
+  // Fetch technician dashboard data
+  const { data: dashboardResponse, isLoading, error, refetch } = useGetTechnicianDashboardQuery(technicianId);
 
   const handleViewCalendar = () => {
     router.push(`/technicians/${technicianId}/technician-calendar`);
@@ -22,6 +27,40 @@ const TechnicianDetailsPage = () => {
   const handleAssignJob = () => {
     setIsAssignJobModalOpen(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="w-full p-2 sm:p-4 overflow-x-hidden">
+        <div className="max-w-[2500px] rounded-2xl mx-auto space-y-3 sm:space-y-4">
+          <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <button onClick={() => router.back()} className="p-2">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+              </div>
+            </div>
+            <TechnicianDetailsSkeleton />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !dashboardResponse?.data) {
+    return (
+      <div className="w-full p-2 sm:p-4 text-center">
+        <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md mx-auto">
+          <p className="text-red-600 mb-4">Failed to load technician details.</p>
+          <Button onClick={() => refetch()} variant="outline">Retry</Button>
+          <Button onClick={() => router.back()} variant="ghost" className="ml-2">Go Back</Button>
+        </div>
+      </div>
+    );
+  }
+
+  const dashboardData = dashboardResponse.data;
 
   return (
     <div className="w-full p-2 sm:p-4 overflow-x-hidden">
@@ -41,7 +80,6 @@ const TechnicianDetailsPage = () => {
               </span>
             </div>
             <div className="w-full sm:w-auto">
-              {/* Action buttons can be added here */}
               <Button
                 onClick={handleViewCalendar}
                 className="w-full sm:w-auto bg-red-800 hover:bg-red-700 text-white flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2"
@@ -53,11 +91,18 @@ const TechnicianDetailsPage = () => {
           </div>
 
           {/* Technician data section */}
-          <TechnicianDetailsSection onAssignJob={handleAssignJob} />
+          <TechnicianDetailsSection 
+            data={dashboardData} 
+            onAssignJob={handleAssignJob} 
+            onEdit={() => console.log("Edit")} 
+          />
 
-          <TechnicianChartSection />
+          <TechnicianChartSection data={dashboardData} />
 
-          <TechnicianDetailsTableSection />
+          <TechnicianDetailsTableSection 
+            todaysJobs={dashboardData.tables.todays_jobs}
+            fullJobHistory={dashboardData.tables.full_job_history}
+          />
         </div>
       </div>
 
@@ -66,7 +111,7 @@ const TechnicianDetailsPage = () => {
         isOpen={isAssignJobModalOpen}
         onClose={() => setIsAssignJobModalOpen(false)}
         technicianId={technicianId}
-        technicianName="Malik Rehman"
+        technicianName={dashboardData.technician.full_name}
       />
     </div>
   );
