@@ -178,7 +178,7 @@ const JobDetailsPage = ({
   const jobStatus = jobData?.header_summary.status;
 
   // Determine which buttons to show based on status
-  const showRescheduleAndCancel = ["assign", "cancel", "rescheduled"].includes(
+  const showRescheduleAndCancel = ["pending", "cancel", "rescheduled"].includes(
     jobStatus || "",
   );
   const showCancelOnly = jobStatus === "in_progress";
