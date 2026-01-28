@@ -21,12 +21,15 @@ const OverviewPage = () => {
     limit: 10,
     ...(filters.idSort && { order_dir: filters.idSort }),
     ...(filters.statusFilter && { status: filters.statusFilter.toLowerCase() }),
-    ...(filters.jobTypeFilter && { type: filters.jobTypeFilter.toLowerCase() }),
+    ...(filters.jobTypeFilter && {
+      job_type: filters.jobTypeFilter.toLowerCase(),
+    }),
     ...(filters.columnFilters.find((f) => f.column === "jobId")?.value && {
       job_id: filters.columnFilters.find((f) => f.column === "jobId")?.value,
     }),
     ...(filters.columnFilters.find((f) => f.column === "client")?.value && {
-      client: filters.columnFilters.find((f) => f.column === "client")?.value,
+      client_name: filters.columnFilters.find((f) => f.column === "client")
+        ?.value,
     }),
     ...(filters.columnFilters.find((f) => f.column === "technician")?.value && {
       technician: filters.columnFilters.find((f) => f.column === "technician")
