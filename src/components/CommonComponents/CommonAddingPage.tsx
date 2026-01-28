@@ -23,6 +23,7 @@ import {
   ProductAutocompleteItem,
   TechnicianAutocompleteItem,
 } from "@/redux/features/adminFeatures/installationAPI";
+import { useAddRepairMutation } from "@/redux/features/adminFeatures/repairsAPI";
 
 interface CommonAddingPageProps {
   title: string;
@@ -100,6 +101,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
 
   const [addInstallation, { isLoading: isSubmitting }] =
     useAddInstallationMutation();
+  const [addRepair, { isLoading: isSubmittingRepair }] = useAddRepairMutation();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -232,6 +234,51 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         toast.error("Notes are required.");
         return false;
       }
+    } else if (isRepairs) {
+      if (!formData.clientId.trim()) {
+        toast.error("Please select a client.");
+        return false;
+      }
+      if (!formData.clientName.trim()) {
+        toast.error("Client name is required.");
+        return false;
+      }
+      if (!formData.productId.trim()) {
+        toast.error("Please select a product.");
+        return false;
+      }
+      if (!formData.productModel.trim()) {
+        toast.error("Product model is required.");
+        return false;
+      }
+      if (!formData.technicianId.trim()) {
+        toast.error("Please select a technician.");
+        return false;
+      }
+      if (!formData.technicianName.trim()) {
+        toast.error("Technician name is required.");
+        return false;
+      }
+      if (!formData.date) {
+        toast.error("Please select a date.");
+        return false;
+      }
+      if (!formData.time) {
+        toast.error("Please select a time.");
+        return false;
+      }
+      if (!formData.priority) {
+        toast.error("Please select a priority.");
+        return false;
+      }
+      if (!formData.problemType) {
+        toast.error("Please select a problem type.");
+        return false;
+      }
+      if (!formData.problemDescription.trim()) {
+        toast.error("Problem description is required.");
+        return false;
+      }
     }
     return true;
   };
@@ -267,6 +314,39 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         toast.error(
           error?.data?.message ||
             "Failed to add installation. Please try again.",
+        );
+      }
+    } else if (isRepairs) {
+      try {
+        const repairData = {
+          client_id: formData.clientId,
+          client_name: formData.clientName,
+          product_id: formData.productId,
+          model_name: formData.productModel,
+          technician_id: formData.technicianId,
+          technician_name: formData.technicianName,
+          scheduled_date: formData.date,
+          scheduled_time: formData.time,
+          priority: formData.priority as "low" | "medium" | "high",
+          problem_type: formData.problemType as
+            | "cooling_issue"
+            | "noise_gas"
+            | "electrical"
+            | "other",
+          problem_description: formData.problemDescription,
+        };
+
+        await addRepair(repairData).unwrap();
+        toast.success("Repair added successfully!");
+
+        if (onSubmit) {
+          onSubmit(formData);
+        } else {
+          router.push("/repairs");
+        }
+      } catch (error: any) {
+        toast.error(
+          error?.data?.message || "Failed to add repair. Please try again.",
         );
       }
     } else {
@@ -423,6 +503,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
                 value={formData.productModel}
                 onChange={(e) => handleChange("productModel", e.target.value)}
                 className="w-full pr-10"
+                disabled
               />
               <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
@@ -578,9 +659,9 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
                   <SelectValue placeholder="select problem type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="electrical">Cooling issue</SelectItem>
-                  <SelectItem value="mechanical">Noise, Gas</SelectItem>
-                  <SelectItem value="software">Electrical</SelectItem>
+                  <SelectItem value="cooling_issue">Cooling issue</SelectItem>
+                  <SelectItem value="noise_gas">Noise, Gas</SelectItem>
+                  <SelectItem value="electrical">Electrical</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -595,8 +676,8 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
             <Textarea
               placeholder={
                 isRepairs || isMaintenance
-                  ? "enter problem description"
-                  : "enter installation job note"
+                  ? "Enter problem description"
+                  : "Enter installation job note"
               }
               value={
                 isRepairs || isMaintenance
@@ -626,10 +707,10 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         </Button>
         <Button
           onClick={handleSubmit}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isSubmittingRepair}
           className="w-full sm:w-auto px-8 sm:px-12 py-2 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white disabled:opacity-50"
         >
-          {isSubmitting ? "Creating..." : "Create Job"}
+          {isSubmitting || isSubmittingRepair ? "Creating..." : "Create Job"}
         </Button>
       </div>
     </div>

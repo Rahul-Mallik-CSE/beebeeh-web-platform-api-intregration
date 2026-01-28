@@ -8,13 +8,13 @@ const AddRepairs = () => {
   const router = useRouter();
 
   const handleSubmit = (data: any) => {
-    console.log("Installation data:", data);
+    console.log("Repair data:", data);
     // Handle form submission here
-    router.push("/installation");
+    router.push("/repairs");
   };
 
   const handleCancel = () => {
-    router.push("/installation");
+    router.push("/repairs");
   };
 
   return (
