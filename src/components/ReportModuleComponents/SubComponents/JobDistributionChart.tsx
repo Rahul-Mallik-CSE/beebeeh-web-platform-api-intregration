@@ -2,9 +2,39 @@
 "use client";
 import React from "react";
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
-import { jobDistributionData } from "@/data/ReportModuleData";
+import { JobDistribution } from "@/redux/features/adminFeatures/reportmoduleAPI";
 
-const JobDistributionChart = () => {
+interface JobDistributionChartProps {
+  data?: JobDistribution;
+}
+
+const JobDistributionChart: React.FC<JobDistributionChartProps> = ({
+  data,
+}) => {
+  // Transform API data to chart format
+  const chartData = data
+    ? [
+        {
+          name: "Installation",
+          value: data.installation,
+          percentage: data.installation,
+          color: "#B91C1C",
+        },
+        {
+          name: "Repair",
+          value: data.repair,
+          percentage: data.repair,
+          color: "#E9C8C8",
+        },
+        {
+          name: "Maintenance",
+          value: data.maintenance,
+          percentage: data.maintenance,
+          color: "#7C3434",
+        },
+      ]
+    : [];
+
   const renderCustomLabel = (entry: any) => {
     const RADIAN = Math.PI / 180;
     const radius = entry.outerRadius * 0.65;
@@ -39,7 +69,7 @@ const JobDistributionChart = () => {
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
-              data={jobDistributionData}
+              data={chartData}
               cx="50%"
               cy="50%"
               labelLine={false}
@@ -51,7 +81,7 @@ const JobDistributionChart = () => {
               startAngle={90}
               endAngle={450}
             >
-              {jobDistributionData.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={entry.color}

@@ -10,21 +10,32 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { weeklyJobActivityData } from "@/data/ReportModuleData";
+import { WeeklyJobActivity } from "@/redux/features/adminFeatures/reportmoduleAPI";
 
-const JobActivityChart = () => {
+interface JobActivityChartProps {
+  data?: WeeklyJobActivity[];
+}
+
+const JobActivityChart: React.FC<JobActivityChartProps> = ({ data }) => {
+  // Transform API data to chart format
+  const chartData =
+    data?.map((item) => ({
+      day: new Date(item.date).toLocaleDateString("en-US", {
+        weekday: "short",
+      }),
+      installation: item.installation,
+      maintenance: item.maintenance,
+      repair: item.repair,
+    })) || [];
+
   return (
     <div className="bg-transparent">
       <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#535F72] mb-3 sm:mb-4">
-        Weekly Jobs Activity
+        Jobs Activity
       </h2>
       <div className="bg-white rounded-2xl py-4 sm:py-6 shadow-sm px-2 sm:px-0">
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart
-            data={weeklyJobActivityData}
-            barCategoryGap="20%"
-            barGap={3}
-          >
+          <BarChart data={chartData} barCategoryGap="20%" barGap={3}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="#e5e7eb"
