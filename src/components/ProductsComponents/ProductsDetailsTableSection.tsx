@@ -2,37 +2,61 @@
 "use client";
 import React, { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { productDetailsData } from "@/data/ProductsData";
 import { Button } from "@/components/ui/button";
-import { PartInventory, FrequentPart, RelatedJob } from "@/types/ProductsTypes";
+import { 
+  ProductDetailData, 
+  ChecklistItem, 
+  RelatedJob, 
+  PartInventoryStatus, 
+  FrequentlyUsedPart,
+  useAddInstallationChecklistMutation,
+  useAddMaintenanceChecklistMutation 
+} from "@/redux/features/adminFeatures/productsAPI";
 import AddCheckListModal from "./AddCheckListModal";
+import { toast } from "react-toastify";
 
-const ProductsDetailsTableSection = () => {
-  const product = productDetailsData["1"];
+interface ProductsDetailsTableSectionProps {
+  product: ProductDetailData;
+}
+
+const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = ({ product }) => {
   const [isInstallationModalOpen, setIsInstallationModalOpen] = useState(false);
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
 
-  const handleAddInstallationTask = (task: string) => {
-    console.log("Adding installation task:", task);
-    // Add logic to update installation checklist
+  const [addInstallationTask] = useAddInstallationChecklistMutation();
+  const [addMaintenanceTask] = useAddMaintenanceChecklistMutation();
+
+  const handleAddInstallationTask = async (task: string) => {
+    try {
+      await addInstallationTask({ productId: product.product_id, task }).unwrap();
+      toast.success("Installation task added successfully");
+      setIsInstallationModalOpen(false);
+    } catch (error) {
+      toast.error("Failed to add installation task");
+    }
   };
 
-  const handleAddMaintenanceTask = (task: string) => {
-    console.log("Adding maintenance task:", task);
-    // Add logic to update maintenance checklist
+  const handleAddMaintenanceTask = async (task: string) => {
+    try {
+      await addMaintenanceTask({ productId: product.product_id, task }).unwrap();
+      toast.success("Maintenance task added successfully");
+      setIsMaintenanceModalOpen(false);
+    } catch (error) {
+      toast.error("Failed to add maintenance task");
+    }
   };
 
-  // Installation Checklist Columns
-  const installationColumns = [
+  // Checklist Columns
+  const checklistColumns = [
     {
       header: "Step",
-      accessor: (row: any) => row.id,
+      accessor: "step" as keyof ChecklistItem,
       className: "w-20",
     },
     {
       header: "Check List",
-      accessor: (row: any) => row.task,
-      className: "w-full text-right",
+      accessor: "task" as keyof ChecklistItem,
+      className: "w-full text-right capitalize",
     },
   ];
 
@@ -40,31 +64,34 @@ const ProductsDetailsTableSection = () => {
   const partsInventoryColumns = [
     {
       header: "Part ID",
-      accessor: (row: PartInventory) => row.partId,
+      accessor: "part_id" as keyof PartInventoryStatus,
     },
     {
       header: "Part Name",
-      accessor: (row: PartInventory) => row.partName,
+      accessor: "part_name" as keyof PartInventoryStatus,
     },
     {
-      header: "Availability",
-      accessor: (row: PartInventory) => row.availability,
+      header: "Available Units",
+      accessor: "available_units" as keyof PartInventoryStatus,
     },
     {
       header: "Status",
-      className: " text-right",
-      accessor: (row: PartInventory) => {
-        const statusColors = {
-          Available: "bg-green-100 text-green-700",
-          "Low Stock": "bg-yellow-100 text-yellow-700",
-          "Out of Stock": "bg-red-100 text-red-700",
+      className: "text-right",
+      accessor: (row: PartInventoryStatus) => {
+        const getStatusColor = (status: string) => {
+          switch (status.toLowerCase()) {
+            case "in stock":
+              return "bg-green-100 text-green-700";
+            case "low stock":
+              return "bg-yellow-100 text-yellow-700";
+            case "out of stock":
+              return "bg-red-100 text-red-700";
+            default:
+              return "bg-gray-100 text-gray-700";
+          }
         };
         return (
-          <span
-            className={`px-2 sm:px-3 py-1 rounded-md text-xs font-medium ${
-              statusColors[row.status]
-            }`}
-          >
+          <span className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}>
             {row.status}
           </span>
         );
@@ -76,20 +103,20 @@ const ProductsDetailsTableSection = () => {
   const frequentPartsColumns = [
     {
       header: "Part ID",
-      accessor: (row: FrequentPart) => row.partId,
+      accessor: "part_id" as keyof FrequentlyUsedPart,
     },
     {
       header: "Part Name",
-      accessor: (row: FrequentPart) => row.partName,
+      accessor: "part_name" as keyof FrequentlyUsedPart,
     },
     {
-      header: "Units",
-      accessor: (row: FrequentPart) => row.units,
+      header: "Unit",
+      accessor: "unit" as keyof FrequentlyUsedPart,
     },
     {
       header: "Used Stock",
-      className: " text-right",
-      accessor: (row: FrequentPart) => row.quantity,
+      className: "text-right",
+      accessor: "used_stock" as keyof FrequentlyUsedPart,
     },
   ];
 
@@ -97,42 +124,50 @@ const ProductsDetailsTableSection = () => {
   const relatedJobsColumns = [
     {
       header: "Job ID",
-      accessor: (row: RelatedJob) => row.jobId,
+      accessor: "job_id" as keyof RelatedJob,
     },
     {
       header: "Client",
-      accessor: (row: RelatedJob) => row.client,
+      accessor: "client" as keyof RelatedJob,
     },
     {
       header: "Type",
-      accessor: (row: RelatedJob) => row.type,
+      accessor: (row: RelatedJob) => (
+        <span className="capitalize">{row.type}</span>
+      ),
     },
     {
       header: "Technician",
-      accessor: (row: RelatedJob) => row.technician,
+      accessor: "technician" as keyof RelatedJob,
     },
     {
-      header: "Criteria Date",
-      accessor: (row: RelatedJob) => row.criteriaDate,
-    },
-    {
-      header: "Complete Date",
-      accessor: (row: RelatedJob) => row.completeDate,
+      header: "Order Date",
+      accessor: "order_by_date" as keyof RelatedJob,
     },
     {
       header: "Status",
+      className: "text-right",
       accessor: (row: RelatedJob) => {
-        const statusColors = {
-          Work: "bg-blue-100 text-blue-700",
-          Done: "bg-green-100 text-green-700",
-          Pending: "bg-yellow-100 text-yellow-700",
+        const getStatusColor = (status: string) => {
+          switch (status.toLowerCase()) {
+            case "complete":
+            case "completed":
+              return "bg-green-100 text-green-700";
+            case "assign":
+            case "in progress":
+            case "in_progress":
+              return "bg-blue-100 text-blue-700";
+            case "rescheduled":
+              return "bg-amber-100 text-amber-700";
+            case "cancel":
+            case "cancelled":
+              return "bg-red-100 text-red-700";
+            default:
+              return "bg-gray-100 text-gray-700";
+          }
         };
         return (
-          <span
-            className={`px-2 sm:px-3 py-1 rounded-md text-xs font-medium ${
-              statusColors[row.status]
-            }`}
-          >
+          <span className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}>
             {row.status}
           </span>
         );
@@ -147,22 +182,22 @@ const ProductsDetailsTableSection = () => {
         {/* Installation Checklist */}
         <div className="space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-600">
+            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-700">
               Installation Checklist
             </h3>
             <Button
               onClick={() => setIsInstallationModalOpen(true)}
               variant="ghost"
               size="sm"
-              className="text-[10px] xs:text-xs sm:text-sm md:text-base h-7 sm:h-8 md:h-9 px-1.5 xs:px-2 sm:px-3 bg-transparent border-none text-red-800 hover:text-red-700 hover:bg-transparent"
+              className="text-xs sm:text-sm h-8 px-3 text-red-800 hover:text-red-700 hover:bg-red-50"
             >
               Add Checklist
             </Button>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <CustomTable
-              data={product.installationChecklist}
-              columns={installationColumns}
+              data={product.installation_checklist}
+              columns={checklistColumns}
               itemsPerPage={6}
             />
           </div>
@@ -171,22 +206,22 @@ const ProductsDetailsTableSection = () => {
         {/* Maintenance Checklist */}
         <div className="space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-600">
+            <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-700">
               Maintenance Checklist
             </h3>
             <Button
               onClick={() => setIsMaintenanceModalOpen(true)}
               variant="ghost"
               size="sm"
-              className="text-[10px] xs:text-xs sm:text-sm md:text-base h-7 sm:h-8 md:h-9 px-1.5 xs:px-2 sm:px-3 bg-transparent border-none text-red-800 hover:text-red-700 hover:bg-transparent"
+              className="text-xs sm:text-sm h-8 px-3 text-red-800 hover:text-red-700 hover:bg-red-50"
             >
               Add Checklist
             </Button>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
             <CustomTable
-              data={product.maintenanceChecklist}
-              columns={installationColumns}
+              data={product.maintenance_checklist}
+              columns={checklistColumns}
               itemsPerPage={6}
             />
           </div>
@@ -195,44 +230,38 @@ const ProductsDetailsTableSection = () => {
 
       {/* All Parts Inventory Status */}
       <div className="space-y-3 border border-gray-200 rounded-lg p-3 sm:p-4 md:p-6 bg-white">
-        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-600">
+        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-700">
           All Parts Inventory Status
         </h3>
-        <div className="bg-white ">
-          <CustomTable
-            data={product.partsInventory}
-            columns={partsInventoryColumns}
-            itemsPerPage={5}
-          />
-        </div>
+        <CustomTable
+          data={product.all_parts_inventory_status}
+          columns={partsInventoryColumns}
+          itemsPerPage={5}
+        />
       </div>
 
       {/* Frequently Used Parts */}
       <div className="space-y-3 border border-gray-200 rounded-lg p-3 sm:p-4 md:p-6 bg-white">
-        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-600">
+        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-700">
           Frequently Used Parts
         </h3>
-        <div className="bg-white ">
-          <CustomTable
-            data={product.frequentlyUsedParts}
-            columns={frequentPartsColumns}
-            itemsPerPage={5}
-          />
-        </div>
+        <CustomTable
+          data={product.frequently_used_parts}
+          columns={frequentPartsColumns}
+          itemsPerPage={5}
+        />
       </div>
 
       {/* Related Jobs */}
       <div className="space-y-3 border border-gray-200 rounded-lg p-3 sm:p-4 md:p-6 bg-white">
-        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-600">
+        <h3 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold text-gray-700">
           Related Jobs
         </h3>
-        <div className="bg-white ">
-          <CustomTable
-            data={product.relatedJobs}
-            columns={relatedJobsColumns}
-            itemsPerPage={5}
-          />
-        </div>
+        <CustomTable
+          data={product.related_jobs}
+          columns={relatedJobsColumns}
+          itemsPerPage={5}
+        />
       </div>
 
       {/* Modals */}
@@ -251,4 +280,3 @@ const ProductsDetailsTableSection = () => {
 };
 
 export default ProductsDetailsTableSection;
-        
