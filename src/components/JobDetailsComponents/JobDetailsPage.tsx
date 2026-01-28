@@ -13,6 +13,8 @@ import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
 import Image from "next/image";
 import { useGetJobDetailsQuery } from "@/redux/features/adminFeatures/jobDetailsAPI";
+import { getImageFullUrl } from "@/lib/utils";
+import { get } from "http";
 
 interface JobDetailsPageProps {
   jobId: string;
@@ -109,7 +111,7 @@ const JobDetailsPage = ({
             ? "Complete"
             : jobStatus === "in_progress"
               ? "In Progress"
-              : jobStatus === "assign"
+              : jobStatus === "pending"
                 ? "Assign"
                 : jobStatus === "cancel"
                   ? "Cancel"
@@ -165,14 +167,19 @@ const JobDetailsPage = ({
                       Before Image
                     </p>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl  flex flex-col items-center justify-center h-64">
-                      {staticImages.beforeImage && (
+                      {jobData?.image_section.before_images ? (
                         <Image
-                          src={staticImages.beforeImage}
+                          src={getImageFullUrl(
+                            jobData.image_section.before_images[0] || "",
+                          )}
                           alt="preview"
                           width={600}
                           height={400}
                           className="w-full h-full object-cover rounded"
+                          unoptimized
                         />
+                      ) : (
+                        <p>Wait for image upload..</p>
                       )}
                     </div>
                   </div>
@@ -183,14 +190,19 @@ const JobDetailsPage = ({
                       After Image
                     </p>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl  flex flex-col items-center justify-center h-64">
-                      {staticImages.afterImage && (
+                      {jobData?.image_section.after_images ? (
                         <Image
-                          src={staticImages.afterImage}
+                          src={getImageFullUrl(
+                            jobData.image_section.after_images[0] || "",
+                          )}
                           alt="preview"
                           width={600}
                           height={400}
                           className="w-full h-full object-cover rounded"
+                          unoptimized
                         />
+                      ) : (
+                        <p>Wait for image upload..</p>
                       )}
                     </div>
                   </div>
@@ -259,11 +271,14 @@ const JobDetailsPage = ({
                   <div className="space-y-4">
                     <div className="border-2 border-dashed border-gray-300 rounded-lg h-16 flex items-center justify-center">
                       <Image
-                        src={staticImages.signatureImage}
+                        src={getImageFullUrl(
+                          jobData?.customer_signature.signature_files[0] || "",
+                        )}
                         alt="Customer signature"
                         width={400}
                         height={128}
                         className="max-h-full max-w-full object-contain"
+                        unoptimized
                       />
                     </div>
                     <div className="border border-black w-full"></div>
