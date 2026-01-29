@@ -85,6 +85,12 @@ export interface GetPartDetailsResponse {
   requestId: string;
 }
 
+export interface DeletePartResponse {
+  success: boolean;
+  message: string;
+  requestId: string;
+}
+
 const partsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     autocompleteProducts: builder.query<AutocompleteProductsResponse, string>({
@@ -139,6 +145,13 @@ const partsAPI = baseApi.injectEndpoints({
       }),
       providesTags: ["Part"],
     }),
+    deletePart: builder.mutation<DeletePartResponse, string>({
+      query: (partId) => ({
+        url: `/api/parts/${partId}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Part"],
+    }),
   }),
 });
 
@@ -148,4 +161,5 @@ export const {
   useGetPartsQuery,
   useSearchPartsQuery,
   useGetPartDetailsQuery,
+  useDeletePartMutation,
 } = partsAPI;

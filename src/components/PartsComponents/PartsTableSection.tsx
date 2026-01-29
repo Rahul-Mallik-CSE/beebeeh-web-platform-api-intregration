@@ -10,7 +10,19 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPartsModal from "./AddPartsModal";
+import { toast } from "react-toastify";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  useDeletePartMutation,
   useGetPartsQuery,
   useSearchPartsQuery,
 } from "@/redux/features/adminFeatures/partsAPI";
@@ -19,6 +31,10 @@ const PartsTableSection = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddPartModalOpen, setIsAddPartModalOpen] = useState(false);
+  const [deletePartId, setDeletePartId] = useState<string | null>(null);
+
+  // Delete mutation
+  const [deletePart, { isLoading: isDeleting }] = useDeletePartMutation();
 
   const queryParams = { page: 1, limit: 1000 };
 
@@ -45,6 +61,18 @@ const PartsTableSection = () => {
     router.push(`/parts/${part.part_id}`);
   };
 
+  const handleDeletePart = async () => {
+    if (!deletePartId) return;
+
+    try {
+      await deletePart(deletePartId).unwrap();
+      toast.success("Part deleted successfully");
+      setDeletePartId(null);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to delete part");
+    }
+  };
+
   const columnsWithActions = [
     ...partsColumns,
     {
@@ -58,7 +86,7 @@ const PartsTableSection = () => {
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
           <button
-            onClick={() => console.log("Delete", row.part_id)}
+            onClick={() => setDeletePartId(row.part_id)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
           >
             <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
@@ -108,6 +136,32 @@ const PartsTableSection = () => {
         onClose={() => setIsAddPartModalOpen(false)}
         onSave={handleAddPart}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!deletePartId}
+        onOpenChange={() => setDeletePartId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Part</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this part? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeletePart}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
