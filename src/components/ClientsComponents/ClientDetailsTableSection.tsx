@@ -2,8 +2,6 @@
 "use client";
 import React, { useMemo } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { useRouter } from "next/navigation";
-import { Eye } from "lucide-react";
 import { JobHistoryItem } from "@/redux/features/adminFeatures/clientsAPI";
 
 interface ClientDetailsTableSectionProps {
@@ -22,21 +20,6 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
   jobHistory,
   jobHistoryMeta,
 }) => {
-  const router = useRouter();
-
-  const handleViewJob = (job: JobHistoryItem) => {
-    // Navigate to job details based on job type
-    let jobType = job.type.toLowerCase();
-
-    // Map job types to their respective route paths
-    // The repairs route is plural, while others are singular
-    if (jobType === "repairing" || jobType === "repair") {
-      jobType = "repairs";
-    }
-
-    router.push(`/${jobType}/${job.job_id}`);
-  };
-
   // Filter data based on service status (if needed in future)
   const filteredData = useMemo(() => {
     return jobHistory || [];
@@ -70,21 +53,6 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
       header: "Complete Date",
       accessor: "complete_date" as keyof JobHistoryItem,
     },
-    {
-      header: "Action",
-      accessor: (row: JobHistoryItem) => (
-        <div className="flex items-center justify-end gap-2">
-          <button
-            onClick={() => handleViewJob(row)}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            title="View Job Details"
-          >
-            <Eye className="w-5 h-5 text-gray-600" />
-          </button>
-        </div>
-      ),
-      className: "text-right",
-    },
   ];
 
   return (
@@ -98,6 +66,8 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
         data={filteredData}
         columns={columnsWithActions}
         itemsPerPage={10}
+        showFilter={false}
+        showActions={false}
       />
     </div>
   );
