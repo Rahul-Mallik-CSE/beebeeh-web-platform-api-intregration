@@ -89,7 +89,7 @@ const RepairsTableSection: React.FC<RepairsTableSectionProps> = ({
           >
             <Eye className="w-4 h-4 text-gray-600" />
           </button>
-          {row.status === "Assign" && (
+          {/* {row.status === "Assign" && (
             <button
               onClick={() => {
                 setSelectedJobId(row.jobId);
@@ -99,7 +99,7 @@ const RepairsTableSection: React.FC<RepairsTableSectionProps> = ({
             >
               <Plus className="w-4 h-4 text-gray-600" />
             </button>
-          )}
+          )} */}
         </div>
       ),
       className: "text-center",
