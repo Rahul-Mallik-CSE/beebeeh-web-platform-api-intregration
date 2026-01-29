@@ -138,7 +138,7 @@ const TechnicianDetailsPage = () => {
                 Technician Details
               </span>
             </div>
-            <div className="w-full sm:w-auto">
+            {/* <div className="w-full sm:w-auto">
               <Button
                 onClick={handleViewCalendar}
                 className="w-full sm:w-auto bg-red-800 hover:bg-red-700 text-white flex items-center justify-center gap-1.5 sm:gap-2 text-xs sm:text-sm px-3 sm:px-4 py-2"
@@ -146,7 +146,7 @@ const TechnicianDetailsPage = () => {
                 <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span className="whitespace-nowrap">View Calendar</span>
               </Button>
-            </div>
+            </div> */}
           </div>
 
           {/* Technician data section */}
