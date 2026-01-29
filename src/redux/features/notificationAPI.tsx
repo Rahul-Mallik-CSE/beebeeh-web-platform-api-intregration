@@ -27,6 +27,7 @@ const notificationAPI = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
+      providesTags: ["Notification"],
     }),
   }),
 });

@@ -80,6 +80,7 @@ const maintenanceAPI = baseApi.injectEndpoints({
         method: "POST",
         body: maintenanceData,
       }),
+      invalidatesTags: ["Maintenance"],
     }),
 
     // Get maintenance
@@ -89,6 +90,7 @@ const maintenanceAPI = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
+      providesTags: ["Maintenance"],
     }),
   }),
 });

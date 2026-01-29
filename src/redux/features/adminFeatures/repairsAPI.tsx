@@ -80,6 +80,7 @@ const repairsAPI = baseApi.injectEndpoints({
         method: "POST",
         body: repairData,
       }),
+      invalidatesTags: ["Repair"],
     }),
 
     // Get repairs
@@ -89,6 +90,7 @@ const repairsAPI = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
+      providesTags: ["Repair"],
     }),
   }),
 });

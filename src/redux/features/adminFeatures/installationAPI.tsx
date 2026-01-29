@@ -152,6 +152,7 @@ const installationAPI = baseApi.injectEndpoints({
         method: "POST",
         body: installationData,
       }),
+      invalidatesTags: ["Installation"],
     }),
 
     // Get installations
@@ -164,6 +165,7 @@ const installationAPI = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
+      providesTags: ["Installation"],
     }),
   }),
 });

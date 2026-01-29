@@ -40,6 +40,9 @@ const baseAPI = createApi({
     "Client",
     "Technician",
     "Product",
+    "Installation",
+    "Repair",
+    "Maintenance",
   ],
   endpoints: () => ({}),
 });
