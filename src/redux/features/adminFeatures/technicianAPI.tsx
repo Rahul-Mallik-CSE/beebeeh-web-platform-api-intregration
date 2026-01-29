@@ -157,7 +157,13 @@ export interface AddTechnicianRequest {
 export interface AddTechnicianResponse {
   success: boolean;
   message: string;
-  data: any;
+
+  requestId: string;
+}
+
+export interface DeleteTechnicianResponse {
+  success: boolean;
+  message: string;
   requestId: string;
 }
 
@@ -166,7 +172,10 @@ export interface AddTechnicianResponse {
 const technicianAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all technicians with filters
-    getTechnicians: builder.query<GetTechniciansResponse, TechnicianFilters | void>({
+    getTechnicians: builder.query<
+      GetTechniciansResponse,
+      TechnicianFilters | void
+    >({
       query: (params) => {
         const queryParams = new URLSearchParams();
         if (params) {
@@ -199,12 +208,17 @@ const technicianAPI = baseApi.injectEndpoints({
     }),
 
     // Get technician dashboard
-    getTechnicianDashboard: builder.query<GetTechnicianDashboardResponse, string>({
+    getTechnicianDashboard: builder.query<
+      GetTechnicianDashboardResponse,
+      string
+    >({
       query: (technicianId) => ({
         url: `/api/technicians/${technicianId}/dashboard/`,
         method: "GET",
       }),
-      providesTags: (result, error, id) => [{ type: "Technician", id: `${id}-dashboard` }],
+      providesTags: (result, error, id) => [
+        { type: "Technician", id: `${id}-dashboard` },
+      ],
     }),
 
     // Add technician
@@ -216,6 +230,18 @@ const technicianAPI = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Technician"],
     }),
+
+    // Delete technician
+    deleteTechnician: builder.mutation<DeleteTechnicianResponse, string>({
+      query: (technicianId) => ({
+        url: `/api/technicians/${technicianId}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, technicianId) => [
+        "Technician",
+        { type: "Technician", id: technicianId },
+      ],
+    }),
   }),
 });
 
@@ -224,6 +250,7 @@ export const {
   useGetTechnicianByIdQuery,
   useGetTechnicianDashboardQuery,
   useAddTechnicianMutation,
+  useDeleteTechnicianMutation,
 } = technicianAPI;
 
 export default technicianAPI;

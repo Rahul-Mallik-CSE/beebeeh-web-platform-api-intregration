@@ -7,8 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddTechnicianModal from "./AddTechnicianModal";
-import { useGetTechniciansQuery, TechnicianListItem } from "@/redux/features/adminFeatures/technicianAPI";
+import {
+  useGetTechniciansQuery,
+  useDeleteTechnicianMutation,
+  TechnicianListItem,
+} from "@/redux/features/adminFeatures/technicianAPI";
 import TableSkeleton from "../CommonComponents/TableSkeleton";
+import { toast } from "react-toastify";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const TechniciansTableSection = () => {
   const router = useRouter();
@@ -16,16 +31,27 @@ const TechniciansTableSection = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddTechnicianModalOpen, setIsAddTechnicianModalOpen] =
     useState(false);
+  const [deleteTechnicianId, setDeleteTechnicianId] = useState<string | null>(
+    null,
+  );
 
-  const { data: techniciansResponse, isLoading, error, refetch } = useGetTechniciansQuery({
+  const {
+    data: techniciansResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetTechniciansQuery({
     page: currentPage,
     limit: 10,
     name: searchQuery,
   });
 
+  const [deleteTechnician, { isLoading: isDeleting }] =
+    useDeleteTechnicianMutation();
+
   const handleAddTechnician = () => {
     setIsAddTechnicianModalOpen(false);
-    refetch();
+    // RTK Query will automatically refetch due to invalidatesTags
   };
 
   const tableData = useMemo(() => {
@@ -35,6 +61,26 @@ const TechniciansTableSection = () => {
 
   const handleViewTechnician = (technician: TechnicianListItem) => {
     router.push(`/technicians/${technician.technician_id}`);
+  };
+
+  const handleDeleteClick = (technicianId: string) => {
+    setDeleteTechnicianId(technicianId);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTechnicianId) return;
+
+    try {
+      await deleteTechnician(deleteTechnicianId).unwrap();
+      toast.success("Technician deleted successfully!");
+      setDeleteTechnicianId(null);
+      // RTK Query will automatically refetch due to invalidatesTags
+    } catch (error: any) {
+      const errorMessage =
+        error?.data?.message ||
+        "Failed to delete technician. Please try again.";
+      toast.error(errorMessage);
+    }
   };
 
   const columns = [
@@ -55,11 +101,16 @@ const TechniciansTableSection = () => {
       accessor: (row: TechnicianListItem) => (
         <div className="flex flex-wrap gap-1">
           {row.skills.map((skill, idx) => (
-            <span key={idx} className="bg-gray-100 px-2 py-0.5 rounded text-[10px] capitalize">
+            <span
+              key={idx}
+              className="bg-gray-100 px-2 py-0.5 rounded text-[10px] capitalize"
+            >
               {skill}
             </span>
           ))}
-          {row.skills.length === 0 && <span className="text-gray-400 text-xs">No skills</span>}
+          {row.skills.length === 0 && (
+            <span className="text-gray-400 text-xs">No skills</span>
+          )}
         </div>
       ),
     },
@@ -83,7 +134,9 @@ const TechniciansTableSection = () => {
           }
         };
         return (
-          <span className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium capitalize ${getStatusColor(row.status)}`}>
+          <span
+            className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium capitalize ${getStatusColor(row.status)}`}
+          >
             {row.status}
           </span>
         );
@@ -101,7 +154,7 @@ const TechniciansTableSection = () => {
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
           <button
-            onClick={() => console.log("Delete", row.technician_id)}
+            onClick={() => handleDeleteClick(row.technician_id)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
             title="Delete Technician"
           >
@@ -117,7 +170,9 @@ const TechniciansTableSection = () => {
     return (
       <div className="w-full p-8 text-center text-red-600">
         <p>Failed to load technicians. Please try again.</p>
-        <Button onClick={() => refetch()} variant="outline" className="mt-4">Retry</Button>
+        <Button onClick={() => refetch()} variant="outline" className="mt-4">
+          Retry
+        </Button>
       </div>
     );
   }
@@ -147,7 +202,9 @@ const TechniciansTableSection = () => {
             className="bg-red-800 hover:bg-red-700 text-white flex items-center gap-1.5 sm:gap-2 text-sm px-3 sm:px-4 py-2"
           >
             <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            <span className="whitespace-nowrap font-bold">Add New Technician</span>
+            <span className="whitespace-nowrap font-bold">
+              Add New Technician
+            </span>
           </Button>
         </div>
       </div>
@@ -175,6 +232,32 @@ const TechniciansTableSection = () => {
         onOpenChange={setIsAddTechnicianModalOpen}
         onSave={handleAddTechnician}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!deleteTechnicianId}
+        onOpenChange={() => setDeleteTechnicianId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Technician</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this technician? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-500"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
