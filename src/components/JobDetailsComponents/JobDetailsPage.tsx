@@ -568,10 +568,12 @@ const JobDetailsPage = ({
                         Before Image
                       </p>
                       <div className="border-2 border-dashed border-gray-300 rounded-xl  flex flex-col items-center justify-center h-64">
-                        {jobData?.image_section.before_images ? (
+                        {jobData?.image_section.before_images &&
+                        jobData.image_section.before_images.length > 0 &&
+                        jobData.image_section.before_images[0] ? (
                           <Image
                             src={getImageFullUrl(
-                              jobData.image_section.before_images[0] || "",
+                              jobData.image_section.before_images[0],
                             )}
                             alt="preview"
                             width={600}
@@ -580,7 +582,9 @@ const JobDetailsPage = ({
                             unoptimized
                           />
                         ) : (
-                          <p>Wait for image upload..</p>
+                          <p className="text-gray-500">
+                            Wait for image upload...
+                          </p>
                         )}
                       </div>
                     </div>
@@ -591,10 +595,12 @@ const JobDetailsPage = ({
                         After Image
                       </p>
                       <div className="border-2 border-dashed border-gray-300 rounded-xl  flex flex-col items-center justify-center h-64">
-                        {jobData?.image_section.after_images ? (
+                        {jobData?.image_section.after_images &&
+                        jobData.image_section.after_images.length > 0 &&
+                        jobData.image_section.after_images[0] ? (
                           <Image
                             src={getImageFullUrl(
-                              jobData.image_section.after_images[0] || "",
+                              jobData.image_section.after_images[0],
                             )}
                             alt="preview"
                             width={600}
@@ -603,7 +609,9 @@ const JobDetailsPage = ({
                             unoptimized
                           />
                         ) : (
-                          <p>Wait for image upload..</p>
+                          <p className="text-gray-500">
+                            Wait for image upload...
+                          </p>
                         )}
                       </div>
                     </div>
@@ -665,17 +673,24 @@ const JobDetailsPage = ({
                     {/* Right side - Signature area */}
                     <div className="space-y-4">
                       <div className="border-2 border-dashed border-gray-300 rounded-lg h-16 flex items-center justify-center">
-                        <Image
-                          src={getImageFullUrl(
-                            jobData?.customer_signature.signature_files[0] ||
-                              "",
-                          )}
-                          alt="Customer signature"
-                          width={400}
-                          height={128}
-                          className="max-h-full max-w-full object-contain"
-                          unoptimized
-                        />
+                        {jobData?.customer_signature.signature_files &&
+                        jobData.customer_signature.signature_files.length > 0 &&
+                        jobData.customer_signature.signature_files[0] ? (
+                          <Image
+                            src={getImageFullUrl(
+                              jobData.customer_signature.signature_files[0],
+                            )}
+                            alt="Customer signature"
+                            width={400}
+                            height={128}
+                            className="max-h-full max-w-full object-contain"
+                            unoptimized
+                          />
+                        ) : (
+                          <p className="text-gray-500 text-sm">
+                            Wait for signature...
+                          </p>
+                        )}
                       </div>
                       <div className="border border-black w-full"></div>
                       <Button className="w-full bg-[#5C3D2E] hover:bg-[#4A2F22] text-white rounded-lg cursor-default">
