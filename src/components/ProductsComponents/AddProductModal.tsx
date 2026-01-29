@@ -23,7 +23,6 @@ interface ProductFormData {
   alias: string;
   frequencyDomestic: string;
   frequencyCommercial: string;
-  partsQuantity: string;
   stockQuantity: string;
 }
 
@@ -37,7 +36,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     alias: "",
     frequencyDomestic: "",
     frequencyCommercial: "",
-    partsQuantity: "",
     stockQuantity: "",
   });
   const [addProduct, { isLoading }] = useAddProductMutation();
@@ -53,7 +51,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       !formData.alias.trim() ||
       !formData.frequencyDomestic.trim() ||
       !formData.frequencyCommercial.trim() ||
-      !formData.partsQuantity.trim() ||
       !formData.stockQuantity.trim()
     ) {
       toast.error("Please fill in all required fields.");
@@ -72,12 +69,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       return;
     }
 
-    const partsQty = parseInt(formData.partsQuantity);
-    if (isNaN(partsQty) || partsQty < 0) {
-      toast.error("Parts Quantity must be a non-negative number.");
-      return;
-    }
-
     const stockQty = parseInt(formData.stockQuantity);
     if (isNaN(stockQty) || stockQty < 0) {
       toast.error("Stock Quantity must be a non-negative number.");
@@ -91,7 +82,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
         alias: formData.alias,
         frequency_domestic_month: freqDom,
         frequency_commercial_month: freqCom,
-        parts_quantity: partsQty,
         stock_quantity: stockQty,
         maintenance_frequency_month: freqDom, // Using domestic frequency as default
         is_active: true,
@@ -122,7 +112,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       alias: "",
       frequencyDomestic: "",
       frequencyCommercial: "",
-      partsQuantity: "",
       stockQuantity: "",
     });
     onClose();
@@ -212,24 +201,6 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               onChange={(e) =>
                 handleChange("frequencyCommercial", e.target.value)
               }
-              className="w-full text-[11px] xs:text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
-            />
-          </div>
-
-          {/* Parts Quantity */}
-          <div className="space-y-1.5">
-            <label
-              htmlFor="partsQuantity"
-              className="text-[11px] xs:text-xs sm:text-lg font-medium text-gray-700"
-            >
-              Parts Quantity
-            </label>
-            <Input
-              id="partsQuantity"
-              type="number"
-              placeholder="Enter how many parts come with this product"
-              value={formData.partsQuantity}
-              onChange={(e) => handleChange("partsQuantity", e.target.value)}
               className="w-full text-[11px] xs:text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
             />
           </div>

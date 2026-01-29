@@ -105,7 +105,6 @@ export interface AddProductRequest {
   alias: string;
   frequency_domestic_month: number;
   frequency_commercial_month: number;
-  parts_quantity: number;
   stock_quantity: number;
   maintenance_frequency_month: number;
   is_active: boolean;
