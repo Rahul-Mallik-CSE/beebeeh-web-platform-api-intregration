@@ -57,6 +57,55 @@ export interface AddInstallationResponse {
   requestId: string;
 }
 
+// Installation list interfaces
+export interface InstallationItem {
+  installation_id: string;
+  client: {
+    id: string;
+    name: string;
+    contact_number: string;
+  };
+  product: {
+    id: string;
+    model_name: string;
+  };
+  technician: {
+    id: string;
+    name: string;
+  };
+  scheduled_date: string;
+  scheduled_time: string;
+  maintenance_frequency_month: number;
+  priority: string;
+  notes: string;
+  status: string;
+  created_at: string;
+}
+
+export interface InstallationResponse {
+  success: boolean;
+  message: string;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: InstallationItem[];
+  requestId: string;
+}
+
+export interface InstallationQueryParams {
+  page?: number;
+  limit?: number;
+  order_dir?: "asc" | "desc";
+  job_id?: string;
+  client?: string;
+  model?: string;
+  technician?: string;
+  status?: string;
+}
+
 const installationAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Autocomplete endpoints
@@ -104,6 +153,18 @@ const installationAPI = baseApi.injectEndpoints({
         body: installationData,
       }),
     }),
+
+    // Get installations
+    getInstallations: builder.query<
+      InstallationResponse,
+      InstallationQueryParams
+    >({
+      query: (params) => ({
+        url: `/api/installations/`,
+        method: "GET",
+        params,
+      }),
+    }),
   }),
 });
 
@@ -112,4 +173,5 @@ export const {
   useAutocompleteProductsQuery,
   useAutocompleteTechniciansQuery,
   useAddInstallationMutation,
+  useGetInstallationsQuery,
 } = installationAPI;
