@@ -23,6 +23,55 @@ export interface AddRepairResponse {
   requestId: string;
 }
 
+// Repair list interfaces
+export interface RepairItem {
+  repair_id: string;
+  client: {
+    id: string;
+    name: string;
+    contact_number: string;
+  };
+  product: {
+    id: string;
+    model_name: string;
+  };
+  technician: {
+    id: string;
+    name: string;
+  };
+  scheduled_date: string;
+  scheduled_time: string;
+  priority: string;
+  problem_type: string;
+  problem_description: string;
+  status: string;
+  created_at: string;
+}
+
+export interface RepairResponse {
+  success: boolean;
+  message: string;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: RepairItem[];
+  requestId: string;
+}
+
+export interface RepairQueryParams {
+  page?: number;
+  limit?: number;
+  client_id?: string;
+  client_name?: string;
+  installation?: string;
+  problem?: string;
+  status?: string;
+  technician?: string;
+}
+
 const repairsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     addRepair: builder.mutation<AddRepairResponse, AddRepairRequest>({
@@ -32,7 +81,16 @@ const repairsAPI = baseApi.injectEndpoints({
         body: repairData,
       }),
     }),
+
+    // Get repairs
+    getRepairs: builder.query<RepairResponse, RepairQueryParams>({
+      query: (params) => ({
+        url: `/api/repairs/`,
+        method: "GET",
+        params,
+      }),
+    }),
   }),
 });
 
-export const { useAddRepairMutation } = repairsAPI;
+export const { useAddRepairMutation, useGetRepairsQuery } = repairsAPI;

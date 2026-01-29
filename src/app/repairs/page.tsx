@@ -1,12 +1,73 @@
 /** @format */
-
+"use client";
+import React, { useState } from "react";
 import RepairsTableSection from "@/components/RepairsComponents/RepairsTableSection";
+import { useGetRepairsQuery } from "@/redux/features/adminFeatures/repairsAPI";
+import { FilterState } from "@/components/CommonComponents/FilterCard";
 
 const RepairsPage = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<FilterState>({
+    idSort: null,
+    statusFilter: "",
+    jobTypeFilter: "",
+    columnFilters: [],
+  });
+
+  // Build query params from filters
+  const queryParams = {
+    page: currentPage,
+    limit: 10,
+    ...(filters.statusFilter && { status: filters.statusFilter.toLowerCase() }),
+    ...(filters.columnFilters.find((f) => f.column === "client")?.value && {
+      client_name: filters.columnFilters.find((f) => f.column === "client")
+        ?.value,
+    }),
+    ...(filters.columnFilters.find((f) => f.column === "model")?.value && {
+      installation: filters.columnFilters.find((f) => f.column === "model")
+        ?.value,
+    }),
+    ...(filters.columnFilters.find((f) => f.column === "technician")?.value && {
+      technician: filters.columnFilters.find((f) => f.column === "technician")
+        ?.value,
+    }),
+    // Note: problem_type not included in filters, as per user request
+  };
+
+  const { data, isLoading, error } = useGetRepairsQuery(queryParams);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleFilterChange = (filterState: FilterState) => {
+    setFilters(filterState);
+    setCurrentPage(1); // Reset to first page when filters change
+  };
+
+  if (error) {
+    return (
+      <div className="w-full p-2 sm:p-4 overflow-x-hidden">
+        <div className="max-w-[2500px] rounded-2xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+            Error loading repairs data. Please try again later.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full p-2 sm:p-4 overflow-x-hidden">
       <div className="max-w-[2500px] rounded-2xl mx-auto">
-        <RepairsTableSection />
+        <RepairsTableSection
+          data={data?.data}
+          isLoading={isLoading}
+          currentPage={data?.meta.page || 1}
+          totalPages={data?.meta.totalPage || 1}
+          onPageChange={handlePageChange}
+          onFilterChange={handleFilterChange}
+        />
       </div>
     </div>
   );

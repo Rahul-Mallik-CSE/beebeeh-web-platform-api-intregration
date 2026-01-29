@@ -44,6 +44,23 @@ export interface InstallationJob {
   status: InstallationJobStatus;
 }
 
+export type RepairJobStatus =
+  | "Assign"
+  | "In Progress"
+  | "Complete"
+  | "Cancel"
+  | "Rescheduled";
+
+export interface RepairJob {
+  id: string;
+  jobId: string;
+  client: string;
+  model: string;
+  technician: string;
+  scheduled: string;
+  status: RepairJobStatus;
+}
+
 export interface Job {
   id: string;
   jobType: JobType;
