@@ -68,9 +68,6 @@ const ChecklistSection = ({ data }: ChecklistSectionProps) => {
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm">
                   Status
                 </TableHead>
-                <TableHead className="font-semibold text-gray-700 text-center text-xs sm:text-sm">
-                  Action
-                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -90,28 +87,6 @@ const ChecklistSection = ({ data }: ChecklistSectionProps) => {
                     >
                       {item.status.charAt(0).toUpperCase() +
                         item.status.slice(1)}
-                    </TableCell>
-                    <TableCell>
-                      {item.status.toLowerCase() === "pending" ? (
-                        <div className="flex justify-center gap-1 sm:gap-2">
-                          <button
-                            className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-green-50 text-green-500"
-                            onClick={() => updateStatus(index, "done")}
-                          >
-                            <Check className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </button>
-                          <button
-                            className="w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center hover:bg-red-50 text-red-500"
-                            onClick={() => updateStatus(index, "cancel")}
-                          >
-                            <X className="w-4 h-4 sm:w-5 sm:h-5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex justify-center text-gray-400 text-xs sm:text-sm">
-                          ---
-                        </div>
-                      )}
                     </TableCell>
                   </TableRow>
                 ))
