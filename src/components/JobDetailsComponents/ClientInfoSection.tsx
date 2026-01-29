@@ -70,7 +70,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             {data?.notes || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2">
+        {/* <div className="flex items-center justify-between py-1.5 sm:py-2">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Pin Location :
           </p>
@@ -88,7 +88,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm font-medium">Map</span>
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );
