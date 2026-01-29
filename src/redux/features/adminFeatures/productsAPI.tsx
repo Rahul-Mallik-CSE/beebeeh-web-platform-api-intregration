@@ -118,6 +118,12 @@ export interface AddProductResponse {
   requestId: string;
 }
 
+export interface DeleteProductResponse {
+  success: boolean;
+  message: string;
+  requestId: string;
+}
+
 // ============= API Endpoints =============
 
 const productsAPI = baseApi.injectEndpoints({
@@ -161,24 +167,43 @@ const productsAPI = baseApi.injectEndpoints({
       invalidatesTags: ["Product"],
     }),
 
+    // Delete product
+    deleteProduct: builder.mutation<DeleteProductResponse, string>({
+      query: (productId) => ({
+        url: `/api/products/${productId}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Product"],
+    }),
+
     // Add installation checklist task
-    addInstallationChecklist: builder.mutation<GetProductDetailResponse, { productId: string; task: string }>({
+    addInstallationChecklist: builder.mutation<
+      GetProductDetailResponse,
+      { productId: string; task: string }
+    >({
       query: ({ productId, task }) => ({
         url: `/api/products/${productId}/checklists/installation/`,
         method: "POST",
         body: { task },
       }),
-      invalidatesTags: (result, error, { productId }) => [{ type: "Product", id: productId }],
+      invalidatesTags: (result, error, { productId }) => [
+        { type: "Product", id: productId },
+      ],
     }),
 
     // Add maintenance checklist task
-    addMaintenanceChecklist: builder.mutation<GetProductDetailResponse, { productId: string; task: string }>({
+    addMaintenanceChecklist: builder.mutation<
+      GetProductDetailResponse,
+      { productId: string; task: string }
+    >({
       query: ({ productId, task }) => ({
         url: `/api/products/${productId}/checklists/maintenance/`,
         method: "POST",
         body: { task },
       }),
-      invalidatesTags: (result, error, { productId }) => [{ type: "Product", id: productId }],
+      invalidatesTags: (result, error, { productId }) => [
+        { type: "Product", id: productId },
+      ],
     }),
   }),
 });
@@ -187,6 +212,7 @@ export const {
   useGetProductsQuery,
   useGetProductByIdQuery,
   useAddProductMutation,
+  useDeleteProductMutation,
   useAddInstallationChecklistMutation,
   useAddMaintenanceChecklistMutation,
 } = productsAPI;

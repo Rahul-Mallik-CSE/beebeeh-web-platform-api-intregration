@@ -9,15 +9,31 @@ import { useRouter } from "next/navigation";
 import AddProductModal from "./AddProductModal";
 import {
   useGetProductsQuery,
+  useDeleteProductMutation,
   ProductListItem,
 } from "@/redux/features/adminFeatures/productsAPI";
 import TableSkeleton from "../CommonComponents/TableSkeleton";
+import { toast } from "react-toastify";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const ProductsTableSection = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
+  const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
+
+  // Delete mutation
+  const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
   // Fetch products with search and pagination
   const {
@@ -34,6 +50,19 @@ const ProductsTableSection = () => {
   const handleAddProductSuccess = () => {
     setIsAddProductModalOpen(false);
     refetch();
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!deleteProductId) return;
+
+    try {
+      await deleteProduct(deleteProductId).unwrap();
+      toast.success("Product deleted successfully");
+      setDeleteProductId(null);
+      refetch();
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to delete product");
+    }
   };
 
   const tableData = useMemo(() => {
@@ -99,7 +128,7 @@ const ProductsTableSection = () => {
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
           <button
-            onClick={() => console.log("Delete", row.product_id)}
+            onClick={() => setDeleteProductId(row.product_id)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
             title="Delete Product"
           >
@@ -164,6 +193,32 @@ const ProductsTableSection = () => {
         onClose={() => setIsAddProductModalOpen(false)}
         onSave={handleAddProductSuccess}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!deleteProductId}
+        onOpenChange={() => setDeleteProductId(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Product</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this product? This action cannot
+              be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteProduct}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
