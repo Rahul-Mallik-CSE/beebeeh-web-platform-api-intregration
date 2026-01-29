@@ -2,103 +2,10 @@
 
 import { Part } from "@/types/PartsTypes";
 
-export const partsData: Part[] = [
-  {
-    id: "1",
-    partId: "Pr - 501",
-    name: "Filter A22",
-    stock: 15,
-    unit: "pcs",
-    min: 20,
-    models: "12 models",
-  },
-  {
-    id: "2",
-    partId: "Pr - 501",
-    name: "Copper Coil",
-    stock: 15,
-    unit: "rolls",
-    min: 20,
-    models: "8 models",
-  },
-  {
-    id: "3",
-    partId: "Pr - 501",
-    name: "Filter A22",
-    stock: 15,
-    unit: "pcs",
-    min: 20,
-    models: "12 models",
-  },
-  {
-    id: "4",
-    partId: "Pr - 501",
-    name: "Copper Coil",
-    stock: 15,
-    unit: "rolls",
-    min: 20,
-    models: "8 models",
-  },
-  {
-    id: "5",
-    partId: "Pr - 501",
-    name: "Copper Coil",
-    stock: 15,
-    unit: "rolls",
-    min: 20,
-    models: "8 models",
-  },
-  {
-    id: "6",
-    partId: "Pr - 501",
-    name: "Filter A22",
-    stock: 15,
-    unit: "pcs",
-    min: 20,
-    models: "12 models",
-  },
-  {
-    id: "7",
-    partId: "Pr - 501",
-    name: "Copper Coil",
-    stock: 15,
-    unit: "rolls",
-    min: 20,
-    models: "8 models",
-  },
-  {
-    id: "8",
-    partId: "Pr - 501",
-    name: "Filter A22",
-    stock: 15,
-    unit: "pcs",
-    min: 20,
-    models: "12 models",
-  },
-  {
-    id: "9",
-    partId: "Pr - 501",
-    name: "Copper Coil",
-    stock: 15,
-    unit: "rolls",
-    min: 20,
-    models: "8 models",
-  },
-  {
-    id: "10",
-    partId: "Pr - 501",
-    name: "Filter A22",
-    stock: 15,
-    unit: "pcs",
-    min: 20,
-    models: "12 models",
-  },
-];
-
 export const partsColumns = [
   {
     header: "Part ID",
-    accessor: (row: Part) => row.partId,
+    accessor: (row: Part) => row.part_id,
   },
   {
     header: "Name",
@@ -114,11 +21,30 @@ export const partsColumns = [
   },
   {
     header: "Min",
-    accessor: (row: Part) => row.min,
+    accessor: (row: Part) => row.min_stock,
   },
   {
     header: "Models",
     accessor: (row: Part) => row.models,
+  },
+];
+
+export const usedHistoryColumns = [
+  {
+    header: "Job ID",
+    accessor: (row: any) => row.jobId,
+  },
+  {
+    header: "Technician",
+    accessor: (row: any) => row.technician,
+  },
+  {
+    header: "Type",
+    accessor: (row: any) => row.type,
+  },
+  {
+    header: "Date",
+    accessor: (row: any) => row.date,
   },
 ];
 
@@ -142,88 +68,6 @@ export const partDetailsData: Record<string, PartDetails> = {
         type: "Repair",
         date: "23 Jan, 2024",
       },
-      {
-        id: "2",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "3",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "4",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "5",
-        jobId: "J-8022",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "6",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "7",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "8",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "9",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
-      {
-        id: "10",
-        jobId: "J-8001",
-        technician: "Linda Kian",
-        type: "Repair",
-        date: "23 Jan, 2024",
-      },
     ],
   },
 };
-
-export const usedHistoryColumns = [
-  {
-    header: "Job ID",
-    accessor: (row: UsedHistory) => row.jobId,
-  },
-  {
-    header: "Technician",
-    accessor: (row: UsedHistory) => row.technician,
-  },
-  {
-    header: "Type",
-    accessor: (row: UsedHistory) => row.type,
-  },
-  {
-    header: "Date",
-    accessor: (row: UsedHistory) => row.date,
-  },
-];

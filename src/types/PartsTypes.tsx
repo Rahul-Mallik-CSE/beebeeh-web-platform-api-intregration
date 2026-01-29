@@ -1,13 +1,13 @@
 /** @format */
 
 export interface Part {
-  id: string;
-  partId: string;
+  part_id: string;
   name: string;
   stock: number;
   unit: string;
-  min: number;
-  models: string;
+  unit_price: string | null;
+  min_stock: number;
+  models: number;
 }
 
 export interface PartDetails {

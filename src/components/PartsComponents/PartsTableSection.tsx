@@ -2,33 +2,47 @@
 "use client";
 import React, { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { partsData, partsColumns } from "@/data/PartsData";
+import TableSkeleton from "@/components/CommonComponents/TableSkeleton";
+import { partsColumns } from "@/data/PartsData";
 import { Part } from "@/types/PartsTypes";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPartsModal from "./AddPartsModal";
+import {
+  useGetPartsQuery,
+  useSearchPartsQuery,
+} from "@/redux/features/adminFeatures/partsAPI";
 
 const PartsTableSection = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddPartModalOpen, setIsAddPartModalOpen] = useState(false);
 
+  const queryParams = { page: 1, limit: 1000 };
+
+  const { data: allData, isLoading: allLoading } = useGetPartsQuery(
+    queryParams,
+    { skip: !!searchQuery },
+  );
+  const { data: searchData, isLoading: searchLoading } = useSearchPartsQuery(
+    { search: searchQuery, ...queryParams },
+    { skip: !searchQuery },
+  );
+
+  const data = searchQuery ? searchData : allData;
+  const isLoading = searchQuery ? searchLoading : allLoading;
+
+  const parts = data?.data || [];
+
   const handleAddPart = (partData: any) => {
     console.log("Adding part:", partData);
     // Add logic to save part
   };
 
-  const filteredParts = partsData.filter(
-    (part) =>
-      part.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      part.partId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      part.unit.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const handleViewPart = (part: Part) => {
-    router.push(`/parts/${part.id}`);
+    router.push(`/parts/${part.part_id}`);
   };
 
   const columnsWithActions = [
@@ -44,7 +58,7 @@ const PartsTableSection = () => {
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
           <button
-            onClick={() => console.log("Delete", row.id)}
+            onClick={() => console.log("Delete", row.part_id)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
           >
             <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
@@ -63,17 +77,6 @@ const PartsTableSection = () => {
           Parts
         </h2>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 w-40 sm:w-48 md:w-56 lg:w-64 text-sm"
-            />
-          </div>
           {/* Add Button */}
           <Button
             onClick={() => setIsAddPartModalOpen(true)}
@@ -87,11 +90,16 @@ const PartsTableSection = () => {
 
       {/* Table */}
       <div className="bg-white rounded-lg">
-        <CustomTable
-          data={filteredParts}
-          columns={columnsWithActions}
-          itemsPerPage={10}
-        />
+        {isLoading ? (
+          <TableSkeleton rows={10} columns={7} />
+        ) : (
+          <CustomTable
+            data={parts}
+            columns={columnsWithActions}
+            itemsPerPage={10}
+            excludeFilterColumns={["Action"]}
+          />
+        )}
       </div>
 
       {/* Add Parts Modal */}

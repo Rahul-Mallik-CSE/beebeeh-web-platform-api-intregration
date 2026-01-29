@@ -35,6 +35,31 @@ export interface AddPartResponse {
   requestId: string;
 }
 
+export interface PartItem {
+  part_id: string;
+  name: string;
+  stock: number;
+  unit: string;
+  unit_price: string | null;
+  min_stock: number;
+  models: number;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPage: number;
+}
+
+export interface GetPartsResponse {
+  success: boolean;
+  message: string;
+  meta: PaginationMeta;
+  data: PartItem[];
+  requestId: string;
+}
+
 const partsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     autocompleteProducts: builder.query<AutocompleteProductsResponse, string>({
@@ -50,7 +75,44 @@ const partsAPI = baseApi.injectEndpoints({
         body: partData,
       }),
     }),
+    getParts: builder.query<
+      GetPartsResponse,
+      { page?: number; limit?: number } | void
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        if (params?.page) queryParams.append("page", params.page.toString());
+        if (params?.limit) queryParams.append("limit", params.limit.toString());
+        const queryString = queryParams.toString();
+        return {
+          url: `/api/parts/${queryString ? `?${queryString}` : ""}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Part"],
+    }),
+    searchParts: builder.query<
+      GetPartsResponse,
+      { search: string; page?: number; limit?: number }
+    >({
+      query: (params) => {
+        const queryParams = new URLSearchParams();
+        queryParams.append("search", params.search);
+        if (params.page) queryParams.append("page", params.page.toString());
+        if (params.limit) queryParams.append("limit", params.limit.toString());
+        return {
+          url: `/api/products/?${queryParams.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["Part"],
+    }),
   }),
 });
 
-export const { useAutocompleteProductsQuery, useAddPartMutation } = partsAPI;
+export const {
+  useAutocompleteProductsQuery,
+  useAddPartMutation,
+  useGetPartsQuery,
+  useSearchPartsQuery,
+} = partsAPI;
