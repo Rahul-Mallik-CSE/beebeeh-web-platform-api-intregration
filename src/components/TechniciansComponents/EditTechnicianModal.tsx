@@ -19,6 +19,7 @@ import {
   TechnicianDashboardData,
 } from "@/redux/features/adminFeatures/technicianAPI";
 import { toast } from "react-toastify";
+import { getImageFullUrl } from "@/lib/utils";
 
 interface EditTechnicianModalProps {
   open: boolean;
@@ -138,7 +139,7 @@ const EditTechnicianModal: React.FC<EditTechnicianModalProps> = ({
       setContactNumber(technician.contact_number);
       setAddress(technician.address);
       setSkills(technician.skills);
-      setProfileImage(technician.profile_image || null);
+      setProfileImage(getImageFullUrl(technician.profile_image) || null);
       setProfileImageFile(null);
     }
     onOpenChange(false);

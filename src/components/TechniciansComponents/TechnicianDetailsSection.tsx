@@ -11,12 +11,14 @@ import { TbSquareRoundedCheck } from "react-icons/tb";
 import { BsCalendar2Check } from "react-icons/bs";
 import { IoIosRadioButtonOn } from "react-icons/io";
 import { TechnicianDashboardData } from "@/redux/features/adminFeatures/technicianAPI";
+import { getImageFullUrl } from "@/lib/utils";
 
 interface TechnicianDetailsSectionProps {
   data: TechnicianDashboardData;
   onEdit?: () => void;
   onDisable?: () => void;
   onAssignJob?: () => void;
+  isDisabling?: boolean;
 }
 
 const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
@@ -24,6 +26,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
   onEdit,
   onDisable,
   onAssignJob,
+  isDisabling = false,
 }) => {
   const { technician, stats } = data;
 
@@ -50,7 +53,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-gradient-to-br from-pink-400 to-purple-500 shrink-0">
             {technician.profile_image ? (
               <Image
-                src={technician.profile_image}
+                src={getImageFullUrl(technician.profile_image)}
                 alt={technician.full_name}
                 fill
                 className="object-cover"
@@ -99,15 +102,26 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {/* Disable Account Button */}
           <Button
             onClick={onDisable}
+            disabled={isDisabling}
             variant="outline"
             className="border-gray-300 text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-none px-3 sm:px-4"
           >
             <MdBlockFlipped className="w-3 h-3 sm:w-4 sm:h-4" />
             <span className="hidden sm:inline">
-              {technician.is_active ? "Disable Account" : "Enable Account"}
+              {isDisabling
+                ? technician.is_active
+                  ? "Disabling..."
+                  : "Enabling..."
+                : technician.is_active
+                  ? "Disable Account"
+                  : "Enable Account"}
             </span>
             <span className="sm:hidden">
-              {technician.is_active ? "Disable" : "Enable"}
+              {isDisabling
+                ? "..."
+                : technician.is_active
+                  ? "Disable"
+                  : "Enable"}
             </span>
           </Button>
 

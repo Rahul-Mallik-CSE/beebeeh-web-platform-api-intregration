@@ -10,7 +10,12 @@ import { useRouter, useParams } from "next/navigation";
 import React, { useState } from "react";
 import AssignJobModal from "@/components/CommonComponents/AssignJobModal";
 import EditTechnicianModal from "@/components/TechniciansComponents/EditTechnicianModal";
-import { useGetTechnicianDashboardQuery } from "@/redux/features/adminFeatures/technicianAPI";
+import {
+  useGetTechnicianDashboardQuery,
+  useDisableTechnicianMutation,
+  useEnableTechnicianMutation,
+} from "@/redux/features/adminFeatures/technicianAPI";
+import { toast } from "react-toastify";
 
 const TechnicianDetailsPage = () => {
   const router = useRouter();
@@ -27,6 +32,12 @@ const TechnicianDetailsPage = () => {
     refetch,
   } = useGetTechnicianDashboardQuery(technicianId);
 
+  // Disable/Enable mutations
+  const [disableTechnician, { isLoading: isDisabling }] =
+    useDisableTechnicianMutation();
+  const [enableTechnician, { isLoading: isEnabling }] =
+    useEnableTechnicianMutation();
+
   const handleViewCalendar = () => {
     router.push(`/technicians/${technicianId}/technician-calendar`);
   };
@@ -42,6 +53,28 @@ const TechnicianDetailsPage = () => {
   const handleEditSave = () => {
     // RTK Query will automatically refetch due to invalidatesTags
     setIsEditModalOpen(false);
+  };
+
+  const handleDisableEnable = async () => {
+    if (!dashboardResponse?.data) return;
+
+    const isActive = dashboardResponse.data.technician.is_active;
+
+    try {
+      if (isActive) {
+        await disableTechnician(technicianId).unwrap();
+        toast.success("Technician disabled successfully!");
+      } else {
+        await enableTechnician(technicianId).unwrap();
+        toast.success("Technician enabled successfully!");
+      }
+      // RTK Query will automatically refetch due to invalidatesTags
+    } catch (error: any) {
+      const errorMessage =
+        error?.data?.message ||
+        `Failed to ${isActive ? "disable" : "enable"} technician. Please try again.`;
+      toast.error(errorMessage);
+    }
   };
 
   if (isLoading) {
@@ -121,6 +154,8 @@ const TechnicianDetailsPage = () => {
             data={dashboardData}
             onAssignJob={handleAssignJob}
             onEdit={handleEditTechnician}
+            onDisable={handleDisableEnable}
+            isDisabling={isDisabling || isEnabling}
           />
 
           <TechnicianChartSection data={dashboardData} />

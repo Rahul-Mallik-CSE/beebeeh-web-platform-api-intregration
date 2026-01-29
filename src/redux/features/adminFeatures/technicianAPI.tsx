@@ -181,6 +181,12 @@ export interface EditTechnicianResponse {
   requestId: string;
 }
 
+export interface DisableEnableTechnicianResponse {
+  success: boolean;
+  message: string;
+  requestId: string;
+}
+
 // ============= API Endpoints =============
 
 const technicianAPI = baseApi.injectEndpoints({
@@ -273,6 +279,37 @@ const technicianAPI = baseApi.injectEndpoints({
         { type: "Technician", id: `${id}-dashboard` },
       ],
     }),
+
+    // Disable technician
+    disableTechnician: builder.mutation<
+      DisableEnableTechnicianResponse,
+      string
+    >({
+      query: (technicianId) => ({
+        url: `/api/technicians/${technicianId}/disable/`,
+        method: "POST",
+      }),
+      invalidatesTags: (result, error, technicianId) => [
+        "Technician",
+        { type: "Technician", id: technicianId },
+        { type: "Technician", id: `${technicianId}-dashboard` },
+      ],
+    }),
+
+    // Enable technician
+    enableTechnician: builder.mutation<DisableEnableTechnicianResponse, string>(
+      {
+        query: (technicianId) => ({
+          url: `/api/technicians/${technicianId}/enable/`,
+          method: "POST",
+        }),
+        invalidatesTags: (result, error, technicianId) => [
+          "Technician",
+          { type: "Technician", id: technicianId },
+          { type: "Technician", id: `${technicianId}-dashboard` },
+        ],
+      },
+    ),
   }),
 });
 
@@ -283,6 +320,8 @@ export const {
   useAddTechnicianMutation,
   useDeleteTechnicianMutation,
   useEditTechnicianMutation,
+  useDisableTechnicianMutation,
+  useEnableTechnicianMutation,
 } = technicianAPI;
 
 export default technicianAPI;
