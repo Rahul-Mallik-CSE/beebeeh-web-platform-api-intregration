@@ -332,14 +332,14 @@ const SignUpForm = () => {
       </form>
 
       {/* Divider */}
-      <div className="flex items-center gap-2 sm:gap-3 mb-2">
+      {/* <div className="flex items-center gap-2 sm:gap-3 mb-2">
         <div className="flex-1 h-px bg-[#E8D5D8]"></div>
         <span className="text-sm text-gray-400">or</span>
         <div className="flex-1 h-px bg-[#E8D5D8]"></div>
-      </div>
+      </div> */}
 
       {/* Google Sign Up */}
-      <Button
+      {/* <Button
         type="button"
         className="w-full border bg-white border-[#E8D5D8] text-gray-700 text-sm sm:text-base font-medium py-2 sm:py-3 rounded-lg flex items-center justify-center gap-2 hover:bg-gray-50 transition-colors"
       >
@@ -367,7 +367,7 @@ const SignUpForm = () => {
           />
         </svg>
         Log in with Google
-      </Button>
+      </Button> */}
 
       {/* Sign In Link */}
       <p className="text-center text-sm text-gray-600 mt-2">
