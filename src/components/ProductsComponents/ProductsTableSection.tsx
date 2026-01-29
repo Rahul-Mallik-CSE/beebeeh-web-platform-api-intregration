@@ -96,10 +96,6 @@ const ProductsTableSection = () => {
       accessor: "frequency_commercial_month" as keyof ProductListItem,
     },
     {
-      header: "Parts Qty",
-      accessor: "parts_quantity" as keyof ProductListItem,
-    },
-    {
       header: "Stock Qty",
       accessor: "stock_quantity" as keyof ProductListItem,
     },
