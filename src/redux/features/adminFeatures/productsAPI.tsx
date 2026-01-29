@@ -124,6 +124,17 @@ export interface DeleteProductResponse {
   requestId: string;
 }
 
+export interface RestockProductRequest {
+  quantity: number;
+}
+
+export interface RestockProductResponse {
+  success: boolean;
+  message: string;
+  data: any;
+  requestId: string;
+}
+
 // ============= API Endpoints =============
 
 const productsAPI = baseApi.injectEndpoints({
@@ -176,6 +187,21 @@ const productsAPI = baseApi.injectEndpoints({
       invalidatesTags: ["Product"],
     }),
 
+    // Restock product
+    restockProduct: builder.mutation<
+      RestockProductResponse,
+      { productId: string; quantity: number }
+    >({
+      query: ({ productId, quantity }) => ({
+        url: `/api/products/${productId}/restock/`,
+        method: "PATCH",
+        body: { quantity },
+      }),
+      invalidatesTags: (result, error, { productId }) => [
+        { type: "Product", id: productId },
+      ],
+    }),
+
     // Add installation checklist task
     addInstallationChecklist: builder.mutation<
       GetProductDetailResponse,
@@ -213,6 +239,7 @@ export const {
   useGetProductByIdQuery,
   useAddProductMutation,
   useDeleteProductMutation,
+  useRestockProductMutation,
   useAddInstallationChecklistMutation,
   useAddMaintenanceChecklistMutation,
 } = productsAPI;

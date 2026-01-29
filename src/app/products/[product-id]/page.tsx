@@ -14,7 +14,12 @@ const ProductDetailsPage = () => {
   const params = useParams();
   const productId = params["product-id"] as string;
 
-  const { data: productResponse, isLoading, error, refetch } = useGetProductByIdQuery(productId);
+  const {
+    data: productResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetProductByIdQuery(productId);
 
   const handleEdit = () => {
     console.log("Edit product:", productId);
@@ -51,8 +56,16 @@ const ProductDetailsPage = () => {
       <div className="w-full p-8 text-center">
         <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md mx-auto">
           <p className="text-red-600 mb-4">Failed to load product details.</p>
-          <Button onClick={() => refetch()} variant="outline">Retry</Button>
-          <Button onClick={() => router.back()} variant="ghost" className="ml-2">Go Back</Button>
+          <Button onClick={() => refetch()} variant="outline">
+            Retry
+          </Button>
+          <Button
+            onClick={() => router.back()}
+            variant="ghost"
+            className="ml-2"
+          >
+            Go Back
+          </Button>
         </div>
       </div>
     );
@@ -83,7 +96,6 @@ const ProductDetailsPage = () => {
           <ProductsDetailsSection
             product={productData}
             onEdit={handleEdit}
-            onView={handleView}
             onDelete={handleDelete}
           />
 
