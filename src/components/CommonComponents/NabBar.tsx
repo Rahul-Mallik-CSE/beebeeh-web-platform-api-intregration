@@ -18,6 +18,7 @@ import { SidebarTrigger } from "../ui/sidebar";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { logout as logoutAction } from "@/redux/features/authSlice";
+import { getImageFullUrl } from "@/lib/utils";
 import { logout } from "@/services/authService";
 
 interface User {
@@ -92,7 +93,7 @@ const NavBar = () => {
               <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-800 flex items-center justify-center overflow-hidden shrink-0">
                 {user?.profile_image ? (
                   <Image
-                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}${user.profile_image}`}
+                    src={getImageFullUrl(user.profile_image)}
                     alt="Profile"
                     width={40}
                     height={40}

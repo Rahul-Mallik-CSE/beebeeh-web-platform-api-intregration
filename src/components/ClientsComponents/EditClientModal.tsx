@@ -19,6 +19,7 @@ import {
 import { Camera } from "lucide-react";
 import Image from "next/image";
 import { ClientDetails } from "@/redux/features/adminFeatures/clientsAPI";
+import { getImageFullUrl } from "@/lib/utils";
 
 interface EditClientModalProps {
   isOpen: boolean;
@@ -40,10 +41,9 @@ const EditClientModal: React.FC<EditClientModalProps> = ({
     address: clientData.address,
     town: clientData.town,
     contact_number: clientData.contact_number,
-    client_type: clientData.client_type,
   });
   const [profileImage, setProfileImage] = useState<string | null>(
-    clientData.profile_image
+    getImageFullUrl(clientData.profile_image),
   );
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,9 +57,8 @@ const EditClientModal: React.FC<EditClientModalProps> = ({
         address: clientData.address,
         town: clientData.town,
         contact_number: clientData.contact_number,
-        client_type: clientData.client_type,
       });
-      setProfileImage(clientData.profile_image);
+      setProfileImage(getImageFullUrl(clientData.profile_image));
       setProfileImageFile(null);
     }
   }, [isOpen, clientData]);
@@ -71,12 +70,12 @@ const EditClientModal: React.FC<EditClientModalProps> = ({
       let processedFile = file;
       if (file.name.length > 100) {
         // Rename file to a shorter name while keeping extension
-        const extension = file.name.split('.').pop();
+        const extension = file.name.split(".").pop();
         const timestamp = Date.now();
         const newName = `client_profile_${timestamp}.${extension}`;
         processedFile = new File([file], newName, { type: file.type });
       }
-      
+
       setProfileImageFile(processedFile);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -87,7 +86,7 @@ const EditClientModal: React.FC<EditClientModalProps> = ({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setFormData({
       ...formData,
@@ -118,10 +117,6 @@ const EditClientModal: React.FC<EditClientModalProps> = ({
       }
       if (formData.contact_number !== clientData.contact_number) {
         formDataToSend.append("contact_number", formData.contact_number);
-      }
-      if (formData.client_type !== clientData.client_type) {
-        // Convert to uppercase as API expects uppercase values
-        formDataToSend.append("client_type", formData.client_type.toUpperCase());
       }
 
       if (profileImageFile) {
@@ -270,28 +265,6 @@ const EditClientModal: React.FC<EditClientModalProps> = ({
                 placeholder="Enter contact number"
                 className="h-9 sm:h-10 text-sm"
               />
-            </div>
-
-            {/* Type */}
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                Type
-              </label>
-              <Select
-                value={formData.client_type}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, client_type: value })
-                }
-              >
-                <SelectTrigger className="w-full h-9 sm:h-10 text-sm">
-                  <SelectValue placeholder="Select client type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="RESIDENTIAL">Residential</SelectItem>
-                  <SelectItem value="COMMERCIAL">Commercial</SelectItem>
-                  <SelectItem value="INDUSTRIAL">Industrial</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

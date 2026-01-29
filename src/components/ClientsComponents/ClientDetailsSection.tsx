@@ -8,6 +8,7 @@ import { MdBlockFlipped, MdEmail, MdLocalPhone } from "react-icons/md";
 import { ClientDetails } from "@/types/ClientsTypes";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { TbSquareRoundedCheck } from "react-icons/tb";
+import { getImageFullUrl } from "@/lib/utils";
 
 interface ClientDetailsSectionProps {
   client: ClientDetails;
@@ -47,7 +48,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
           <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-linear-to-br from-pink-400 to-purple-500 shrink-0">
             {client.profileImage ? (
               <Image
-                src={client.profileImage}
+                src={getImageFullUrl(client.profileImage)}
                 alt={client.name}
                 fill
                 className="object-cover"
@@ -72,7 +73,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
             </p>
             <div
               className={`inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-sm text-xs font-medium ${getStatusColor(
-                client.status
+                client.status,
               )}`}
             >
               {client.status}
@@ -106,8 +107,8 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                   ? "Disabling..."
                   : "Enabling..."
                 : isActive
-                ? "Disable Account"
-                : "Enable Account"}
+                  ? "Disable Account"
+                  : "Enable Account"}
             </span>
             <span className="lg:hidden">
               {isTogglingStatus
@@ -115,8 +116,8 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
                   ? "Disabling..."
                   : "Enabling..."
                 : isActive
-                ? "Disable"
-                : "Enable"}
+                  ? "Disable"
+                  : "Enable"}
             </span>
           </Button>
         </div>
