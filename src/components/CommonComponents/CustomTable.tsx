@@ -43,6 +43,8 @@ interface CustomTableProps<T> {
   excludeFilterColumns?: string[];
   predefinedStatusOptions?: string[];
   predefinedJobTypeOptions?: string[];
+  showFilter?: boolean;
+  showActions?: boolean;
 }
 
 const CustomTable = <T extends Record<string, any>>({
@@ -59,6 +61,8 @@ const CustomTable = <T extends Record<string, any>>({
   excludeFilterColumns = [],
   predefinedStatusOptions,
   predefinedJobTypeOptions,
+  showFilter = true,
+  showActions = true,
 }: CustomTableProps<T>) => {
   const [internalCurrentPage, setInternalCurrentPage] = useState(1);
   const [filterState, setFilterState] = useState<FilterState | null>(null);
@@ -310,16 +314,18 @@ const CustomTable = <T extends Record<string, any>>({
         ) : (
           <div></div>
         )}
-        <FilterCard
-          columns={columns}
-          data={data}
-          onApplyFilter={handleApplyFilter}
-          onClearFilter={handleClearFilter}
-          currentFilter={filterState || undefined}
-          excludeColumns={excludeFilterColumns}
-          predefinedStatusOptions={predefinedStatusOptions}
-          predefinedJobTypeOptions={predefinedJobTypeOptions}
-        />
+        {showFilter && (
+          <FilterCard
+            columns={columns}
+            data={data}
+            onApplyFilter={handleApplyFilter}
+            onClearFilter={handleClearFilter}
+            currentFilter={filterState || undefined}
+            excludeColumns={excludeFilterColumns}
+            predefinedStatusOptions={predefinedStatusOptions}
+            predefinedJobTypeOptions={predefinedJobTypeOptions}
+          />
+        )}
       </div>
 
       {/* Table Container with Horizontal Scroll */}
@@ -339,7 +345,7 @@ const CustomTable = <T extends Record<string, any>>({
                     {column.header}
                   </TableHead>
                 ))}
-                {onAction && (
+                {showActions && onAction && (
                   <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm text-right py-2 sm:py-3 whitespace-nowrap">
                     Action
                   </TableHead>
@@ -363,7 +369,7 @@ const CustomTable = <T extends Record<string, any>>({
                       {renderCell(row, column)}
                     </TableCell>
                   ))}
-                  {onAction && (
+                  {showActions && onAction && (
                     <TableCell className="text-right py-3 sm:py-5">
                       <button
                         onClick={() => onAction(row)}

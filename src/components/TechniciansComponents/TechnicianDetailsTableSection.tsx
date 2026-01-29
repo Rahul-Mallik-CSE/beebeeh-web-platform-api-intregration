@@ -2,33 +2,21 @@
 "use client";
 import React from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { JobItem, TablePagination } from "@/redux/features/adminFeatures/technicianAPI";
-import { useRouter } from "next/navigation";
+import {
+  JobItem,
+  TablePagination,
+} from "@/redux/features/adminFeatures/technicianAPI";
 
 interface TechnicianDetailsTableSectionProps {
   todaysJobs: [JobItem[], TablePagination];
   fullJobHistory: [JobItem[], TablePagination];
 }
 
-const TechnicianDetailsTableSection: React.FC<TechnicianDetailsTableSectionProps> = ({
-  todaysJobs,
-  fullJobHistory,
-}) => {
-  const router = useRouter();
+const TechnicianDetailsTableSection: React.FC<
+  TechnicianDetailsTableSectionProps
+> = ({ todaysJobs, fullJobHistory }) => {
   const [todaysJobsList, todaysMeta] = todaysJobs;
   const [historyJobsList, historyMeta] = fullJobHistory;
-
-  const handleAction = (job: JobItem) => {
-    // Navigate to job details based on job type
-    let jobType = job.type.toLowerCase();
-    
-    // Map job types to their respective route paths
-    if (jobType === "repairing" || jobType === "repair") {
-      jobType = "repairs";
-    }
-
-    router.push(`/${jobType}/${job.job_id}`);
-  };
 
   const columns = [
     {
@@ -78,7 +66,9 @@ const TechnicianDetailsTableSection: React.FC<TechnicianDetailsTableSectionProps
           }
         };
         return (
-          <span className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}>
+          <span
+            className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}
+          >
             {row.status.replace("_", " ")}
           </span>
         );
@@ -105,8 +95,9 @@ const TechnicianDetailsTableSection: React.FC<TechnicianDetailsTableSectionProps
         <CustomTable
           data={todaysJobsList}
           columns={columns}
-          onAction={handleAction}
           itemsPerPage={5}
+          showFilter={false}
+          showActions={false}
         />
       </div>
 
@@ -118,8 +109,9 @@ const TechnicianDetailsTableSection: React.FC<TechnicianDetailsTableSectionProps
         <CustomTable
           data={historyJobsList}
           columns={historyColumns}
-          onAction={handleAction}
           itemsPerPage={10}
+          showFilter={false}
+          showActions={false}
         />
       </div>
     </div>
