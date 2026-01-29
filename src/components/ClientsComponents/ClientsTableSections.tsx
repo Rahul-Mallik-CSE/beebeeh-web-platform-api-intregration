@@ -40,11 +40,16 @@ const ClientsTableSections = () => {
   const [deleteClientId, setDeleteClientId] = useState<string | null>(null);
 
   // Fetch clients with pagination and filters
-  const { data: clientsResponse, isLoading, error, refetch } = useGetClientsQuery({
+  const {
+    data: clientsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetClientsQuery({
     page: currentPage,
     limit: itemsPerPage,
     ...Object.fromEntries(
-      Object.entries(searchFilters).filter(([_, value]) => value !== "")
+      Object.entries(searchFilters).filter(([_, value]) => value !== ""),
     ),
   });
 
@@ -65,7 +70,7 @@ const ClientsTableSections = () => {
       await deleteClient(deleteClientId).unwrap();
       toast.success("Client deleted successfully!");
       setDeleteClientId(null);
-      refetch();
+      // RTK Query will automatically refetch due to invalidatesTags
     } catch (error: any) {
       const errorMessage =
         error?.data?.message || "Failed to delete client. Please try again.";
@@ -209,6 +214,7 @@ const ClientsTableSections = () => {
             currentPage={currentPage}
             totalPages={clientsResponse?.meta?.totalPage || 1}
             onPageChange={handlePageChange}
+            excludeFilterColumns={["Last Service", "Created", "Action"]}
           />
         )}
       </div>
