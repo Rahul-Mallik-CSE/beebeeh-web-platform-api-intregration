@@ -95,9 +95,9 @@ const NavBar = () => {
                   <Image
                     src={getImageFullUrl(user.profile_image)}
                     alt="Profile"
-                    width={40}
-                    height={40}
-                    className="object-cover"
+                    width={60}
+                    height={60}
+                    className="w-full h-full rounded-full"
                   />
                 ) : (
                   <span className="text-white font-semibold text-lg">
