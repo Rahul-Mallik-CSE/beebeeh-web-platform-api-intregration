@@ -91,6 +91,16 @@ export interface DeletePartResponse {
   requestId: string;
 }
 
+export interface RestockPartRequest {
+  stock_quantity: number;
+}
+
+export interface RestockPartResponse {
+  success: boolean;
+  message: string;
+  requestId: string;
+}
+
 const partsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     autocompleteProducts: builder.query<AutocompleteProductsResponse, string>({
@@ -152,6 +162,17 @@ const partsAPI = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Part"],
     }),
+    restockPart: builder.mutation<
+      RestockPartResponse,
+      { partId: string; data: RestockPartRequest }
+    >({
+      query: ({ partId, data }) => ({
+        url: `/api/parts/${partId}/restock/`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Part"],
+    }),
   }),
 });
 
@@ -162,4 +183,5 @@ export const {
   useSearchPartsQuery,
   useGetPartDetailsQuery,
   useDeletePartMutation,
+  useRestockPartMutation,
 } = partsAPI;

@@ -6,14 +6,20 @@ import PartsDetailsTableSection from "@/components/PartsComponents/PartsDetailsT
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
-import { useGetPartDetailsQuery } from "@/redux/features/adminFeatures/partsAPI";
+import {
+  useGetPartDetailsQuery,
+  useRestockPartMutation,
+} from "@/redux/features/adminFeatures/partsAPI";
 import TableSkeleton from "@/components/CommonComponents/TableSkeleton";
 import { Button } from "@/components/ui/button";
+import { toast } from "react-toastify";
+import RestockModal from "@/components/PartsComponents/RestockModal";
 
 const PartsDetailsPage = () => {
   const router = useRouter();
   const params = useParams();
   const partsId = params["parts-id"] as string;
+  const [isRestockModalOpen, setIsRestockModalOpen] = React.useState(false);
 
   // Fetch part details from API
   const {
@@ -21,6 +27,9 @@ const PartsDetailsPage = () => {
     isLoading,
     error,
   } = useGetPartDetailsQuery(partsId);
+
+  // Restock mutation
+  const [restockPart, { isLoading: isRestocking }] = useRestockPartMutation();
 
   // Transform API data to match component expectations
   const transformedPart = partResponse?.data
@@ -56,7 +65,20 @@ const PartsDetailsPage = () => {
   };
 
   const handleRestock = () => {
-    console.log("Restock part:", partsId);
+    setIsRestockModalOpen(true);
+  };
+
+  const handleRestockSubmit = async (stockQuantity: number) => {
+    try {
+      await restockPart({
+        partId: partsId,
+        data: { stock_quantity: stockQuantity },
+      }).unwrap();
+      toast.success("Part restocked successfully");
+      setIsRestockModalOpen(false);
+    } catch (error: any) {
+      toast.error(error?.data?.message || "Failed to restock part");
+    }
   };
 
   if (error) {
@@ -136,6 +158,15 @@ const PartsDetailsPage = () => {
           <PartsDetailsTableSection usedHistory={transformedPart.usedHistory} />
         </div>
       </div>
+
+      {/* Restock Modal */}
+      <RestockModal
+        isOpen={isRestockModalOpen}
+        onClose={() => setIsRestockModalOpen(false)}
+        onSubmit={handleRestockSubmit}
+        isLoading={isRestocking}
+        currentStock={transformedPart?.stock || 0}
+      />
     </div>
   );
 };
