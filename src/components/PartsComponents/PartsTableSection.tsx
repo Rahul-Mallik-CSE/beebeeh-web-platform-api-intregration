@@ -85,12 +85,6 @@ const PartsTableSection = () => {
           >
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
-          <button
-            onClick={() => setDeletePartId(row.part_id)}
-            className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
-          >
-            <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
-          </button>
         </div>
       ),
       className: "text-right",

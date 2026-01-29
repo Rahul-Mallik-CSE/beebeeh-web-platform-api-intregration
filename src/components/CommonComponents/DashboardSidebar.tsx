@@ -59,11 +59,11 @@ export default function DashboardSidebar() {
       icon: LayoutGrid,
       label: "Overview",
     },
-    {
-      href: "/my-jobs",
-      icon: PiSuitcaseSimple,
-      label: "My Jobs",
-    },
+    // {
+    //   href: "/my-jobs",
+    //   icon: PiSuitcaseSimple,
+    //   label: "My Jobs",
+    // },
     {
       href: "/clients",
       icon: LiaUserCogSolid,
