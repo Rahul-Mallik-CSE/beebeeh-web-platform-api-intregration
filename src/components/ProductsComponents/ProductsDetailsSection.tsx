@@ -41,7 +41,7 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
           </p>
           <span
             className={`inline-block px-2 sm:px-3 py-1 rounded-md text-xs font-medium mt-2 ${getStatusColor(
-              product.is_active
+              product.is_active,
             )}`}
           >
             {product.is_active ? "Active" : "Inactive"}
@@ -50,23 +50,6 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2">
-          <Button
-            onClick={onEdit}
-            className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3 md:px-4 h-8 sm:h-9"
-          >
-            <Pencil className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-            <span className="hidden xs:inline">Edit Product</span>
-            <span className="xs:hidden">Edit</span>
-          </Button>
-          <Button
-            onClick={onDelete}
-            variant="outline"
-            className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3 md:px-4 h-8 sm:h-9 border-none bg-gray-100 hover:bg-gray-50"
-          >
-            <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-            <span className="hidden xs:inline">Delete Product</span>
-            <span className="xs:hidden">Delete</span>
-          </Button>
           <Button
             onClick={onView}
             className="bg-red-800 hover:bg-red-700 text-white flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3 md:px-4 h-8 sm:h-9"
@@ -137,7 +120,9 @@ const StatCard: React.FC<StatCardProps> = ({
           {icon}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs sm:text-[13px] text-gray-500 font-medium mb-0.5">{title}</p>
+          <p className="text-xs sm:text-[13px] text-gray-500 font-medium mb-0.5">
+            {title}
+          </p>
           <p className="text-sm sm:text-base font-bold text-gray-800 truncate">
             {value}
           </p>

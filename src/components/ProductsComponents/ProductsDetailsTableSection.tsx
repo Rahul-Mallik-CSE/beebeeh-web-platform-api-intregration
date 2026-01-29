@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
 import { Button } from "@/components/ui/button";
-import { 
-  ProductDetailData, 
-  ChecklistItem, 
-  RelatedJob, 
-  PartInventoryStatus, 
+import {
+  ProductDetailData,
+  ChecklistItem,
+  RelatedJob,
+  PartInventoryStatus,
   FrequentlyUsedPart,
   useAddInstallationChecklistMutation,
-  useAddMaintenanceChecklistMutation 
+  useAddMaintenanceChecklistMutation,
 } from "@/redux/features/adminFeatures/productsAPI";
 import AddCheckListModal from "./AddCheckListModal";
 import { toast } from "react-toastify";
@@ -19,7 +19,9 @@ interface ProductsDetailsTableSectionProps {
   product: ProductDetailData;
 }
 
-const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = ({ product }) => {
+const ProductsDetailsTableSection: React.FC<
+  ProductsDetailsTableSectionProps
+> = ({ product }) => {
   const [isInstallationModalOpen, setIsInstallationModalOpen] = useState(false);
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
 
@@ -28,7 +30,10 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
 
   const handleAddInstallationTask = async (task: string) => {
     try {
-      await addInstallationTask({ productId: product.product_id, task }).unwrap();
+      await addInstallationTask({
+        productId: product.product_id,
+        task,
+      }).unwrap();
       toast.success("Installation task added successfully");
       setIsInstallationModalOpen(false);
     } catch (error) {
@@ -38,7 +43,10 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
 
   const handleAddMaintenanceTask = async (task: string) => {
     try {
-      await addMaintenanceTask({ productId: product.product_id, task }).unwrap();
+      await addMaintenanceTask({
+        productId: product.product_id,
+        task,
+      }).unwrap();
       toast.success("Maintenance task added successfully");
       setIsMaintenanceModalOpen(false);
     } catch (error) {
@@ -91,7 +99,9 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
           }
         };
         return (
-          <span className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}>
+          <span
+            className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}
+          >
             {row.status}
           </span>
         );
@@ -167,7 +177,9 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
           }
         };
         return (
-          <span className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}>
+          <span
+            className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}
+          >
             {row.status}
           </span>
         );
@@ -199,6 +211,7 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
               data={product.installation_checklist}
               columns={checklistColumns}
               itemsPerPage={6}
+              showFilter={false}
             />
           </div>
         </div>
@@ -223,6 +236,7 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
               data={product.maintenance_checklist}
               columns={checklistColumns}
               itemsPerPage={6}
+              showFilter={false}
             />
           </div>
         </div>
@@ -237,6 +251,7 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
           data={product.all_parts_inventory_status}
           columns={partsInventoryColumns}
           itemsPerPage={5}
+          showFilter={false}
         />
       </div>
 
@@ -249,6 +264,7 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
           data={product.frequently_used_parts}
           columns={frequentPartsColumns}
           itemsPerPage={5}
+          showFilter={false}
         />
       </div>
 
@@ -261,6 +277,7 @@ const ProductsDetailsTableSection: React.FC<ProductsDetailsTableSectionProps> = 
           data={product.related_jobs}
           columns={relatedJobsColumns}
           itemsPerPage={5}
+          showFilter={false}
         />
       </div>
 
