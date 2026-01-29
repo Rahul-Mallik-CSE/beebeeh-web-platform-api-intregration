@@ -1,99 +1,93 @@
 /** @format */
 "use client";
-import { Eye, Search } from "lucide-react";
-import { FiPlusCircle } from "react-icons/fi";
-import React, { useState } from "react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import React, { useState, useMemo } from "react";
+import { Plus, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import CustomTable from "../CommonComponents/CustomTable";
-import { maintenanceData } from "@/data/MaintenanceData";
-import { Maintenance, MaintenanceColumn } from "@/types/MaintenanceTypes";
-import { Checkbox } from "../ui/checkbox";
+import type { MaintenanceJob } from "@/types/AllTypes";
 import { useRouter } from "next/navigation";
+import AssignTechnicianModal from "../CommonComponents/AssignTechnicianModal";
+import { MaintenanceItem } from "@/redux/features/adminFeatures/maintenanceAPI";
+import { FilterState } from "../CommonComponents/FilterCard";
 
-const MaintenanceTableSection = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+interface MaintenanceTableSectionProps {
+  data?: MaintenanceItem[];
+  isLoading?: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onFilterChange: (filterState: FilterState) => void;
+}
+
+const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
+  data = [],
+  isLoading,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onFilterChange,
+}) => {
   const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string>("");
 
   const handleViewAssignJob = () => {
     router.push(`/maintenance/all-assign-job`);
   };
 
-  const filteredData = maintenanceData.filter((item) =>
-    Object.values(item).some((value) =>
-      value.toString().toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  );
+  // Transform API data to match MaintenanceJob interface
+  const transformedData: MaintenanceJob[] = useMemo(() => {
+    if (!data || !Array.isArray(data)) {
+      return [];
+    }
+    return data.map((item) => ({
+      id: item.maintenance_id,
+      jobId: item.maintenance_id,
+      client: item.client.name,
+      model: item.product.model_name,
+      technician: item.technician.name,
+      scheduled: item.scheduled_date,
+      status: item.status
+        .split("_")
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ") as any,
+    }));
+  }, [data]);
 
-  const maintenanceColumns: MaintenanceColumn[] = [
+  const maintenanceColumns = [
+    {
+      header: "Job ID",
+      accessor: "jobId" as keyof MaintenanceJob,
+    },
     {
       header: "Client",
-      accessor: "client",
+      accessor: "client" as keyof MaintenanceJob,
     },
     {
       header: "Model",
-      accessor: "model",
+      accessor: "model" as keyof MaintenanceJob,
     },
     {
-      header: "Due Date",
-      accessor: "dueDate",
+      header: "Technician",
+      accessor: "technician" as keyof MaintenanceJob,
     },
     {
-      header: "Day Left",
-      accessor: "dayLeft",
-    },
-    {
-      header: "Locality",
-      accessor: "locality",
-    },
-    {
-      header: "Last Service",
-      accessor: "lastService",
-    },
-    {
-      header: "Client Contacted",
-      accessor: (row: Maintenance) => (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={row.clientContacted}
-            className="h-5 w-5 border-2 data-[state=checked]:bg-red-800 data-[state=checked]:border-red-800"
-          />
-        </div>
-      ),
-      className: "text-center",
+      header: "Scheduled",
+      accessor: "scheduled" as keyof MaintenanceJob,
     },
     {
       header: "Status",
-      accessor: (row: Maintenance) => (
-        <div
-          className={`px-3 py-1 rounded-md text-sm font-medium inline-flex ${
-            row.status === "Upcoming"
-              ? "bg-purple-100 text-purple-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {row.status}
-        </div>
-      ),
+      accessor: "status" as keyof MaintenanceJob,
     },
     {
       header: "Action",
-      accessor: (row: Maintenance) => (
+      accessor: (row: MaintenanceJob) => (
         <div className="flex items-center justify-center gap-2">
-          <button className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors">
-            <Eye className="w-4 h-4 text-gray-600" />
-          </button>
           <button
-            onClick={() =>
-              router.push(
-                `/maintenance/${row.client
-                  .toLowerCase()
-                  .replace(" ", "-")}-maintenance`
-              )
-            }
+            onClick={() => router.push(`/maintenance/${row.jobId}`)}
             className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
           >
-            <FiPlusCircle className="w-4 h-4 text-gray-600" />
+            <Eye className="w-4 h-4 text-gray-600" />
           </button>
         </div>
       ),
@@ -101,36 +95,65 @@ const MaintenanceTableSection = () => {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-2xl py-6 px-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-32 mb-4"></div>
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="h-12 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full space-y-4 sm:space-y-6 bg-white p-3 sm:p-4 md:p-6 rounded-2xl">
-      {/* Header with Search and Button */}
+      {/* Header with Button */}
       <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-gray-800">
           Maintenance
         </h1>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-          <div className="relative w-40 sm:w-48 md:w-56 lg:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 pr-3 sm:pr-4 py-2 w-full text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-800 focus:border-transparent"
-            />
-          </div>
-          <Button
-            onClick={handleViewAssignJob}
-            className="bg-red-800 hover:bg-red-700 text-white px-3 sm:px-4 md:px-6 py-2 rounded-lg flex items-center gap-1.5 sm:gap-2 text-sm"
-          >
-            <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
-            <span className="whitespace-nowrap">View Assign Job</span>
-          </Button>
-        </div>
+        <Button
+          onClick={handleViewAssignJob}
+          className="bg-red-800 hover:bg-red-700 text-white px-3 sm:px-4 md:px-6 py-2 rounded-lg flex items-center gap-1.5 sm:gap-2 text-sm"
+        >
+          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+          <span className="whitespace-nowrap">View Assign Job</span>
+        </Button>
       </div>
 
       {/* Table */}
-      <CustomTable data={filteredData} columns={maintenanceColumns} />
+      <div className="">
+        <CustomTable
+          data={transformedData}
+          columns={maintenanceColumns}
+          itemsPerPage={10}
+          serverSidePagination={true}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={onPageChange}
+          onFilterChange={onFilterChange}
+          excludeFilterColumns={["Scheduled", "Action"]}
+          predefinedStatusOptions={[
+            "Assign",
+            "In Progress",
+            "Complete",
+            "Cancel",
+            "Rescheduled",
+          ]}
+        />
+      </div>
+
+      {/* Assign Technician Modal */}
+      <AssignTechnicianModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        jobId={selectedJobId}
+      />
     </div>
   );
 };

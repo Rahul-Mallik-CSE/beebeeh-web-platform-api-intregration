@@ -61,6 +61,23 @@ export interface RepairJob {
   status: RepairJobStatus;
 }
 
+export type MaintenanceJobStatus =
+  | "Assign"
+  | "In Progress"
+  | "Complete"
+  | "Cancel"
+  | "Rescheduled";
+
+export interface MaintenanceJob {
+  id: string;
+  jobId: string;
+  client: string;
+  model: string;
+  technician: string;
+  scheduled: string;
+  status: MaintenanceJobStatus;
+}
+
 export interface Job {
   id: string;
   jobType: JobType;

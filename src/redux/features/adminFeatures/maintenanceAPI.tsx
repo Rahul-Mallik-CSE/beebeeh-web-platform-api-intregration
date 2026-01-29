@@ -22,6 +22,53 @@ export interface AddMaintenanceResponse {
   requestId: string;
 }
 
+// Maintenance list interfaces
+export interface MaintenanceItem {
+  maintenance_id: string;
+  client: {
+    id: string;
+    name: string;
+    contact_number: string;
+  };
+  product: {
+    id: string;
+    model_name: string;
+  };
+  technician: {
+    id: string;
+    name: string;
+  };
+  scheduled_date: string;
+  scheduled_time: string;
+  priority: string;
+  problem_description: string;
+  status: string;
+  created_at: string;
+}
+
+export interface MaintenanceResponse {
+  success: boolean;
+  message: string;
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPage: number;
+  };
+  data: MaintenanceItem[];
+  requestId: string;
+}
+
+export interface MaintenanceQueryParams {
+  page?: number;
+  limit?: number;
+  client_name?: string;
+  model?: string;
+  locality?: string;
+  status?: string;
+  order?: "asc" | "desc";
+}
+
 const maintenanceAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     addMaintenance: builder.mutation<
@@ -34,7 +81,17 @@ const maintenanceAPI = baseApi.injectEndpoints({
         body: maintenanceData,
       }),
     }),
+
+    // Get maintenance
+    getMaintenance: builder.query<MaintenanceResponse, MaintenanceQueryParams>({
+      query: (params) => ({
+        url: `/api/maintenance/`,
+        method: "GET",
+        params,
+      }),
+    }),
   }),
 });
 
-export const { useAddMaintenanceMutation } = maintenanceAPI;
+export const { useAddMaintenanceMutation, useGetMaintenanceQuery } =
+  maintenanceAPI;
