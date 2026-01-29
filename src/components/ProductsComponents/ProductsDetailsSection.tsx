@@ -100,7 +100,7 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           <StatCard
             icon={<IoIosCard className="w-5 h-5 sm:w-6 sm:h-6" />}
             title="Domestic Freq"
@@ -115,13 +115,7 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
             bgColor="bg-green-100"
             iconColor="text-green-600"
           />
-          <StatCard
-            icon={<GiAutoRepair className="w-5 h-5 sm:w-6 sm:h-6" />}
-            title="Parts Qty"
-            value={product.parts_quantity.toString()}
-            bgColor="bg-[#E0E7FF]"
-            iconColor="text-[#4f46e5]"
-          />
+
           <StatCard
             icon={<Package className="w-5 h-5 sm:w-6 sm:h-6" />}
             title="Stock Qty"
