@@ -185,17 +185,6 @@ const TechniciansTableSection = () => {
           Technicians
         </h2>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search by name"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 w-40 sm:w-48 md:w-56 lg:w-64 text-sm"
-            />
-          </div>
           {/* Add Button */}
           <Button
             onClick={() => setIsAddTechnicianModalOpen(true)}

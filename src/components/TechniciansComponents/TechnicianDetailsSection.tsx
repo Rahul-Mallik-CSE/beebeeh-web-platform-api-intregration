@@ -126,13 +126,13 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           </Button>
 
           {/* Assign Job Button */}
-          <Button
+          {/* <Button
             onClick={onAssignJob}
             className="bg-red-800 hover:bg-red-700 text-white flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-none px-3 sm:px-4"
           >
             <span className="hidden sm:inline">Assign Job</span>
             <span className="sm:hidden">Assign</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
 

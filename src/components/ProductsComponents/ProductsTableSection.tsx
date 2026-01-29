@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddProductModal from "./AddProductModal";
-import { useGetProductsQuery, ProductListItem } from "@/redux/features/adminFeatures/productsAPI";
+import {
+  useGetProductsQuery,
+  ProductListItem,
+} from "@/redux/features/adminFeatures/productsAPI";
 import TableSkeleton from "../CommonComponents/TableSkeleton";
 
 const ProductsTableSection = () => {
@@ -17,7 +20,12 @@ const ProductsTableSection = () => {
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
 
   // Fetch products with search and pagination
-  const { data: productsResponse, isLoading, error, refetch } = useGetProductsQuery({
+  const {
+    data: productsResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetProductsQuery({
     page: currentPage,
     limit: 10,
     model_name: searchQuery,
@@ -71,7 +79,9 @@ const ProductsTableSection = () => {
       accessor: (row: ProductListItem) => {
         const isActive = row.is_active;
         return (
-          <span className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium ${isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+          <span
+            className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium ${isActive ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
+          >
             {isActive ? "Active" : "Inactive"}
           </span>
         );
@@ -105,7 +115,9 @@ const ProductsTableSection = () => {
     return (
       <div className="w-full p-8 text-center text-red-600">
         <p>Failed to load products. Please try again.</p>
-        <Button onClick={() => refetch()} variant="outline" className="mt-4">Retry</Button>
+        <Button onClick={() => refetch()} variant="outline" className="mt-4">
+          Retry
+        </Button>
       </div>
     );
   }
@@ -118,17 +130,6 @@ const ProductsTableSection = () => {
           Products
         </h2>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
-            <Input
-              type="text"
-              placeholder="Search by model name"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 sm:pl-10 w-40 sm:w-48 md:w-56 lg:w-64 text-sm"
-            />
-          </div>
           {/* Add Button */}
           <Button
             onClick={() => setIsAddProductModalOpen(true)}
