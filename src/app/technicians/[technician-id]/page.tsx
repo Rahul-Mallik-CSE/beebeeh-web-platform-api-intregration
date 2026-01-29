@@ -9,6 +9,7 @@ import { ArrowLeft, Eye } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import React, { useState } from "react";
 import AssignJobModal from "@/components/CommonComponents/AssignJobModal";
+import EditTechnicianModal from "@/components/TechniciansComponents/EditTechnicianModal";
 import { useGetTechnicianDashboardQuery } from "@/redux/features/adminFeatures/technicianAPI";
 
 const TechnicianDetailsPage = () => {
@@ -16,9 +17,15 @@ const TechnicianDetailsPage = () => {
   const params = useParams();
   const technicianId = params["technician-id"] as string;
   const [isAssignJobModalOpen, setIsAssignJobModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Fetch technician dashboard data
-  const { data: dashboardResponse, isLoading, error, refetch } = useGetTechnicianDashboardQuery(technicianId);
+  const {
+    data: dashboardResponse,
+    isLoading,
+    error,
+    refetch,
+  } = useGetTechnicianDashboardQuery(technicianId);
 
   const handleViewCalendar = () => {
     router.push(`/technicians/${technicianId}/technician-calendar`);
@@ -26,6 +33,15 @@ const TechnicianDetailsPage = () => {
 
   const handleAssignJob = () => {
     setIsAssignJobModalOpen(true);
+  };
+
+  const handleEditTechnician = () => {
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSave = () => {
+    // RTK Query will automatically refetch due to invalidatesTags
+    setIsEditModalOpen(false);
   };
 
   if (isLoading) {
@@ -52,9 +68,19 @@ const TechnicianDetailsPage = () => {
     return (
       <div className="w-full p-2 sm:p-4 text-center">
         <div className="bg-white border border-gray-200 rounded-2xl p-8 max-w-md mx-auto">
-          <p className="text-red-600 mb-4">Failed to load technician details.</p>
-          <Button onClick={() => refetch()} variant="outline">Retry</Button>
-          <Button onClick={() => router.back()} variant="ghost" className="ml-2">Go Back</Button>
+          <p className="text-red-600 mb-4">
+            Failed to load technician details.
+          </p>
+          <Button onClick={() => refetch()} variant="outline">
+            Retry
+          </Button>
+          <Button
+            onClick={() => router.back()}
+            variant="ghost"
+            className="ml-2"
+          >
+            Go Back
+          </Button>
         </div>
       </div>
     );
@@ -91,15 +117,15 @@ const TechnicianDetailsPage = () => {
           </div>
 
           {/* Technician data section */}
-          <TechnicianDetailsSection 
-            data={dashboardData} 
-            onAssignJob={handleAssignJob} 
-            onEdit={() => console.log("Edit")} 
+          <TechnicianDetailsSection
+            data={dashboardData}
+            onAssignJob={handleAssignJob}
+            onEdit={handleEditTechnician}
           />
 
           <TechnicianChartSection data={dashboardData} />
 
-          <TechnicianDetailsTableSection 
+          <TechnicianDetailsTableSection
             todaysJobs={dashboardData.tables.todays_jobs}
             fullJobHistory={dashboardData.tables.full_job_history}
           />
@@ -112,6 +138,14 @@ const TechnicianDetailsPage = () => {
         onClose={() => setIsAssignJobModalOpen(false)}
         technicianId={technicianId}
         technicianName={dashboardData.technician.full_name}
+      />
+
+      {/* Edit Technician Modal */}
+      <EditTechnicianModal
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        technicianData={dashboardData}
+        onSave={handleEditSave}
       />
     </div>
   );

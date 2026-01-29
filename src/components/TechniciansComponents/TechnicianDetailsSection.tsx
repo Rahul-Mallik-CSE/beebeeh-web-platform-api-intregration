@@ -76,7 +76,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
             </p>
             <div
               className={`inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-sm text-xs font-medium capitalize ${getStatusColor(
-                technician.status
+                technician.status,
               )}`}
             >
               {technician.status}
@@ -144,7 +144,9 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
           {
             id: "address",
             label: "Address",
-            value: technician.address + (technician.town ? `, ${technician.town}` : ""),
+            value:
+              technician.address +
+              (technician.town ? `, ${technician.town}` : ""),
             icon: FaMapMarkerAlt,
             iconBgColor: "bg-green-100",
             iconColor: "text-green-600",
@@ -217,7 +219,7 @@ const TechnicianDetailsSection: React.FC<TechnicianDetailsSectionProps> = ({
             value: (
               <span
                 className={`inline-flex items-center px-3 py-1 rounded-sm text-xs font-medium capitalize ${getStatusColor(
-                  technician.status
+                  technician.status,
                 )}`}
               >
                 {technician.status}

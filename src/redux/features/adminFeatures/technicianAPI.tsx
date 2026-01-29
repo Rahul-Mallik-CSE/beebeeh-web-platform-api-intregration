@@ -167,6 +167,20 @@ export interface DeleteTechnicianResponse {
   requestId: string;
 }
 
+export interface EditTechnicianRequest {
+  full_name: string;
+  contact_number: string;
+  address: string;
+  skills: string[];
+  profile_image?: File;
+}
+
+export interface EditTechnicianResponse {
+  success: boolean;
+  message: string;
+  requestId: string;
+}
+
 // ============= API Endpoints =============
 
 const technicianAPI = baseApi.injectEndpoints({
@@ -242,6 +256,23 @@ const technicianAPI = baseApi.injectEndpoints({
         { type: "Technician", id: technicianId },
       ],
     }),
+
+    // Edit technician
+    editTechnician: builder.mutation<
+      EditTechnicianResponse,
+      { id: string; data: FormData }
+    >({
+      query: ({ id, data }) => ({
+        url: `/api/technicians/${id}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        "Technician",
+        { type: "Technician", id },
+        { type: "Technician", id: `${id}-dashboard` },
+      ],
+    }),
   }),
 });
 
@@ -251,6 +282,7 @@ export const {
   useGetTechnicianDashboardQuery,
   useAddTechnicianMutation,
   useDeleteTechnicianMutation,
+  useEditTechnicianMutation,
 } = technicianAPI;
 
 export default technicianAPI;
