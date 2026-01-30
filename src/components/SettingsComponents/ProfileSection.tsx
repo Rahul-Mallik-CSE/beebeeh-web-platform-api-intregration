@@ -9,6 +9,10 @@ import ProfileEditModal from "./ProfileEditModal";
 import ResetPassModal from "./ResetPassModal";
 import { useGetProfileQuery } from "@/redux/features/settingAPI";
 import { useChangePasswordMutation } from "@/redux/features/authAPI";
+import {
+  useGetTechnicianStatusQuery,
+  useUpdateTechnicianStatusMutation,
+} from "@/redux/features/settingAPI";
 import { getImageFullUrl } from "@/lib/utils";
 import { toast } from "react-toastify";
 
@@ -16,6 +20,10 @@ const ProfileSection = () => {
   const { data, isLoading, error } = useGetProfileQuery();
   const [changePassword, { isLoading: isChangingPassword }] =
     useChangePasswordMutation();
+  const { data: statusData, isLoading: isStatusLoading } =
+    useGetTechnicianStatusQuery();
+  const [updateTechnicianStatus, { isLoading: isUpdatingStatus }] =
+    useUpdateTechnicianStatusMutation();
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -89,6 +97,20 @@ const ProfileSection = () => {
       console.error("Change password failed:", err);
       toast.error(
         err?.data?.message || "Failed to change password. Please try again.",
+      );
+    }
+  };
+
+  const handleStatusChange = async (
+    newStatus: "available" | "unavailable" | "busy",
+  ) => {
+    try {
+      await updateTechnicianStatus({ status: newStatus }).unwrap();
+      toast.success(`Status updated to ${newStatus}!`);
+    } catch (err: any) {
+      console.error("Status update failed:", err);
+      toast.error(
+        err?.data?.message || "Failed to update status. Please try again.",
       );
     }
   };
@@ -255,6 +277,57 @@ const ProfileSection = () => {
           </div>
         </div>
       </div>
+
+      {/* Technician Status Section - Only show for technicians */}
+      {formData.role === "technician" && (
+        <div className="border-t pt-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">
+            Availability Status
+          </h3>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-700">
+                  Current Status
+                </p>
+                <p className="text-xs text-gray-500">
+                  Set your availability for new job assignments
+                </p>
+              </div>
+              <div className="flex gap-2">
+                {["available", "busy", "unavailable"].map((status) => (
+                  <Button
+                    key={status}
+                    onClick={() =>
+                      handleStatusChange(
+                        status as "available" | "unavailable" | "busy",
+                      )
+                    }
+                    disabled={isUpdatingStatus || isStatusLoading}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      statusData?.data?.status === status
+                        ? status === "available"
+                          ? "bg-green-100 text-green-800 border border-green-300"
+                          : status === "busy"
+                            ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                            : "bg-red-100 text-red-800 border border-red-300"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+                    }`}
+                  >
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {isStatusLoading && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900"></div>
+                Loading status...
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       <ProfileEditModal
