@@ -9,12 +9,9 @@ interface ClientInfoSectionProps {
 
 const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
   const handleMapClick = () => {
-    // Open Google Maps with the coordinates
-    const { latitude, longitude } = data.pin_location;
-    if (latitude && longitude) {
-      const googleMapsUrl = `https://www.google.com/maps?q=${latitude},${longitude}`;
-      window.open(googleMapsUrl, "_blank");
-    }
+    // Open the provided Google Maps link
+    const mapUrl = data.location;
+    window.open(mapUrl, "_blank");
   };
 
   return (
@@ -57,21 +54,18 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             {data.notes || "N/A"}
           </p>
         </div>
-        {/* <div className="flex items-center justify-between py-1.5 sm:py-2">
+        <div className="flex items-center justify-between py-1.5 sm:py-2">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Pin Location :
           </p>
           <button
             onClick={handleMapClick}
-            disabled={
-              !data.pin_location.latitude || !data.pin_location.longitude
-            }
-            className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#FF6F001A] text-gray-600 rounded-lg hover:bg-orange-100 transition-colors ${!data.pin_location.latitude || !data.pin_location.longitude ? "opacity-50 cursor-not-allowed" : ""}`}
+            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#FF6F001A] text-gray-600 rounded-lg hover:bg-orange-100 transition-colors"
           >
             <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm font-medium">Map</span>
           </button>
-        </div> */}
+        </div>
       </div>
     </div>
   );

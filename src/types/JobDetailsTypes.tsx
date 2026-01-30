@@ -35,6 +35,7 @@ export interface ClientInformationSection {
   address: string;
   town: string;
   client_type: ClientType;
+  location: string;
   notes: string;
   pin_location: PinLocation;
 }

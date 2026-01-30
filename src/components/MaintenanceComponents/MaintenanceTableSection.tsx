@@ -31,8 +31,8 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedJobId, setSelectedJobId] = useState<string>("");
 
-  const handleViewAssignJob = () => {
-    router.push(`/maintenance/all-assign-job`);
+  const handleAddMaintenance = () => {
+    router.push(`/maintenance/add-maintenance`);
   };
 
   // Transform API data to match MaintenanceJob interface
@@ -118,11 +118,11 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
           Maintenance
         </h1>
         <Button
-          onClick={handleViewAssignJob}
+          onClick={handleAddMaintenance}
           className="bg-red-800 hover:bg-red-700 text-white px-3 sm:px-4 md:px-6 py-2 rounded-lg flex items-center gap-1.5 sm:gap-2 text-sm"
         >
-          <Eye className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
-          <span className="whitespace-nowrap">View Assign Job</span>
+          <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+          <span className="whitespace-nowrap">Add Maintenance</span>
         </Button>
       </div>
 
