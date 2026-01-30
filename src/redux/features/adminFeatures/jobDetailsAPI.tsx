@@ -24,6 +24,7 @@ export interface ClientInformation {
   locality: string;
   notes: string;
   pin_location: PinLocation;
+  location: string;
 }
 
 export interface TechnicianDetails {
