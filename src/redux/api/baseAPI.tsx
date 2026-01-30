@@ -33,6 +33,7 @@ const baseAPI = createApi({
     "Chat",
     "Notification",
     "Profile",
+    "TechnicianStatus",
     "AllJobs",
     "TodaysJobs",
     "ReportModule",

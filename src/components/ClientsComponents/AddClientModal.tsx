@@ -50,6 +50,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
     email: "",
     address: "",
     town: "",
+    location: "",
     contactNumber: "",
     type: "",
   });
