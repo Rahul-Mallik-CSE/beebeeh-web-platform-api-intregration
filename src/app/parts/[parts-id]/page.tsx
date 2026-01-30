@@ -167,6 +167,8 @@ const PartsDetailsPage = () => {
         isLoading={isRestocking}
         currentStock={transformedPart?.stock || 0}
       />
+
+      {/* delete button here */}
     </div>
   );
 };

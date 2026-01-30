@@ -4,25 +4,13 @@ import { useState, useMemo } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
 import TableSkeleton from "@/components/CommonComponents/TableSkeleton";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddClientModal, { ClientFormData } from "./AddClientModal";
 import {
   useGetClientsQuery,
-  useDeleteClientMutation,
   ClientListItem,
 } from "@/redux/features/adminFeatures/clientsAPI";
-import { toast } from "react-toastify";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 const ClientsTableSections = () => {
   const router = useRouter();
@@ -37,8 +25,6 @@ const ClientsTableSections = () => {
     contact_number: "",
     order: "" as "asc" | "desc" | "",
   });
-  const [deleteClientId, setDeleteClientId] = useState<string | null>(null);
-
   // Fetch clients with pagination and filters
   const {
     data: clientsResponse,
@@ -53,29 +39,8 @@ const ClientsTableSections = () => {
     ),
   });
 
-  const [deleteClient, { isLoading: isDeleting }] = useDeleteClientMutation();
-
   const handleViewClient = (client: ClientListItem) => {
     router.push(`/clients/${client.client_id}`);
-  };
-
-  const handleDeleteClick = (clientId: string) => {
-    setDeleteClientId(clientId);
-  };
-
-  const handleConfirmDelete = async () => {
-    if (!deleteClientId) return;
-
-    try {
-      await deleteClient(deleteClientId).unwrap();
-      toast.success("Client deleted successfully!");
-      setDeleteClientId(null);
-      // RTK Query will automatically refetch due to invalidatesTags
-    } catch (error: any) {
-      const errorMessage =
-        error?.data?.message || "Failed to delete client. Please try again.";
-      toast.error(errorMessage);
-    }
   };
 
   const handleSaveClient = (data: ClientFormData) => {
@@ -155,14 +120,6 @@ const ClientsTableSections = () => {
           >
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
-          <button
-            onClick={() => handleDeleteClick(row.client_id)}
-            className="p-1.5 sm:p-2 cursor-pointer hover:bg-red-50 rounded-full transition-colors"
-            title="Delete Client"
-            disabled={isDeleting}
-          >
-            <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" />
-          </button>
         </div>
       ),
       className: "text-right",
@@ -225,32 +182,6 @@ const ClientsTableSections = () => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveClient}
       />
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog
-        open={deleteClientId !== null}
-        onOpenChange={(open: boolean) => !open && setDeleteClientId(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              client and remove their data from the system.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDelete}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
