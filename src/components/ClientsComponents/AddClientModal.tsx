@@ -32,6 +32,7 @@ export interface ClientFormData {
   lastName: string;
   email: string;
   address: string;
+  location: string;
   town: string;
   contactNumber: string;
   type: string;
@@ -63,12 +64,12 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
       let processedFile = file;
       if (file.name.length > 100) {
         // Rename file to a shorter name while keeping extension
-        const extension = file.name.split('.').pop();
+        const extension = file.name.split(".").pop();
         const timestamp = Date.now();
         const newName = `client_profile_${timestamp}.${extension}`;
         processedFile = new File([file], newName, { type: file.type });
       }
-      
+
       setProfileImageFile(processedFile);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -95,6 +96,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
       !formData.email.trim() ||
       !formData.address.trim() ||
       !formData.town.trim() ||
+      !formData.location.trim() ||
       !formData.contactNumber.trim() ||
       !formData.type.trim()
     ) {
@@ -117,8 +119,9 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
       formDataToSend.append("email", formData.email);
       formDataToSend.append("address", formData.address);
       formDataToSend.append("town", formData.town);
+      formDataToSend.append("location", formData.location);
       formDataToSend.append("contact_number", formData.contactNumber);
-      formDataToSend.append("client_type", formData.type.toUpperCase());
+      formDataToSend.append("client_type", formData.type);
       formDataToSend.append("is_active", "true");
 
       if (profileImageFile) {
@@ -152,6 +155,7 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
       email: "",
       address: "",
       town: "",
+      location: "",
       contactNumber: "",
       type: "",
     });
@@ -292,6 +296,21 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
               />
             </div>
 
+            {/* Location */}
+            <div>
+              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
+                Location
+              </label>
+              <Input
+                type="text"
+                name="location"
+                value={formData.location}
+                onChange={handleChange}
+                placeholder="Enter location"
+                className="h-9 sm:h-10 text-sm"
+              />
+            </div>
+
             {/* Contact Number */}
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
@@ -322,9 +341,8 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
                   <SelectValue placeholder="Select client type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="RESIDENTIAL">Residential</SelectItem>
-                  <SelectItem value="COMMERCIAL">Commercial</SelectItem>
-                  <SelectItem value="INDUSTRIAL">Industrial</SelectItem>
+                  <SelectItem value="domestic">Domestic</SelectItem>
+                  <SelectItem value="commercial">Commercial</SelectItem>
                 </SelectContent>
               </Select>
             </div>

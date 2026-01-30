@@ -90,17 +90,6 @@ const InstallationTableSection: React.FC<InstallationTableSectionProps> = ({
           >
             <Eye className="w-4 h-4 text-gray-600" />
           </button>
-          {row.status === "Assign" && (
-            <button
-              onClick={() => {
-                setSelectedJobId(row.jobId);
-                setIsModalOpen(true);
-              }}
-              className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <Plus className="w-4 h-4 text-gray-600" />
-            </button>
-          )}
         </div>
       ),
       className: "text-center",
