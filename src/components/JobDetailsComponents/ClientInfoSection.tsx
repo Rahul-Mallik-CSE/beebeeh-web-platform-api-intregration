@@ -75,7 +75,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
           </p>
           <button
             onClick={handleMapClick}
-            className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#FF6F001A] text-gray-600 rounded-lg hover:bg-orange-100 transition-colors"
+            className="cursor-pointer flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 bg-[#FF6F001A] text-gray-600 rounded-lg hover:bg-orange-100 transition-colors"
           >
             <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             <span className="text-xs sm:text-sm font-medium">Map</span>

@@ -98,6 +98,7 @@ const NavBar = () => {
                     width={60}
                     height={60}
                     className="w-full h-full rounded-full"
+                    unoptimized
                   />
                 ) : (
                   <span className="text-white font-semibold text-lg">

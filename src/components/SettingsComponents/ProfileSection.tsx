@@ -154,6 +154,7 @@ const ProfileSection = () => {
               width={80}
               height={80}
               className="object-cover w-full h-full"
+              unoptimized
             />
           </div>
           <div>
@@ -304,15 +305,14 @@ const ProfileSection = () => {
                       )
                     }
                     disabled={isUpdatingStatus || isStatusLoading}
-                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                      statusData?.data?.status === status
-                        ? status === "available"
-                          ? "bg-green-100 text-green-800 border border-green-300"
-                          : status === "busy"
-                            ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
-                            : "bg-red-100 text-red-800 border border-red-300"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
-                    }`}
+                    className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${statusData?.data?.status === status
+                      ? status === "available"
+                        ? "bg-green-100 text-green-800 border border-green-300"
+                        : status === "busy"
+                          ? "bg-yellow-100 text-yellow-800 border border-yellow-300"
+                          : "bg-red-100 text-red-800 border border-red-300"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300"
+                      }`}
                   >
                     {status.charAt(0).toUpperCase() + status.slice(1)}
                   </Button>

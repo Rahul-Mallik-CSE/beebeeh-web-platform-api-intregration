@@ -53,7 +53,7 @@ export const useWebSocketNotifications =
       // Get token from localStorage
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        console.error("No access token found for WebSocket connection");
+
         return null;
       }
 
