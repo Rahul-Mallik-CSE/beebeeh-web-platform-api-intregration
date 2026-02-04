@@ -16,7 +16,7 @@ const LoadingScreen = () => {
 
         {/* Beebeeh text */}
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-[#9E2729] mb-3 sm:mb-4">
-          Beebeeh
+          Wello
         </h1>
 
         {/* Spinner */}
