@@ -187,6 +187,23 @@ export interface DisableEnableTechnicianResponse {
   requestId: string;
 }
 
+export interface CalendarDayData {
+  date: string;
+  installations: number;
+  repairs: number;
+  maintenance: number;
+}
+
+export interface GetTechnicianCalendarMonthResponse {
+  success: boolean;
+  message: string;
+  data: {
+    technician_id: string;
+    days: CalendarDayData[];
+  };
+  requestId: string | null;
+}
+
 // ============= API Endpoints =============
 
 const technicianAPI = baseApi.injectEndpoints({
@@ -310,6 +327,20 @@ const technicianAPI = baseApi.injectEndpoints({
         ],
       },
     ),
+
+    // Get technician calendar month
+    getTechnicianCalendarMonth: builder.query<
+      GetTechnicianCalendarMonthResponse,
+      string
+    >({
+      query: (technicianId) => ({
+        url: `/api/calendar/technician/month/?technician_id=${technicianId}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, id) => [
+        { type: "Technician", id: `${id}-calendar` },
+      ],
+    }),
   }),
 });
 
@@ -322,6 +353,7 @@ export const {
   useEditTechnicianMutation,
   useDisableTechnicianMutation,
   useEnableTechnicianMutation,
+  useGetTechnicianCalendarMonthQuery,
 } = technicianAPI;
 
 export default technicianAPI;

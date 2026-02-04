@@ -3,10 +3,13 @@
 
 import CalendarPageDesign from "@/components/TechniciansComponents/CalendarPageDesign";
 import { ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 const TechnicalCalendarPage = () => {
   const router = useRouter();
+  const params = useParams();
+  const technicianId = params["technician-id"] as string;
+
   return (
     <div className="w-full p-2 sm:p-4 overflow-x-hidden">
       <div className="max-w-[2500px] rounded-2xl mx-auto space-y-3 sm:space-y-4">
@@ -25,7 +28,7 @@ const TechnicalCalendarPage = () => {
               </span>
             </div>
           </div>
-          <CalendarPageDesign />
+          <CalendarPageDesign technicianId={technicianId} />
         </div>
       </div>
     </div>
