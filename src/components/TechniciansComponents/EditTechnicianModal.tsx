@@ -20,6 +20,7 @@ import {
 } from "@/redux/features/adminFeatures/technicianAPI";
 import { toast } from "react-toastify";
 import { getImageFullUrl } from "@/lib/utils";
+import { get } from "http";
 
 interface EditTechnicianModalProps {
   open: boolean;
@@ -86,7 +87,7 @@ const EditTechnicianModal: React.FC<EditTechnicianModalProps> = ({
     }
 
     // Contact number validation (basic)
-    if (contactNumber.trim().length < 10) {
+    if (contactNumber.trim().length < 2) {
       toast.error("Please enter a valid contact number.");
       return;
     }
@@ -98,10 +99,8 @@ const EditTechnicianModal: React.FC<EditTechnicianModalProps> = ({
       formDataToSend.append("contact_number", contactNumber.trim());
       formDataToSend.append("address", address.trim());
 
-      // Handle skills array - send as individual items matching the API format
-      skills.forEach((skill) => {
-        formDataToSend.append("skills", skill);
-      });
+      // Handle skills array - send as comma-separated string
+      formDataToSend.append("skills", skills.join(", "));
 
       // Only append profile image if a new one was selected
       if (profileImageFile) {
@@ -160,7 +159,7 @@ const EditTechnicianModal: React.FC<EditTechnicianModalProps> = ({
             <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200 group-hover:border-gray-300 transition-colors">
               {profileImage ? (
                 <Image
-                  src={profileImage}
+                  src={getImageFullUrl(profileImage)}
                   alt="Profile"
                   width={128}
                   height={128}
