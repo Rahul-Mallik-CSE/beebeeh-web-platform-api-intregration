@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         port: "8001",
         pathname: "/media/**",
       },
+      {
+        protocol: "https",
+        hostname: "beebeeh-api-production.up.railway.app",
+      },
     ],
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",
