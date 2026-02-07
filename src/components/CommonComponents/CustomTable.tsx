@@ -353,97 +353,112 @@ const CustomTable = <T extends Record<string, any>>({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {currentData.map((row, rowIndex) => (
-                <TableRow
-                  key={rowIndex}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  {columns.map((column, colIndex) => (
-                    <TableCell
-                      key={colIndex}
-                      className={cn(
-                        "text-gray-700 py-3 sm:py-5 text-xs sm:text-sm whitespace-nowrap",
-                        column.className,
-                      )}
-                    >
-                      {renderCell(row, column)}
-                    </TableCell>
-                  ))}
-                  {showActions && onAction && (
-                    <TableCell className="text-right py-3 sm:py-5">
-                      <button
-                        onClick={() => onAction(row)}
-                        className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors inline-flex items-center justify-center"
-                      >
-                        <View className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
-                      </button>
-                    </TableCell>
-                  )}
+              {currentData.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length + (showActions && onAction ? 1 : 0)}
+                    className="text-center py-12 sm:py-16"
+                  >
+                    <p className="text-gray-500 text-sm sm:text-base font-medium">
+                      No results found
+                    </p>
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                currentData.map((row, rowIndex) => (
+                  <TableRow
+                    key={rowIndex}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
+                    {columns.map((column, colIndex) => (
+                      <TableCell
+                        key={colIndex}
+                        className={cn(
+                          "text-gray-700 py-3 sm:py-5 text-xs sm:text-sm whitespace-nowrap",
+                          column.className,
+                        )}
+                      >
+                        {renderCell(row, column)}
+                      </TableCell>
+                    ))}
+                    {showActions && onAction && (
+                      <TableCell className="text-right py-3 sm:py-5">
+                        <button
+                          onClick={() => onAction(row)}
+                          className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors inline-flex items-center justify-center"
+                        >
+                          <View className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+                        </button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </div>
       </div>
 
       {/* Pagination */}
-      <Pagination>
-        <PaginationContent className="flex-wrap gap-1">
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => handlePageChange(currentPage - 1)}
-              className={cn(
-                "text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4",
-                currentPage === 1
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer",
-              )}
-            />
-          </PaginationItem>
-
-          {getPageNumbers().map((page, index) => (
-            <PaginationItem key={index} className="hidden xs:inline-flex">
-              {page === "..." ? (
-                <PaginationEllipsis className="h-8 sm:h-10" />
-              ) : (
-                <PaginationLink
-                  onClick={() => handlePageChange(page as number)}
-                  isActive={currentPage === page}
-                  className={cn(
-                    "cursor-pointer text-xs sm:text-sm h-8 sm:h-10 w-8 sm:w-10",
-                    currentPage === page &&
-                      "bg-red-800 text-white hover:bg-red-700 hover:text-white",
-                  )}
-                >
-                  {page}
-                </PaginationLink>
-              )}
+      {currentData.length > 0 && (
+        <Pagination>
+          <PaginationContent className="flex-wrap gap-1">
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => handlePageChange(currentPage - 1)}
+                className={cn(
+                  "text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4",
+                  currentPage === 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer",
+                )}
+              />
             </PaginationItem>
-          ))}
 
-          {/* Mobile: Show only current page */}
-          <PaginationItem className="xs:hidden">
-            <PaginationLink
-              isActive={true}
-              className="cursor-default bg-red-800 text-white h-8 w-8 text-xs"
-            >
-              {currentPage}
-            </PaginationLink>
-          </PaginationItem>
+            {getPageNumbers().map((page, index) => (
+              <PaginationItem key={index} className="hidden xs:inline-flex">
+                {page === "..." ? (
+                  <PaginationEllipsis className="h-8 sm:h-10" />
+                ) : (
+                  <PaginationLink
+                    onClick={() => handlePageChange(page as number)}
+                    isActive={currentPage === page}
+                    className={cn(
+                      "cursor-pointer text-xs sm:text-sm h-8 sm:h-10 w-8 sm:w-10",
+                      currentPage === page &&
+                        "bg-red-800 text-white hover:bg-red-700 hover:text-white",
+                    )}
+                  >
+                    {page}
+                  </PaginationLink>
+                )}
+              </PaginationItem>
+            ))}
 
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => handlePageChange(currentPage + 1)}
-              className={cn(
-                "text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4",
-                currentPage === totalPages
-                  ? "pointer-events-none opacity-50"
-                  : "cursor-pointer",
-              )}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+            {/* Mobile: Show only current page */}
+            <PaginationItem className="xs:hidden">
+              <PaginationLink
+                isActive={true}
+                className="cursor-default bg-red-800 text-white h-8 w-8 text-xs"
+              >
+                {currentPage}
+              </PaginationLink>
+            </PaginationItem>
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => handlePageChange(currentPage + 1)}
+                className={cn(
+                  "text-xs sm:text-sm h-8 sm:h-10 px-2 sm:px-4",
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer",
+                )}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 };
