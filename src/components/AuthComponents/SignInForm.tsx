@@ -65,10 +65,10 @@ export const SignInForm = () => {
       </div>
       {/* Welcome Text */}
       <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[#9E2729] mb-1">
-        Welcome to Beebeeh
+        Welcome to Wello
       </h1>
       <p className="text-sm sm:text-base text-[#9E2729] mb-4 sm:mb-6">
-        Sign in to access your Beebeeh dashboard and continue your work.
+        Sign in to access your Wello dashboard and continue your work.
       </p>
 
       <form onSubmit={handleSignIn}>

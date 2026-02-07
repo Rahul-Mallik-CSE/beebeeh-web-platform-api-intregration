@@ -198,7 +198,7 @@ export default function DashboardSidebar() {
             <Link href="/overview" className="flex gap-2 ">
               {isCollapsed ? (
                 <h1 className="mt-2 mb-3 font-bold text-sm text-white rounded-full px-1 border-2 border-gray-200">
-                  B
+                  W
                 </h1>
               ) : (
                 // <div className="mt-2 flex items-center gap-2">
@@ -215,7 +215,7 @@ export default function DashboardSidebar() {
 
                   {/* Beebeeh text */}
                   <h1 className="text-xl  font-bold text-white mb-3 sm:mb-4">
-                    Beebeeh
+                    Wello
                   </h1>
                 </div>
               )}

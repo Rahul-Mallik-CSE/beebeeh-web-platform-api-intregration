@@ -153,7 +153,7 @@ const SignUpForm = () => {
         Create an Account
       </h1>
       <p className="text-sm sm:text-base text-[#9E2729] mb-2">
-        Get started with Beebeeh
+        Get started with Wello
       </p>
 
       <form onSubmit={handleSignUp}>

@@ -1,6 +1,6 @@
 <!-- @format -->
 
-# Beebeeh Web Platform
+# Wello Beebeeh Web Platform
 
 A modern, responsive technician dashboard web application built with Next.js 16, TypeScript, and Tailwind CSS. This platform enables technicians to efficiently manage job assignments, track service requests, view notifications, and maintain detailed job records.
 
