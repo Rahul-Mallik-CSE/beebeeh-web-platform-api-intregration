@@ -304,7 +304,7 @@ const CustomTable = <T extends Record<string, any>>({
   };
 
   return (
-    <div className="w-full space-y-3 sm:space-y-4 overflow-x-auto">
+    <div className="w-full space-y-3 sm:space-y-4 overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-2 sm:px-0 gap-4">
         {title ? (
