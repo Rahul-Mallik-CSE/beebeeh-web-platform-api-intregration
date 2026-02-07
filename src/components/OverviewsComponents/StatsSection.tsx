@@ -31,24 +31,20 @@ const StatsSection = ({ isLoading, cards, cardTrends }: StatsSectionProps) => {
     },
     {
       id: 2,
-      title: "Completed Work",
+      title: "Total Completed Work",
       value: cards.completed_work.toString(),
       icon: (
         <PiSunHorizonFill className="w-6 h-6 sm:w-7 sm:h-7 text-purple-600" />
       ),
-      trend: `${cardTrends.completed_work.change_pct}% ${cardTrends.completed_work.compare_text}`,
-      trendDirection: cardTrends.completed_work.direction,
       iconBgColor: "bg-purple-100",
     },
     {
       id: 3,
-      title: "Pending Jobs",
+      title: "Total Pending Jobs",
       value: cards.pending_jobs.toString(),
       icon: (
         <FaClockRotateLeft className="w-6 h-6 sm:w-7 sm:h-7 text-[#FEC12C]" />
       ),
-      trend: `${cardTrends.pending_jobs.change_pct}% ${cardTrends.pending_jobs.compare_text}`,
-      trendDirection: cardTrends.pending_jobs.direction,
       iconBgColor: "bg-[#FEC12C26]",
     },
     {
