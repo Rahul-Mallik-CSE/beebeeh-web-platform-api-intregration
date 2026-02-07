@@ -462,7 +462,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search client ID or client name"
+                placeholder="Start with C- to search client ID or client name"
                 value={formData.searchClient}
                 onChange={(e) => handleChange("searchClient", e.target.value)}
                 className="w-full pr-10"
@@ -526,7 +526,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search product id or model name"
+                placeholder="Start with P- to search product id or model name"
                 value={formData.searchProduct}
                 onChange={(e) => handleChange("searchProduct", e.target.value)}
                 className="w-full pr-10"
@@ -660,7 +660,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Select technician id"
+                placeholder="Start with T- to search technician id"
                 value={formData.searchTechnician}
                 onChange={(e) =>
                   handleChange("searchTechnician", e.target.value)

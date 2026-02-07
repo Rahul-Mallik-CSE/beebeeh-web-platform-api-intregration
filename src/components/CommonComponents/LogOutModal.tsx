@@ -26,7 +26,7 @@ export default function LogoutModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex justify-center items-center text-2xl font-semibold text-red-500">
+          <DialogTitle className="flex justify-center items-center text-2xl font-semibold text-[#9E2729]">
             <LogOut className="mr-2 h-6 w-6" /> Sign Out
           </DialogTitle>
         </DialogHeader>
@@ -34,7 +34,7 @@ export default function LogoutModal({
         <div className="flex flex-col items-center py-4">
           <h3 className="mb-6 text-xl font-semibold text-center">
             Are you sure you want to{" "}
-            <span className="font-bold text-red-500">sign out?</span>
+            <span className="font-bold text-[#9E2729]">sign out?</span>
           </h3>
 
           <div className="flex justify-center gap-4 w-full">
@@ -43,7 +43,7 @@ export default function LogoutModal({
             </Button>
             <Button
               onClick={onConfirm}
-              className="w-1/2 text-white bg-red-500 hover:bg-red-600"
+              className="w-1/2 text-white bg-[#9E2729] hover:bg-[#7A1B1C]"
             >
               Yes, Sign Out
             </Button>
