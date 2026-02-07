@@ -112,6 +112,14 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
       return;
     }
 
+    // Google Maps URL validation
+    const googleMapsUrlRegex =
+      /^https:\/\/(maps\.app\.goo\.gl\/|www\.google\.com\/maps\/|goo\.gl\/maps\/).+$/;
+    if (!googleMapsUrlRegex.test(formData.location)) {
+      toast.error("Please provide a valid Google Maps URL for the location.");
+      return;
+    }
+
     try {
       // Create FormData object
       const formDataToSend = new FormData();
@@ -300,16 +308,28 @@ const AddClientModal: React.FC<AddClientModalProps> = ({
             {/* Location */}
             <div>
               <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">
-                Location
+                Location (Google Maps URL)
               </label>
-              <Input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Enter location"
-                className="h-9 sm:h-10 text-sm"
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="Paste Google Maps URL here"
+                  className="h-9 sm:h-10 pr-16 text-sm"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    window.open("https://www.google.com/maps/", "_blank")
+                  }
+                  className="cursor-pointer text-green-600 absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1 text-xs  transition-colors"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Map</span>
+                </button>
+              </div>
             </div>
 
             {/* Contact Number */}
