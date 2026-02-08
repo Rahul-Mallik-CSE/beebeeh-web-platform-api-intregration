@@ -1,7 +1,7 @@
 /** @format */
 "use client";
 import React from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
 import { JobDistribution } from "@/redux/features/adminFeatures/reportmoduleAPI";
 
 interface JobDistributionChartProps {
@@ -50,11 +50,8 @@ const JobDistributionChart: React.FC<JobDistributionChartProps> = ({
         dominantBaseline="central"
         className="font-semibold"
       >
-        <tspan x={x} dy="-8" fontSize="16" fontWeight="bold">
+        <tspan x={x} dy="0" fontSize="16" fontWeight="bold">
           {entry.percentage}%
-        </tspan>
-        <tspan x={x} dy="18" fontSize="13" fontWeight="500">
-          {entry.name}
         </tspan>
       </text>
     );
@@ -68,6 +65,7 @@ const JobDistributionChart: React.FC<JobDistributionChartProps> = ({
       <div className="bg-white rounded-2xl py-3 sm:py-4">
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
+            <Legend />
             <Pie
               data={chartData}
               cx="50%"
