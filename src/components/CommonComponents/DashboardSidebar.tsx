@@ -131,7 +131,7 @@ export default function DashboardSidebar() {
     {
       href: "/all-jobs",
       icon: Briefcase,
-      label: "All Jobs",
+      label: "My Jobs",
     },
     {
       href: "/notifications",
