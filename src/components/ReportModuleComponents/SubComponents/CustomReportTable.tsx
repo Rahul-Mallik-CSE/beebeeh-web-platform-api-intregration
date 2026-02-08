@@ -1,14 +1,6 @@
 /** @format */
 
 import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 interface Column {
   key: string;
@@ -53,30 +45,31 @@ const CustomReportTable: React.FC<CustomReportTableProps> = ({
         {title}
       </h2>
       <div className="bg-white rounded-2xl overflow-auto h-[380px]">
-        <Table className="w-full ">
-          <TableHeader className="sticky top-0 z-10">
-            <TableRow className="bg-[#5C2E2E] hover:bg-[#5C2E2E]">
+        <table className="w-full relative">
+          <thead className="sticky top-0 z-10 bg-[#5C2E2E]">
+            <tr className="bg-[#5C2E2E]">
               {columns.map((column, index) => (
-                <TableHead
+                <th
                   key={column.key}
-                  className={`text-white font-semibold text-xs sm:text-sm h-10 sm:h-12 px-2 sm:px-4 whitespace-nowrap ${
+                  className={`text-white font-semibold text-xs sm:text-sm h-10 sm:h-12 px-2 sm:px-4 whitespace-nowrap bg-[#5C2E2E] text-left ${
                     index === 0 ? "rounded-tl-2xl" : ""
                   } ${index === columns.length - 1 ? "rounded-tr-2xl" : ""}`}
                   style={{ width: column.width }}
                 >
                   {column.label}
-                </TableHead>
+                </th>
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+            </tr>
+          </thead>
+
+          <tbody>
             {data.map((row, index) => (
-              <TableRow
+              <tr
                 key={row.id || index}
                 className="border-b border-gray-100 hover:bg-gray-50"
               >
                 {columns.map((column) => (
-                  <TableCell
+                  <td
                     key={column.key}
                     className="py-3 sm:py-4 text-xs sm:text-sm text-gray-700 px-2 sm:px-4 whitespace-nowrap"
                   >
@@ -91,12 +84,12 @@ const CustomReportTable: React.FC<CustomReportTableProps> = ({
                     ) : (
                       row[column.key]
                     )}
-                  </TableCell>
+                  </td>
                 ))}
-              </TableRow>
+              </tr>
             ))}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
     </div>
   );
