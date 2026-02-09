@@ -47,10 +47,13 @@ const RepairsTableSection: React.FC<RepairsTableSectionProps> = ({
       model: item.product.model_name,
       technician: item.technician.name,
       scheduled: item.scheduled_date,
-      status: item.status
-        .split("_")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ") as any,
+      status:
+        item.status === "assign"
+          ? "Pending"
+          : (item.status
+              .split("_")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ") as any),
     }));
   }, [data]);
 
@@ -150,7 +153,7 @@ const RepairsTableSection: React.FC<RepairsTableSectionProps> = ({
           onFilterChange={onFilterChange}
           excludeFilterColumns={["Scheduled", "Action"]}
           predefinedStatusOptions={[
-            "Assign",
+            "Pending",
             "In Progress",
             "Complete",
             "Cancel",

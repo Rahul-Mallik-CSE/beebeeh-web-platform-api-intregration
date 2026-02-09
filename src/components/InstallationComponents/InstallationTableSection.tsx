@@ -48,10 +48,13 @@ const InstallationTableSection: React.FC<InstallationTableSectionProps> = ({
       serial: "", // Assuming not provided
       technician: item.technician.name,
       scheduled: item.scheduled_date,
-      status: item.status
-        .split("_")
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(" ") as any,
+      status:
+        item.status === "assign"
+          ? "Pending"
+          : (item.status
+              .split("_")
+              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+              .join(" ") as any),
     }));
   }, [data]);
 
@@ -140,7 +143,7 @@ const InstallationTableSection: React.FC<InstallationTableSectionProps> = ({
           onFilterChange={onFilterChange}
           excludeFilterColumns={["Scheduled", "Action"]}
           predefinedStatusOptions={[
-            "Assign",
+            "Pending",
             "In Progress",
             "Complete",
             "Cancel",

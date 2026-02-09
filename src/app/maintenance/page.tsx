@@ -14,12 +14,26 @@ const MaintenancePage = () => {
     columnFilters: [],
   });
 
+  // Map status display to API value
+  const mapStatusToAPI = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      pending: "assign",
+      "in progress": "in_progress",
+      complete: "complete",
+      cancel: "cancel",
+      rescheduled: "rescheduled",
+    };
+    return statusMap[status.toLowerCase()] || status.toLowerCase();
+  };
+
   // Build query params from filters
   const queryParams = {
     page: currentPage,
     limit: 10,
     order: filters.idSort || "asc",
-    ...(filters.statusFilter && { status: filters.statusFilter.toLowerCase() }),
+    ...(filters.statusFilter && {
+      status: mapStatusToAPI(filters.statusFilter),
+    }),
     ...(filters.columnFilters.find((f) => f.column === "client")?.value && {
       client_name: filters.columnFilters.find((f) => f.column === "client")
         ?.value,

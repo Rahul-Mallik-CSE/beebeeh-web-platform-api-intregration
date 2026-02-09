@@ -14,12 +14,26 @@ const InstallationPage = () => {
     columnFilters: [],
   });
 
+  // Map status display to API value
+  const mapStatusToAPI = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      pending: "assign",
+      "in progress": "in_progress",
+      complete: "complete",
+      cancel: "cancel",
+      rescheduled: "rescheduled",
+    };
+    return statusMap[status.toLowerCase()] || status.toLowerCase();
+  };
+
   // Build query params from filters
   const queryParams = {
     page: currentPage,
     limit: 10,
     ...(filters.idSort && { order_dir: filters.idSort }),
-    ...(filters.statusFilter && { status: filters.statusFilter.toLowerCase() }),
+    ...(filters.statusFilter && {
+      status: mapStatusToAPI(filters.statusFilter),
+    }),
     ...(filters.columnFilters.find((f) => f.column === "jobId")?.value && {
       job_id: filters.columnFilters.find((f) => f.column === "jobId")?.value,
     }),
