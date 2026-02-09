@@ -134,6 +134,7 @@ const ClientsTableSections: React.FC<ClientsTableSectionsProps> = ({
           <TableSkeleton rows={10} columns={9} />
         ) : (
           <CustomTable
+            key={`clients-${currentPage}`}
             data={data}
             columns={columns}
             itemsPerPage={10}

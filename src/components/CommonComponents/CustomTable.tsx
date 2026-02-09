@@ -91,6 +91,12 @@ const CustomTable = <T extends Record<string, any>>({
 
   // Apply filtering and sorting to data
   const filteredAndSortedData = useMemo(() => {
+    // When using server-side pagination, skip client-side filtering/sorting
+    // because the server already handles it
+    if (serverSidePagination) {
+      return [...data];
+    }
+
     let result = [...data];
 
     if (filterState) {
@@ -160,7 +166,7 @@ const CustomTable = <T extends Record<string, any>>({
     }
 
     return result;
-  }, [data, filterState, columns]);
+  }, [data, filterState, columns, serverSidePagination]);
 
   // For server-side pagination, use all filtered data (no slicing)
   // For client-side pagination, slice the data
@@ -168,15 +174,6 @@ const CustomTable = <T extends Record<string, any>>({
     serverSidePagination && externalTotalPages
       ? externalTotalPages
       : Math.ceil(filteredAndSortedData.length / itemsPerPage);
-
-  console.log("Pagination Debug:", {
-    serverSidePagination,
-    externalTotalPages,
-    externalCurrentPage,
-    totalPages,
-    currentPage,
-    dataLength: data.length,
-  });
 
   const currentData = serverSidePagination
     ? filteredAndSortedData
@@ -268,13 +265,6 @@ const CustomTable = <T extends Record<string, any>>({
     const pages: (number | string)[] = [];
     const maxVisible = 5;
 
-    console.log(
-      "getPageNumbers - totalPages:",
-      totalPages,
-      "currentPage:",
-      currentPage,
-    );
-
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
@@ -299,7 +289,6 @@ const CustomTable = <T extends Record<string, any>>({
       }
     }
 
-    console.log("getPageNumbers - pages array:", pages);
     return pages;
   };
 

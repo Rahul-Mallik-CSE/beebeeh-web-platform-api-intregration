@@ -29,7 +29,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
     switch (status) {
       case "Available":
         return "bg-emerald-100 text-emerald-700";
-      case "Unavailable":
+      case "Inactive":
         return "bg-red-100 text-red-700";
       case "Busy":
         return "bg-yellow-100 text-yellow-700";

@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import ClientsTableSections from "@/components/ClientsComponents/ClientsTableSections";
 import {
   useGetClientsQuery,
@@ -36,38 +36,34 @@ const ClientsPage = () => {
   };
 
   // Build query params from filters
-  const queryParams: ClientsQueryParams = useMemo(
-    () => ({
-      page: currentPage,
-      limit: 10,
-      ...(filters.idSort && { order: filters.idSort }),
-      ...(filters.statusFilter &&
-        mapStatusToAPI(filters.statusFilter) !== undefined && {
-          is_active: mapStatusToAPI(filters.statusFilter),
-        }),
-      ...(filters.jobTypeFilter && {
-        type: mapClientTypeToAPI(filters.jobTypeFilter),
+  const queryParams: ClientsQueryParams = {
+    page: currentPage,
+    limit: 10,
+    ...(filters.idSort && { order: filters.idSort }),
+    ...(filters.statusFilter &&
+      mapStatusToAPI(filters.statusFilter) !== undefined && {
+        is_active: mapStatusToAPI(filters.statusFilter),
       }),
-      ...(filters.columnFilters.find((f) => f.column === "Name")?.value && {
-        name: filters.columnFilters.find((f) => f.column === "Name")?.value,
-      }),
-      ...(filters.columnFilters.find((f) => f.column === "Town")?.value && {
-        town: filters.columnFilters.find((f) => f.column === "Town")?.value,
-      }),
-      ...(filters.columnFilters.find((f) => f.column === "Client ID")
-        ?.value && {
-        client_id: filters.columnFilters.find((f) => f.column === "Client ID")
-          ?.value,
-      }),
-      ...(filters.columnFilters.find((f) => f.column === "Contact Number")
-        ?.value && {
-        contact_number: filters.columnFilters.find(
-          (f) => f.column === "Contact Number",
-        )?.value,
-      }),
+    ...(filters.jobTypeFilter && {
+      type: mapClientTypeToAPI(filters.jobTypeFilter),
     }),
-    [currentPage, filters],
-  );
+    ...(filters.columnFilters.find((f) => f.column === "name")?.value && {
+      name: filters.columnFilters.find((f) => f.column === "name")?.value,
+    }),
+    ...(filters.columnFilters.find((f) => f.column === "town")?.value && {
+      town: filters.columnFilters.find((f) => f.column === "town")?.value,
+    }),
+    ...(filters.columnFilters.find((f) => f.column === "client_id")?.value && {
+      client_id: filters.columnFilters.find((f) => f.column === "client_id")
+        ?.value,
+    }),
+    ...(filters.columnFilters.find((f) => f.column === "contact_number")
+      ?.value && {
+      contact_number: filters.columnFilters.find(
+        (f) => f.column === "contact_number",
+      )?.value,
+    }),
+  };
 
   const { data, isLoading, error, refetch } = useGetClientsQuery(queryParams);
 
@@ -98,10 +94,10 @@ const ClientsPage = () => {
         {/* table section */}
         <div className="bg-white border border-gray-200 rounded-2xl p-3 sm:p-4 md:p-6">
           <ClientsTableSections
-            data={data?.data}
+            data={data?.data || []}
             isLoading={isLoading}
-            currentPage={data?.meta.page || 1}
-            totalPages={data?.meta.totalPage || 1}
+            currentPage={data?.meta?.page || currentPage}
+            totalPages={data?.meta?.totalPage || 1}
             onPageChange={handlePageChange}
             onFilterChange={handleFilterChange}
             onClientAdded={refetch}

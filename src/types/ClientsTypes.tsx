@@ -15,7 +15,7 @@ export interface ClientDetails extends Client {
   profileImage?: string;
   email: string;
   address: string;
-  status: "Available" | "Unavailable" | "Busy";
+  status: "Available" | "Inactive" | "Busy";
   totalJobs: number;
 }
 

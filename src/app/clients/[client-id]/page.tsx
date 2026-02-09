@@ -188,7 +188,7 @@ const ClientDetailsPage = ({ params }: PageProps) => {
               profileImage: client.profile_image || undefined,
               email: client.email,
               address: client.address,
-              status: client.is_active ? "Available" : "Unavailable",
+              status: client.is_active ? "Available" : "Inactive",
               totalJobs: client.total_job,
             }}
             onEdit={handleEdit}

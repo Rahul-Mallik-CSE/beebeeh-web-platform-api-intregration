@@ -108,8 +108,17 @@ const clientsAPI = baseApi.injectEndpoints({
         method: "GET",
         params: params || {},
       }),
-      providesTags: ["Client"],
-      keepUnusedDataFor: 300, // Keep cache for 5 minutes
+      providesTags: (result) =>
+        result
+          ? [
+              "Client",
+              ...result.data.map(({ client_id }) => ({
+                type: "Client" as const,
+                id: client_id,
+              })),
+            ]
+          : ["Client"],
+      keepUnusedDataFor: 0, // Don't cache - always fetch fresh data
     }),
 
     // Get single client details by ID
