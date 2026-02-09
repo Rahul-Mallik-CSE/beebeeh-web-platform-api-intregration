@@ -55,7 +55,7 @@ const ChecklistSection = ({ data }: ChecklistSectionProps) => {
         Checklist Section:
       </h3>
       <div className="rounded-2xl border border-gray-200">
-        <ScrollArea className="h-[250px] rounded-2xl">
+        <ScrollArea className="h-[330px] rounded-2xl">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">

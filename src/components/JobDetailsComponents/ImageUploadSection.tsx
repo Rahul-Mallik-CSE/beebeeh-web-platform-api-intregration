@@ -36,7 +36,7 @@ const UploadArea: React.FC<UploadAreaProps> = ({
   onDragOver,
   onRemove,
 }) => (
-  <div className="space-y-3 sm:space-y-4 min-h-[280px] sm:min-h-[326px]">
+  <div className="space-y-3 sm:space-y-4 min-h-[330px] sm:min-h-[326px]">
     <p className="text-sm sm:text-base font-bold text-gray-800">
       {type === "before" ? "Before Image" : "After Image"}
     </p>

@@ -1,8 +1,8 @@
 /** @format */
 
 "use client";
-import React, { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,12 +21,15 @@ import ImageUploadSection from "./ImageUploadSection";
 import ClientInfoSection from "./ClientInfoSection";
 import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
+import TechnicianDetailsSection from "./TechnicianDetailsSection";
 import Image from "next/image";
 import {
   useGetJobDetailsQuery,
   useCancelJobMutation,
   useRescheduleJobMutation,
 } from "@/redux/features/adminFeatures/jobDetailsAPI";
+import { useAutocompleteTechniciansQuery } from "@/redux/features/adminFeatures/installationAPI";
+
 import { getImageFullUrl } from "@/lib/utils";
 import jsPDF from "jspdf";
 
@@ -54,10 +57,43 @@ const JobDetailsPage = ({
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
 
+  // Technician search states
+  const [technicianIdName, setTechnicianIdName] = useState("");
+  const [technicianName, setTechnicianName] = useState("");
+  const [technicianId, setTechnicianId] = useState("");
+  const [showTechnicianDropdown, setShowTechnicianDropdown] = useState(false);
+  const technicianRef = useRef<HTMLInputElement>(null);
+
   const { data, isLoading, error } = useGetJobDetailsQuery({ job_id: jobId });
   const [cancelJob, { isLoading: isCanceling }] = useCancelJobMutation();
   const [rescheduleJob, { isLoading: isRescheduling }] =
     useRescheduleJobMutation();
+
+  // Technician autocomplete
+  const { data: technicianSuggestions, isFetching: isFetchingTechnicians } =
+    useAutocompleteTechniciansQuery(
+      { q: technicianIdName },
+      {
+        skip: technicianIdName.length < 2,
+      },
+    );
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        technicianRef.current &&
+        !technicianRef.current.contains(event.target as Node)
+      ) {
+        setShowTechnicianDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleCancel = async () => {
     try {
@@ -75,21 +111,56 @@ const JobDetailsPage = ({
       alert("Please fill in both date and time.");
       return;
     }
+    if (!technicianId || !technicianName) {
+      alert("Please select a technician.");
+      return;
+    }
     try {
       await rescheduleJob({
         job_id: jobId,
         scheduled_date: scheduledDate,
         scheduled_time: scheduledTime,
+        technician_id: technicianId,
+        technician_name: technicianName,
       }).unwrap();
       setIsRescheduleModalOpen(false);
       setScheduledDate("");
       setScheduledTime("");
+      setTechnicianIdName("");
+      setTechnicianName("");
+      setTechnicianId("");
+      setShowTechnicianDropdown(false);
       // On success, navigate back
       router.back();
     } catch (error) {
       console.error("Failed to reschedule job:", error);
       // Handle error
     }
+  };
+
+  const handleTechnicianChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTechnicianIdName(value);
+    setShowTechnicianDropdown(value.length >= 2);
+
+    // Clear selected technician if user modifies input
+    if (technicianId && value !== technicianId) {
+      setTechnicianName("");
+      setTechnicianId("");
+    }
+  };
+
+  const handleTechnicianSelect = (technician: {
+    technician_id: string;
+    name: string;
+    contact_number: string;
+    status: string;
+    skills: string[];
+  }) => {
+    setTechnicianIdName(technician.technician_id);
+    setTechnicianId(technician.technician_id);
+    setTechnicianName(technician.name);
+    setShowTechnicianDropdown(false);
   };
 
   const handleExportPDF = () => {
@@ -543,6 +614,7 @@ const JobDetailsPage = ({
           <div className="lg:col-span-2 xl:col-span-2 space-y-4 sm:space-y-6">
             <HeaderSummaryCard data={jobData?.header_summary} />
             <ClientInfoSection data={jobData?.client_information} />
+            <TechnicianDetailsSection data={jobData?.technician_details} />
             <ProductDetailsSection data={jobData?.product_details} />
           </div>
           {/* Right Column - 1/3 */}
@@ -766,7 +838,18 @@ const JobDetailsPage = ({
       {/* Reschedule Modal */}
       <Dialog
         open={isRescheduleModalOpen}
-        onOpenChange={setIsRescheduleModalOpen}
+        onOpenChange={(open) => {
+          setIsRescheduleModalOpen(open);
+          if (!open) {
+            // Reset form when modal closes
+            setScheduledDate("");
+            setScheduledTime("");
+            setTechnicianIdName("");
+            setTechnicianName("");
+            setTechnicianId("");
+            setShowTechnicianDropdown(false);
+          }
+        }}
       >
         <DialogContent>
           <DialogHeader>
@@ -789,6 +872,56 @@ const JobDetailsPage = ({
                 type="time"
                 value={scheduledTime}
                 onChange={(e) => setScheduledTime(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="technicianIdName">Technician ID / Name</Label>
+              <div className="relative" ref={technicianRef}>
+                <Input
+                  id="technicianIdName"
+                  type="text"
+                  placeholder="Start with T- to search technician id"
+                  value={technicianIdName}
+                  onChange={handleTechnicianChange}
+                  className="w-full pr-10"
+                />
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                {showTechnicianDropdown && technicianIdName.length >= 2 && (
+                  <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto mt-1">
+                    {isFetchingTechnicians ? (
+                      <div className="px-4 py-2 text-sm text-gray-500">
+                        Loading...
+                      </div>
+                    ) : technicianSuggestions?.data?.length ? (
+                      technicianSuggestions.data.map((technician) => (
+                        <div
+                          key={technician.technician_id}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                          onClick={() => handleTechnicianSelect(technician)}
+                        >
+                          <div className="font-medium">
+                            {technician.technician_id}
+                          </div>
+                          <div className="text-gray-500">{technician.name}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2 text-sm text-gray-500">
+                        No technicians found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="technicianName">Technician Name</Label>
+              <Input
+                id="technicianName"
+                type="text"
+                value={technicianName}
+                disabled
+                className="w-full"
               />
             </div>
             <div className="flex justify-end gap-2">

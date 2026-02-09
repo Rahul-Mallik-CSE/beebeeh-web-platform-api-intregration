@@ -22,7 +22,7 @@ const FrequentlyUsedParts = ({ data }: FrequentlyUsedPartsProps) => {
         Frequently Used Parts:
       </h3>
       <div className="rounded-2xl border border-gray-200">
-        <ScrollArea className="h-[190px] rounded-2xl">
+        <ScrollArea className="h-[330px] rounded-2xl">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50">

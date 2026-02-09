@@ -23,6 +23,7 @@ export interface ClientInformation {
   address: string;
   locality: string;
   notes: string;
+  problem_type: string;
   pin_location: PinLocation;
   location: string;
 }
@@ -32,6 +33,7 @@ export interface TechnicianDetails {
   technician_name: string;
   town: string;
   installed_date: string;
+  contact_number: string;
   last_service_date: string;
 }
 
@@ -113,14 +115,23 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         job_id,
         scheduled_date,
         scheduled_time,
+        technician_id,
+        technician_name,
       }: {
         job_id: string;
         scheduled_date: string;
         scheduled_time: string;
+        technician_id: string;
+        technician_name: string;
       }) => ({
         url: `/api/admin/job-reschedule/?job_id=${job_id}`,
         method: "POST",
-        body: { scheduled_date, scheduled_time },
+        body: {
+          scheduled_date,
+          scheduled_time,
+          technician_id,
+          technician_name,
+        },
       }),
       invalidatesTags: ["JobDetails"],
     }),

@@ -26,7 +26,7 @@ const ProductDetailsSection = ({ data }: ProductDetailsSectionProps) => {
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
         Product Details Section:
       </h3>
-      <div className="space-y-3 sm:space-y-4 border border-gray-200 p-3 sm:p-4 rounded-2xl">
+      <div className="space-y-2 sm:space-y-3 border border-gray-200 p-3 sm:p-4 rounded-2xl">
         <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Product ID :
