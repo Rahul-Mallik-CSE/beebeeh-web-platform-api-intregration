@@ -18,6 +18,7 @@ const RepairsPage = () => {
   const queryParams = {
     page: currentPage,
     limit: 10,
+    ...(filters.idSort && { order_dir: filters.idSort }),
     ...(filters.statusFilter && { status: filters.statusFilter.toLowerCase() }),
     ...(filters.columnFilters.find((f) => f.column === "client")?.value && {
       client_name: filters.columnFilters.find((f) => f.column === "client")
