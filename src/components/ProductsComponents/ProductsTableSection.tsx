@@ -1,19 +1,18 @@
 /** @format */
 "use client";
-import React, { useState, useMemo } from "react";
+import { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddProductModal from "./AddProductModal";
 import {
-  useGetProductsQuery,
   useDeleteProductMutation,
   ProductListItem,
 } from "@/redux/features/adminFeatures/productsAPI";
 import TableSkeleton from "../CommonComponents/TableSkeleton";
 import { toast } from "react-toastify";
+import { FilterState } from "../CommonComponents/FilterCard";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,31 +24,35 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-const ProductsTableSection = () => {
+interface ProductsTableSectionProps {
+  data?: ProductListItem[];
+  isLoading?: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onFilterChange: (filterState: FilterState) => void;
+  onProductAdded?: () => void;
+}
+
+const ProductsTableSection: React.FC<ProductsTableSectionProps> = ({
+  data = [],
+  isLoading,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onFilterChange,
+  onProductAdded,
+}) => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [isAddProductModalOpen, setIsAddProductModalOpen] = useState(false);
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
   // Delete mutation
   const [deleteProduct, { isLoading: isDeleting }] = useDeleteProductMutation();
 
-  // Fetch products with search and pagination
-  const {
-    data: productsResponse,
-    isLoading,
-    error,
-    refetch,
-  } = useGetProductsQuery({
-    page: currentPage,
-    limit: 10,
-    model_name: searchQuery,
-  });
-
   const handleAddProductSuccess = () => {
     setIsAddProductModalOpen(false);
-    refetch();
+    onProductAdded?.();
   };
 
   const handleDeleteProduct = async () => {
@@ -59,16 +62,11 @@ const ProductsTableSection = () => {
       await deleteProduct(deleteProductId).unwrap();
       toast.success("Product deleted successfully");
       setDeleteProductId(null);
-      refetch();
+      onProductAdded?.();
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to delete product");
     }
   };
-
-  const tableData = useMemo(() => {
-    if (!productsResponse?.data) return [];
-    return productsResponse.data;
-  }, [productsResponse]);
 
   const handleViewProduct = (product: ProductListItem) => {
     router.push(`/products/${product.product_id}`);
@@ -136,17 +134,6 @@ const ProductsTableSection = () => {
     },
   ];
 
-  if (error) {
-    return (
-      <div className="w-full p-8 text-center text-red-600">
-        <p>Failed to load products. Please try again.</p>
-        <Button onClick={() => refetch()} variant="outline" className="mt-4">
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* Header Section */}
@@ -172,13 +159,16 @@ const ProductsTableSection = () => {
           <TableSkeleton rows={10} columns={9} />
         ) : (
           <CustomTable
-            data={tableData}
+            key={`products-${currentPage}`}
+            data={data}
             columns={columns}
             itemsPerPage={10}
             serverSidePagination={true}
             currentPage={currentPage}
-            totalPages={productsResponse?.meta?.totalPage || 1}
-            onPageChange={(page) => setCurrentPage(page)}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            onFilterChange={onFilterChange}
+            excludeFilterColumns={["Action", "Status"]}
           />
         )}
       </div>

@@ -97,6 +97,7 @@ export interface ProductQueryParams {
   parts_quantity?: number;
   stock_quantity?: number;
   maintenance_frequency_month?: number;
+  is_active?: boolean;
   order_dir?: "asc" | "desc";
 }
 
