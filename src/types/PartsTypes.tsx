@@ -1,5 +1,11 @@
 /** @format */
 
+export interface PartModel {
+  product_id: string;
+  model_name: string;
+  alias: string;
+}
+
 export interface Part {
   part_id: string;
   name: string;
@@ -7,7 +13,8 @@ export interface Part {
   unit: string;
   unit_price: string | null;
   min_stock: number;
-  models: number;
+  models: PartModel[];
+  status: "stock_in" | "low_stock" | "stock_out";
 }
 
 export interface PartDetails {

@@ -5,27 +5,55 @@ import { Part } from "@/types/PartsTypes";
 export const partsColumns = [
   {
     header: "Part ID",
-    accessor: (row: Part) => row.part_id,
+    accessor: "part_id" as keyof Part,
   },
   {
     header: "Name",
-    accessor: (row: Part) => row.name,
+    accessor: "name" as keyof Part,
   },
   {
     header: "Stock",
-    accessor: (row: Part) => row.stock,
+    accessor: "stock" as keyof Part,
   },
   {
     header: "Unit",
-    accessor: (row: Part) => row.unit,
+    accessor: "unit" as keyof Part,
   },
   {
     header: "Min",
-    accessor: (row: Part) => row.min_stock,
+    accessor: "min_stock" as keyof Part,
   },
   {
-    header: "Models",
-    accessor: (row: Part) => row.models,
+    header: "Model Name",
+    accessor: (row: Part) =>
+      row.models?.map((m) => m.model_name).join(", ") || "N/A",
+  },
+  {
+    header: "Status",
+    accessor: (row: Part) => {
+      const statusMap: Record<string, { label: string; className: string }> = {
+        stock_in: {
+          label: "Stock In",
+          className: "bg-green-100 text-green-700",
+        },
+        low_stock: {
+          label: "Low Stock",
+          className: "bg-orange-100 text-orange-700",
+        },
+        stock_out: {
+          label: "Stock Out",
+          className: "bg-red-100 text-red-700",
+        },
+      };
+      const info = statusMap[row.status] || statusMap.stock_in;
+      return (
+        <span
+          className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-medium ${info.className}`}
+        >
+          {info.label}
+        </span>
+      );
+    },
   },
 ];
 

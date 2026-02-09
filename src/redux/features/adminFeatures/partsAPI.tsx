@@ -35,6 +35,12 @@ export interface AddPartResponse {
   requestId: string;
 }
 
+export interface PartModel {
+  product_id: string;
+  model_name: string;
+  alias: string;
+}
+
 export interface PartItem {
   part_id: string;
   name: string;
@@ -42,7 +48,20 @@ export interface PartItem {
   unit: string;
   unit_price: string | null;
   min_stock: number;
-  models: number;
+  models: PartModel[];
+  status: "stock_in" | "low_stock" | "stock_out";
+}
+
+export interface PartsQueryParams {
+  page?: number;
+  limit?: number;
+  part_id?: string;
+  name?: string;
+  model_name?: string;
+  min?: number;
+  stock?: number;
+  status?: string;
+  order_dir?: "asc" | "desc";
 }
 
 export interface PaginationMeta {
@@ -116,33 +135,19 @@ const partsAPI = baseApi.injectEndpoints({
         body: partData,
       }),
     }),
-    getParts: builder.query<
-      GetPartsResponse,
-      { page?: number; limit?: number } | void
-    >({
+    getParts: builder.query<GetPartsResponse, PartsQueryParams | void>({
       query: (params) => {
         const queryParams = new URLSearchParams();
-        if (params?.page) queryParams.append("page", params.page.toString());
-        if (params?.limit) queryParams.append("limit", params.limit.toString());
+        if (params) {
+          Object.entries(params).forEach(([key, value]) => {
+            if (value !== undefined && value !== "") {
+              queryParams.append(key, value.toString());
+            }
+          });
+        }
         const queryString = queryParams.toString();
         return {
           url: `/api/parts/${queryString ? `?${queryString}` : ""}`,
-          method: "GET",
-        };
-      },
-      providesTags: ["Part"],
-    }),
-    searchParts: builder.query<
-      GetPartsResponse,
-      { search: string; page?: number; limit?: number }
-    >({
-      query: (params) => {
-        const queryParams = new URLSearchParams();
-        queryParams.append("search", params.search);
-        if (params.page) queryParams.append("page", params.page.toString());
-        if (params.limit) queryParams.append("limit", params.limit.toString());
-        return {
-          url: `/api/products/?${queryParams.toString()}`,
           method: "GET",
         };
       },
@@ -180,7 +185,6 @@ export const {
   useAutocompleteProductsQuery,
   useAddPartMutation,
   useGetPartsQuery,
-  useSearchPartsQuery,
   useGetPartDetailsQuery,
   useDeletePartMutation,
   useRestockPartMutation,

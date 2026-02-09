@@ -1,16 +1,20 @@
 /** @format */
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
 import TableSkeleton from "@/components/CommonComponents/TableSkeleton";
 import { partsColumns } from "@/data/PartsData";
 import { Part } from "@/types/PartsTypes";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddPartsModal from "./AddPartsModal";
 import { toast } from "react-toastify";
+import { FilterState } from "../CommonComponents/FilterCard";
+import {
+  useDeletePartMutation,
+  PartItem,
+} from "@/redux/features/adminFeatures/partsAPI";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,40 +25,36 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  useDeletePartMutation,
-  useGetPartsQuery,
-  useSearchPartsQuery,
-} from "@/redux/features/adminFeatures/partsAPI";
 
-const PartsTableSection = () => {
+interface PartsTableSectionProps {
+  data?: PartItem[];
+  isLoading?: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onFilterChange: (filterState: FilterState) => void;
+  onPartAdded?: () => void;
+}
+
+const PartsTableSection: React.FC<PartsTableSectionProps> = ({
+  data = [],
+  isLoading,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onFilterChange,
+  onPartAdded,
+}) => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
   const [isAddPartModalOpen, setIsAddPartModalOpen] = useState(false);
   const [deletePartId, setDeletePartId] = useState<string | null>(null);
 
   // Delete mutation
   const [deletePart, { isLoading: isDeleting }] = useDeletePartMutation();
 
-  const queryParams = { page: 1, limit: 1000 };
-
-  const { data: allData, isLoading: allLoading } = useGetPartsQuery(
-    queryParams,
-    { skip: !!searchQuery },
-  );
-  const { data: searchData, isLoading: searchLoading } = useSearchPartsQuery(
-    { search: searchQuery, ...queryParams },
-    { skip: !searchQuery },
-  );
-
-  const data = searchQuery ? searchData : allData;
-  const isLoading = searchQuery ? searchLoading : allLoading;
-
-  const parts = data?.data || [];
-
-  const handleAddPart = (partData: any) => {
-    console.log("Adding part:", partData);
-    // Add logic to save part
+  const handleAddPart = () => {
+    setIsAddPartModalOpen(false);
+    onPartAdded?.();
   };
 
   const handleViewPart = (part: Part) => {
@@ -68,6 +68,7 @@ const PartsTableSection = () => {
       await deletePart(deletePartId).unwrap();
       toast.success("Part deleted successfully");
       setDeletePartId(null);
+      onPartAdded?.();
     } catch (error: any) {
       toast.error(error?.data?.message || "Failed to delete part");
     }
@@ -82,6 +83,7 @@ const PartsTableSection = () => {
           <button
             onClick={() => handleViewPart(row)}
             className="p-1.5 sm:p-2 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
+            title="View Details"
           >
             <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
           </button>
@@ -113,13 +115,20 @@ const PartsTableSection = () => {
       {/* Table */}
       <div className="bg-white rounded-lg">
         {isLoading ? (
-          <TableSkeleton rows={10} columns={7} />
+          <TableSkeleton rows={10} columns={8} />
         ) : (
           <CustomTable
-            data={parts}
+            key={`parts-${currentPage}`}
+            data={data}
             columns={columnsWithActions}
             itemsPerPage={10}
-            excludeFilterColumns={["Action"]}
+            serverSidePagination={true}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            onFilterChange={onFilterChange}
+            excludeFilterColumns={["Action", "Unit"]}
+            predefinedStatusOptions={["Stock In", "Low Stock", "Stock Out"]}
           />
         )}
       </div>
