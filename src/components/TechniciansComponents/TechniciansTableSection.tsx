@@ -1,14 +1,12 @@
 /** @format */
 "use client";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Eye, Trash2 } from "lucide-react";
+import { Plus, Eye, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddTechnicianModal from "./AddTechnicianModal";
 import {
-  useGetTechniciansQuery,
   useDeleteTechnicianMutation,
   TechnicianListItem,
 } from "@/redux/features/adminFeatures/technicianAPI";
@@ -24,40 +22,41 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { FilterState } from "../CommonComponents/FilterCard";
 
-const TechniciansTableSection = () => {
+interface TechniciansTableSectionProps {
+  data?: TechnicianListItem[];
+  isLoading?: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onFilterChange: (filterState: FilterState) => void;
+  onTechnicianAdded?: () => void;
+}
+
+const TechniciansTableSection: React.FC<TechniciansTableSectionProps> = ({
+  data = [],
+  isLoading,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onFilterChange,
+  onTechnicianAdded,
+}) => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
   const [isAddTechnicianModalOpen, setIsAddTechnicianModalOpen] =
     useState(false);
   const [deleteTechnicianId, setDeleteTechnicianId] = useState<string | null>(
     null,
   );
 
-  const {
-    data: techniciansResponse,
-    isLoading,
-    error,
-    refetch,
-  } = useGetTechniciansQuery({
-    page: currentPage,
-    limit: 10,
-    name: searchQuery,
-  });
-
   const [deleteTechnician, { isLoading: isDeleting }] =
     useDeleteTechnicianMutation();
 
   const handleAddTechnician = () => {
     setIsAddTechnicianModalOpen(false);
-    // RTK Query will automatically refetch due to invalidatesTags
+    onTechnicianAdded?.();
   };
-
-  const tableData = useMemo(() => {
-    if (!techniciansResponse?.data) return [];
-    return techniciansResponse.data;
-  }, [techniciansResponse]);
 
   const handleViewTechnician = (technician: TechnicianListItem) => {
     router.push(`/technicians/${technician.technician_id}`);
@@ -74,7 +73,6 @@ const TechniciansTableSection = () => {
       await deleteTechnician(deleteTechnicianId).unwrap();
       toast.success("Technician deleted successfully!");
       setDeleteTechnicianId(null);
-      // RTK Query will automatically refetch due to invalidatesTags
     } catch (error: any) {
       const errorMessage =
         error?.data?.message ||
@@ -166,17 +164,6 @@ const TechniciansTableSection = () => {
     },
   ];
 
-  if (error) {
-    return (
-      <div className="w-full p-8 text-center text-red-600">
-        <p>Failed to load technicians. Please try again.</p>
-        <Button onClick={() => refetch()} variant="outline" className="mt-4">
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* Header Section */}
@@ -204,13 +191,16 @@ const TechniciansTableSection = () => {
           <TableSkeleton rows={10} columns={7} />
         ) : (
           <CustomTable
-            data={tableData}
+            data={data}
             columns={columns}
             itemsPerPage={10}
             serverSidePagination={true}
             currentPage={currentPage}
-            totalPages={techniciansResponse?.meta?.totalPage || 1}
-            onPageChange={(page) => setCurrentPage(page)}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            onFilterChange={onFilterChange}
+            excludeFilterColumns={["Total Jobs", "Action"]}
+            predefinedStatusOptions={["Available", "Busy", "Unavailable"]}
           />
         )}
       </div>
