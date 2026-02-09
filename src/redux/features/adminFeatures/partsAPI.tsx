@@ -76,6 +76,7 @@ export interface UsedHistoryItem {
   job_id: string;
   quantity_used: number;
   used_at: string;
+  technician_name: string;
 }
 
 export interface GetPartsResponse {
@@ -93,8 +94,9 @@ export interface PartDetailsData {
   unit_price: string;
   stock: number;
   min_stock: number;
-  models: number;
+  models: PartModel[];
   used_history: UsedHistoryItem[];
+  status: "stock_in" | "low_stock" | "stock_out";
 }
 
 export interface GetPartDetailsResponse {

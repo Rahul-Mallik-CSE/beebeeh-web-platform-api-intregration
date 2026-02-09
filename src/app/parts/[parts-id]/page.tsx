@@ -38,19 +38,21 @@ const PartsDetailsPage = () => {
         partId: partResponse.data.part_id,
         name: partResponse.data.name,
         unit: partResponse.data.unit,
-        status: (partResponse.data.stock > partResponse.data.min_stock
+        status: (partResponse.data.status === "stock_in"
           ? "Stocks In"
-          : partResponse.data.stock === 0
+          : partResponse.data.status === "stock_out"
             ? "Stocks Out"
             : "Low Stock") as "Stocks In" | "Stocks Out" | "Low Stock",
         maintenanceStock: partResponse.data.stock, // Using stock as maintenance stock for now
-        models: partResponse.data.models,
+        models: partResponse.data.models.map((m) => m.model_name).join(", "), // Show model names
         stock: partResponse.data.stock,
         usedHistory: partResponse.data.used_history.map((history, index) => ({
           id: `${history.job_id}-${index}`,
           jobId: history.job_id,
-          technician: "Unknown", // API doesn't provide technician info
-          type: history.job_type,
+          technician: history.technician_name,
+          type:
+            history.job_type.charAt(0).toUpperCase() +
+            history.job_type.slice(1),
           date: new Date(history.used_at).toLocaleDateString(),
         })),
       }

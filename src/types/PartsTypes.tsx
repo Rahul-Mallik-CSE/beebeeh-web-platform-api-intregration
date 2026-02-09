@@ -24,7 +24,7 @@ export interface PartDetails {
   unit: string;
   status: "Stocks In" | "Stocks Out" | "Low Stock";
   maintenanceStock: number;
-  models: number;
+  models: string;
   stock: number;
   usedHistory: UsedHistory[];
 }
