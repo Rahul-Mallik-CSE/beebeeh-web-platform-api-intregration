@@ -86,7 +86,7 @@ export const partDetailsData: Record<string, PartDetails> = {
     unit: "pcs",
     status: "Stocks In",
     maintenanceStock: 50,
-    models: 15,
+    models: "CoolMaster X300, CoolMaster X400",
     stock: 505,
     usedHistory: [
       {
