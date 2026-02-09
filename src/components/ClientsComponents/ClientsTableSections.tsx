@@ -1,43 +1,36 @@
 /** @format */
 "use client";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
 import TableSkeleton from "@/components/CommonComponents/TableSkeleton";
 import { Button } from "@/components/ui/button";
 import { Plus, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddClientModal, { ClientFormData } from "./AddClientModal";
-import {
-  useGetClientsQuery,
-  ClientListItem,
-} from "@/redux/features/adminFeatures/clientsAPI";
+import { ClientListItem } from "@/redux/features/adminFeatures/clientsAPI";
+import { FilterState } from "../CommonComponents/FilterCard";
 
-const ClientsTableSections = () => {
+interface ClientsTableSectionsProps {
+  data?: ClientListItem[];
+  isLoading?: boolean;
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+  onFilterChange: (filterState: FilterState) => void;
+  onClientAdded?: () => void;
+}
+
+const ClientsTableSections: React.FC<ClientsTableSectionsProps> = ({
+  data = [],
+  isLoading,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onFilterChange,
+  onClientAdded,
+}) => {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [searchFilters, setSearchFilters] = useState({
-    name: "",
-    town: "",
-    type: "",
-    client_id: "",
-    contact_number: "",
-    order: "" as "asc" | "desc" | "",
-  });
-  // Fetch clients with pagination and filters
-  const {
-    data: clientsResponse,
-    isLoading,
-    error,
-    refetch,
-  } = useGetClientsQuery({
-    page: currentPage,
-    limit: itemsPerPage,
-    ...Object.fromEntries(
-      Object.entries(searchFilters).filter(([_, value]) => value !== ""),
-    ),
-  });
 
   const handleViewClient = (client: ClientListItem) => {
     router.push(`/clients/${client.client_id}`);
@@ -46,18 +39,8 @@ const ClientsTableSections = () => {
   const handleSaveClient = (data: ClientFormData) => {
     // This is handled in AddClientModal, just close the modal
     setIsModalOpen(false);
-    refetch();
+    onClientAdded?.();
   };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  // Transform API data to table format
-  const tableData = useMemo(() => {
-    if (!clientsResponse?.data) return [];
-    return clientsResponse.data;
-  }, [clientsResponse]);
 
   // Define table columns
   const columns = [
@@ -126,19 +109,6 @@ const ClientsTableSections = () => {
     },
   ];
 
-  if (error) {
-    return (
-      <div className="w-full p-8 text-center">
-        <p className="text-red-600 mb-4">
-          Failed to load clients. Please try again.
-        </p>
-        <Button onClick={() => refetch()} variant="outline">
-          Retry
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="w-full space-y-3 sm:space-y-4">
       {/* Header Section */}
@@ -164,14 +134,23 @@ const ClientsTableSections = () => {
           <TableSkeleton rows={10} columns={9} />
         ) : (
           <CustomTable
-            data={tableData}
+            data={data}
             columns={columns}
-            itemsPerPage={itemsPerPage}
+            itemsPerPage={10}
             serverSidePagination={true}
             currentPage={currentPage}
-            totalPages={clientsResponse?.meta?.totalPage || 1}
-            onPageChange={handlePageChange}
-            excludeFilterColumns={["Last Service", "Created", "Action"]}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+            onFilterChange={onFilterChange}
+            excludeFilterColumns={[
+              "Last Service",
+              "Created",
+              "Action",
+              "Installations",
+              "Type",
+            ]}
+            predefinedStatusOptions={["Active", "Inactive"]}
+            predefinedJobTypeOptions={["Commercial", "Domestic"]}
           />
         )}
       </div>

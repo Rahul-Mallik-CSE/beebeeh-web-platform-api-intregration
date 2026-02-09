@@ -95,6 +95,7 @@ export interface ClientsQueryParams {
   client_id?: string;
   contact_number?: string;
   order?: "asc" | "desc";
+  is_active?: boolean;
 }
 
 // ============= API Endpoints =============
@@ -102,26 +103,11 @@ const clientsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all clients with pagination and filters
     getClients: builder.query<GetClientsResponse, ClientsQueryParams | void>({
-      query: (params) => {
-        const queryParams = new URLSearchParams();
-        
-        if (params) {
-          if (params.page) queryParams.append("page", params.page.toString());
-          if (params.limit) queryParams.append("limit", params.limit.toString());
-          if (params.name) queryParams.append("name", params.name);
-          if (params.town) queryParams.append("town", params.town);
-          if (params.type) queryParams.append("type", params.type);
-          if (params.client_id) queryParams.append("client_id", params.client_id);
-          if (params.contact_number) queryParams.append("contact_number", params.contact_number);
-          if (params.order) queryParams.append("order", params.order);
-        }
-
-        const queryString = queryParams.toString();
-        return {
-          url: `/api/clients/${queryString ? `?${queryString}` : ""}`,
-          method: "GET",
-        };
-      },
+      query: (params) => ({
+        url: `/api/clients/`,
+        method: "GET",
+        params: params || {},
+      }),
       providesTags: ["Client"],
       keepUnusedDataFor: 300, // Keep cache for 5 minutes
     }),
@@ -132,7 +118,9 @@ const clientsAPI = baseApi.injectEndpoints({
         url: `/api/clients/${clientId}/`,
         method: "GET",
       }),
-      providesTags: (result, error, clientId) => [{ type: "Client", id: clientId }],
+      providesTags: (result, error, clientId) => [
+        { type: "Client", id: clientId },
+      ],
       keepUnusedDataFor: 300, // Keep cache for 5 minutes
     }),
 
