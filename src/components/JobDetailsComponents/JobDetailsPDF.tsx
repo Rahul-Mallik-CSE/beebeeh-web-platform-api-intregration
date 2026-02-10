@@ -367,7 +367,7 @@ const JobDetailsPDF: React.FC<JobDetailsPDFProps> = ({ jobData, jobId }) => {
         {jobData?.frequently_used_parts &&
           jobData.frequently_used_parts.length > 0 && (
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Frequently Used Parts</Text>
+              <Text style={styles.sectionTitle}>Used Parts</Text>
               {jobData.frequently_used_parts.map((part: any, index: number) => (
                 <View key={index} style={styles.partsItem}>
                   <Text style={{ width: "50%" }}>{part.part_name}</Text>

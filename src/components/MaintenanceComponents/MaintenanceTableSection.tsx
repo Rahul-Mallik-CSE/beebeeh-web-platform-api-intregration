@@ -45,8 +45,8 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
       jobId: item.maintenance_id,
       client: item.client.name,
       model: item.product.model_name,
-      technician: item.technician.name,
-      scheduled: item.scheduled_date,
+      technician: item.technician?.name || "N/A",
+      scheduled: item.scheduled_date || "N/A",
       status:
         item.status === "assign"
           ? "Pending"
@@ -147,6 +147,8 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
             "Complete",
             "Cancel",
             "Rescheduled",
+            "Upcoming",
+            "Overdue",
           ]}
         />
       </div>

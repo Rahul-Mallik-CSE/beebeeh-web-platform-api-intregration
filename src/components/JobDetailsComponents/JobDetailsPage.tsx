@@ -222,6 +222,8 @@ const JobDetailsPage = ({
     "pending",
     "cancel",
     "rescheduled",
+    "overdue",
+    "upcoming",
   ].includes(jobStatus || "");
   const showCancelOnly = jobStatus === "in_progress";
   const showExportPDF = jobStatus === "complete";
@@ -268,9 +270,13 @@ const JobDetailsPage = ({
                   ? "Pending"
                   : jobStatus === "cancel"
                     ? "Cancel"
-                    : jobStatus === "rescheduled"
-                      ? "Rescheduled"
-                      : "Unknown"}
+                    : jobStatus === "overdue"
+                      ? "Overdue"
+                      : jobStatus === "upcoming"
+                        ? "Upcoming"
+                        : jobStatus === "rescheduled"
+                          ? "Rescheduled"
+                          : "Unknown"}
           </Button>
         </div>
 
