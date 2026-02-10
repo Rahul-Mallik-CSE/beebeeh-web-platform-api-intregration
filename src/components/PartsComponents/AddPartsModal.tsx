@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Lock } from "lucide-react";
+import { X } from "lucide-react";
 import {
   useAutocompleteProductsQuery,
   useAddPartMutation,
@@ -30,8 +30,7 @@ interface AddPartsModalProps {
 }
 
 export interface PartsFormData {
-  productId: string;
-  productName: string;
+  selectedProducts: { product_id: string; model_name: string }[];
   partName: string;
   unit: string;
   unitPrice: string;
@@ -45,8 +44,7 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
   onSave,
 }) => {
   const [formData, setFormData] = useState<PartsFormData>({
-    productId: "",
-    productName: "",
+    selectedProducts: [],
     partName: "",
     unit: "",
     unitPrice: "",
@@ -54,48 +52,27 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
     lowStockWarning: "",
   });
 
-  // Autocomplete states
-  const [productIdQuery, setProductIdQuery] = useState("");
-  const [productNameQuery, setProductNameQuery] = useState("");
-  const [showProductIdDropdown, setShowProductIdDropdown] = useState(false);
-  const [showProductNameDropdown, setShowProductNameDropdown] = useState(false);
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(
-    null,
-  );
-  const [selectedProductName, setSelectedProductName] = useState<string | null>(
-    null,
-  );
-
-  const productIdRef = useRef<HTMLInputElement>(null);
-  const productNameRef = useRef<HTMLInputElement>(null);
+  // Product search states
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const productSearchRef = useRef<HTMLDivElement>(null);
 
   const [addPart, { isLoading }] = useAddPartMutation();
 
-  // Autocomplete queries with debouncing
-  const { data: productIdSuggestions, isFetching: isFetchingProductId } =
-    useAutocompleteProductsQuery(productIdQuery, {
-      skip: productIdQuery.length < 2,
+  // Autocomplete query
+  const { data: productSuggestions, isFetching: isFetchingProducts } =
+    useAutocompleteProductsQuery(productSearchQuery, {
+      skip: productSearchQuery.length < 2,
     });
 
-  const { data: productNameSuggestions, isFetching: isFetchingProductName } =
-    useAutocompleteProductsQuery(productNameQuery, {
-      skip: productNameQuery.length < 2,
-    });
-
-  // Close dropdowns when clicking outside
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        productIdRef.current &&
-        !productIdRef.current.contains(event.target as Node)
+        productSearchRef.current &&
+        !productSearchRef.current.contains(event.target as Node)
       ) {
-        setShowProductIdDropdown(false);
-      }
-      if (
-        productNameRef.current &&
-        !productNameRef.current.contains(event.target as Node)
-      ) {
-        setShowProductNameDropdown(false);
+        setShowProductDropdown(false);
       }
     };
 
@@ -114,63 +91,54 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
     });
   };
 
-  const handleProductIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProductSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const value = e.target.value;
-    setFormData((prev) => ({ ...prev, productId: value }));
-    setProductIdQuery(value);
-    setShowProductIdDropdown(value.length >= 2);
-
-    // Clear selected product if user modifies ID
-    if (selectedProductId && value !== selectedProductId) {
-      setSelectedProductId(null);
-      setSelectedProductName(null);
-      setFormData((prev) => ({ ...prev, productName: "" }));
-    }
+    setProductSearchQuery(value);
+    setShowProductDropdown(value.length >= 2);
   };
 
-  const handleProductNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setFormData((prev) => ({ ...prev, productName: value }));
-    setProductNameQuery(value);
-    setShowProductNameDropdown(value.length >= 2);
+  const handleProductSelect = (product: {
+    product_id: string;
+    model_name: string;
+  }) => {
+    // Check if product is already selected
+    const isAlreadySelected = formData.selectedProducts.some(
+      (p) => p.product_id === product.product_id,
+    );
 
-    // Clear selected product if user modifies name
-    if (selectedProductName && value !== selectedProductName) {
-      setSelectedProductId(null);
-      setSelectedProductName(null);
-      setFormData((prev) => ({ ...prev, productId: "" }));
+    if (isAlreadySelected) {
+      toast.info("Product already selected");
+      return;
     }
-  };
 
-  const handleProductIdSelect = (product: any) => {
+    // Add product to selected list
     setFormData((prev) => ({
       ...prev,
-      productId: product.product_id,
-      productName: product.model_name,
+      selectedProducts: [
+        ...prev.selectedProducts,
+        { product_id: product.product_id, model_name: product.model_name },
+      ],
     }));
-    setSelectedProductId(product.product_id);
-    setSelectedProductName(product.model_name);
-    setProductIdQuery("");
-    setShowProductIdDropdown(false);
+
+    // Clear search
+    setProductSearchQuery("");
+    setShowProductDropdown(false);
   };
 
-  const handleProductNameSelect = (product: any) => {
+  const handleRemoveProduct = (productId: string) => {
     setFormData((prev) => ({
       ...prev,
-      productId: product.product_id,
-      productName: product.model_name,
+      selectedProducts: prev.selectedProducts.filter(
+        (p) => p.product_id !== productId,
+      ),
     }));
-    setSelectedProductId(product.product_id);
-    setSelectedProductName(product.model_name);
-    setProductNameQuery("");
-    setShowProductNameDropdown(false);
   };
 
   const handleSubmit = async () => {
     // Validation: Check if all required fields are filled
     if (
-      !formData.productId.trim() ||
-      !formData.productName.trim() ||
       !formData.partName.trim() ||
       !formData.unit.trim() ||
       !formData.unitPrice.trim() ||
@@ -203,7 +171,7 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
     try {
       // Prepare the payload
       const partData = {
-        product_id: formData.productId,
+        product_ids: formData.selectedProducts.map((p) => p.product_id),
         part_name: formData.partName,
         unit: formData.unit,
         unit_price: unitPrice,
@@ -223,30 +191,26 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
       // Reset and close
       handleReset();
       onClose();
-    } catch (error: any) {
-      // Show error message
-      toast.error(
-        error?.data?.message || "Failed to add part. Please try again.",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error && typeof error === "object" && "data" in error
+          ? (error.data as { message?: string })?.message
+          : undefined;
+      toast.error(errorMessage || "Failed to add part. Please try again.");
     }
   };
 
   const handleReset = () => {
     setFormData({
-      productId: "",
-      productName: "",
+      selectedProducts: [],
       partName: "",
       unit: "",
       unitPrice: "",
       stockQuantity: "",
       lowStockWarning: "",
     });
-    setProductIdQuery("");
-    setProductNameQuery("");
-    setShowProductIdDropdown(false);
-    setShowProductNameDropdown(false);
-    setSelectedProductId(null);
-    setSelectedProductName(null);
+    setProductSearchQuery("");
+    setShowProductDropdown(false);
   };
 
   const handleCancel = () => {
@@ -266,32 +230,31 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
 
           {/* Form Fields */}
           <div className="space-y-2.5 xs:space-y-3 sm:space-y-4">
-            {/* Product ID - Search with Autocomplete */}
+            {/* Product Search - Multi-select */}
             <div>
               <label className="block text-[11px] xs:text-xs sm:text-sm md:text-base font-medium text-gray-700 mb-1 xs:mb-1.5 sm:mb-2">
-                Product ID
+                Products
               </label>
-              <div className="relative" ref={productIdRef}>
+              <div className="relative" ref={productSearchRef}>
                 <Input
                   type="text"
-                  name="productId"
-                  value={formData.productId}
-                  onChange={handleProductIdChange}
-                  placeholder="Search by product ID..."
+                  value={productSearchQuery}
+                  onChange={handleProductSearchChange}
+                  placeholder="Search products by ID or name..."
                   className="h-8 xs:h-9 sm:h-10 text-xs xs:text-sm"
                 />
-                {showProductIdDropdown && productIdSuggestions?.data && (
+                {showProductDropdown && productSuggestions?.data && (
                   <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                    {isFetchingProductId ? (
+                    {isFetchingProducts ? (
                       <div className="px-4 py-3 text-sm text-gray-500">
                         Loading...
                       </div>
-                    ) : productIdSuggestions.data.length > 0 ? (
-                      productIdSuggestions.data.map((product) => (
+                    ) : productSuggestions.data.length > 0 ? (
+                      productSuggestions.data.map((product) => (
                         <button
                           key={product.product_id}
                           type="button"
-                          onClick={() => handleProductIdSelect(product)}
+                          onClick={() => handleProductSelect(product)}
                           className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                         >
                           <div className="font-medium">
@@ -307,49 +270,31 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Product Name - Search with Autocomplete */}
-            <div>
-              <label className="block text-[11px] xs:text-xs sm:text-sm md:text-base font-medium text-gray-700 mb-1 xs:mb-1.5 sm:mb-2">
-                Product Name
-              </label>
-              <div className="relative" ref={productNameRef}>
-                <Input
-                  type="text"
-                  name="productName"
-                  value={formData.productName}
-                  onChange={handleProductNameChange}
-                  placeholder="Search by product name..."
-                  className="h-8 xs:h-9 sm:h-10 text-xs xs:text-sm"
-                />
-                {showProductNameDropdown && productNameSuggestions?.data && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                    {isFetchingProductName ? (
-                      <div className="px-4 py-3 text-sm text-gray-500">
-                        Loading...
-                      </div>
-                    ) : productNameSuggestions.data.length > 0 ? (
-                      productNameSuggestions.data.map((product) => (
-                        <button
-                          key={product.product_id}
-                          type="button"
-                          onClick={() => handleProductNameSelect(product)}
-                          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                        >
-                          <div className="font-medium">
-                            {product.product_id} - {product.model_name}
-                          </div>
-                        </button>
-                      ))
-                    ) : (
-                      <div className="px-4 py-3 text-sm text-gray-500">
-                        No products found
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
+              {/* Selected Products Display */}
+              {formData.selectedProducts.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {formData.selectedProducts.map((product) => (
+                    <div
+                      key={product.product_id}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 rounded-md text-xs sm:text-sm"
+                    >
+                      <span className="font-medium text-red-800">
+                        {product.product_id}
+                      </span>
+                      <span className="text-red-600">-</span>
+                      <span className="text-red-700">{product.model_name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProduct(product.product_id)}
+                        className="ml-1 text-red-600 hover:text-red-800 focus:outline-none"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Part Name */}

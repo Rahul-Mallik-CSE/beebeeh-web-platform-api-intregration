@@ -20,7 +20,7 @@ export interface AutocompleteProductsResponse {
 }
 
 export interface AddPartRequest {
-  product_id: string;
+  product_ids: string[];
   part_name: string;
   unit: string;
   unit_price: number;
@@ -31,7 +31,7 @@ export interface AddPartRequest {
 export interface AddPartResponse {
   success: boolean;
   message: string;
-  data: any;
+  data: unknown;
   requestId: string;
 }
 
