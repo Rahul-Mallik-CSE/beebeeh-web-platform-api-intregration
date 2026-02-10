@@ -29,9 +29,9 @@ import {
   useRescheduleJobMutation,
 } from "@/redux/features/adminFeatures/jobDetailsAPI";
 import { useAutocompleteTechniciansQuery } from "@/redux/features/adminFeatures/installationAPI";
-
 import { getImageFullUrl } from "@/lib/utils";
-import jsPDF from "jspdf";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import JobDetailsPDF from "./JobDetailsPDF";
 
 interface JobDetailsPageProps {
   jobId: string;
@@ -161,272 +161,6 @@ const JobDetailsPage = ({
     setTechnicianId(technician.technician_id);
     setTechnicianName(technician.name);
     setShowTechnicianDropdown(false);
-  };
-
-  const handleExportPDF = () => {
-    if (!jobData) return;
-
-    const pdf = new jsPDF();
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let yPosition = 20;
-
-    // Helper function to add text with word wrapping
-    const addWrappedText = (
-      text: string,
-      x: number,
-      y: number,
-      maxWidth: number,
-      fontSize: number = 10,
-    ) => {
-      pdf.setFontSize(fontSize);
-      const lines = pdf.splitTextToSize(text, maxWidth);
-      pdf.text(lines, x, y);
-      return y + lines.length * 5;
-    };
-
-    // Helper function to check if we need a new page
-    const checkNewPage = (requiredSpace: number) => {
-      if (yPosition + requiredSpace > pageHeight - 20) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-    };
-
-    // Title
-    pdf.setFontSize(20);
-    pdf.setFont("helvetica", "bold");
-    pdf.text("Job Details Report", pageWidth / 2, yPosition, {
-      align: "center",
-    });
-    yPosition += 15;
-
-    // Job ID and Status
-    pdf.setFontSize(12);
-    pdf.setFont("helvetica", "normal");
-    pdf.text(`Job ID: ${jobId}`, 20, yPosition);
-    pdf.text(
-      `Status: ${jobStatus?.toUpperCase() || "N/A"}`,
-      pageWidth - 20,
-      yPosition,
-      { align: "right" },
-    );
-    yPosition += 10;
-
-    // Header Summary Section
-    if (jobData.header_summary) {
-      checkNewPage(60);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Job Summary", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const summaryData = [
-        `Job ID: ${jobData.header_summary.job_id || "N/A"}`,
-        `Job Type: ${jobData.header_summary.job_type || "N/A"}`,
-        `Priority: ${jobData.header_summary.priority || "N/A"}`,
-        `Status: ${jobData.header_summary.status || "N/A"}`,
-        `Scheduled Date: ${jobData.header_summary.scheduled_date || "N/A"}`,
-        `Scheduled Time: ${jobData.header_summary.scheduled_time || "N/A"}`,
-      ];
-
-      summaryData.forEach((item) => {
-        yPosition = addWrappedText(item, 20, yPosition, pageWidth - 40);
-        yPosition += 2;
-      });
-      yPosition += 5;
-    }
-
-    // Client Information Section
-    if (jobData.client_information) {
-      checkNewPage(50);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Client Information", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const clientData = [
-        `Client ID: ${jobData.client_information.client_id || "N/A"}`,
-        `Name: ${jobData.client_information.client_name || "N/A"}`,
-        `Contact Number: ${jobData.client_information.contact_number || "N/A"}`,
-        `Address: ${jobData.client_information.address || "N/A"}`,
-        `Locality: ${jobData.client_information.locality || "N/A"}`,
-        `Notes: ${jobData.client_information.notes || "N/A"}`,
-      ];
-
-      clientData.forEach((item) => {
-        yPosition = addWrappedText(item, 20, yPosition, pageWidth - 40);
-        yPosition += 2;
-      });
-      yPosition += 5;
-    }
-
-    // Technician Details Section
-    if (jobData.technician_details) {
-      checkNewPage(40);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Technician Details", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const technicianData = [
-        `Technician ID: ${jobData.technician_details.technician_id || "N/A"}`,
-        `Name: ${jobData.technician_details.technician_name || "N/A"}`,
-        `Town: ${jobData.technician_details.town || "N/A"}`,
-        `Installed Date: ${jobData.technician_details.installed_date || "N/A"}`,
-        `Last Service Date: ${jobData.technician_details.last_service_date || "N/A"}`,
-      ];
-
-      technicianData.forEach((item) => {
-        yPosition = addWrappedText(item, 20, yPosition, pageWidth - 40);
-        yPosition += 2;
-      });
-      yPosition += 5;
-    }
-
-    // Product Details Section
-    if (jobData.product_details) {
-      checkNewPage(40);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Product Details", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const productData = [
-        `Product ID: ${jobData.product_details.product_id || "N/A"}`,
-        `Product Model: ${jobData.product_details.product_model_name || "N/A"}`,
-        `Alias: ${jobData.product_details.alias || "N/A"}`,
-        `Installation Date: ${jobData.product_details.installed_date || "N/A"}`,
-        `Last Service Date: ${jobData.product_details.last_service_date || "N/A"}`,
-      ];
-
-      productData.forEach((item) => {
-        yPosition = addWrappedText(item, 20, yPosition, pageWidth - 40);
-        yPosition += 2;
-      });
-      yPosition += 5;
-    }
-
-    // Checklist Section
-    if (jobData.checklist_section && jobData.checklist_section.length > 0) {
-      checkNewPage(30 + jobData.checklist_section.length * 8);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Checklist", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      jobData.checklist_section.forEach((item, index) => {
-        const status =
-          item.status.charAt(0).toUpperCase() + item.status.slice(1);
-        let checklistItem = `Step ${item.step}: ${item.task} - ${status}`;
-        if (item.part_code) {
-          checklistItem += ` (Part Code: ${item.part_code})`;
-        }
-        yPosition = addWrappedText(
-          checklistItem,
-          20,
-          yPosition,
-          pageWidth - 40,
-        );
-        yPosition += 2;
-      });
-      yPosition += 5;
-    }
-
-    // Frequently Used Parts Section
-    if (
-      jobData.frequently_used_parts &&
-      jobData.frequently_used_parts.length > 0
-    ) {
-      checkNewPage(30 + jobData.frequently_used_parts.length * 8);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Frequently Used Parts", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      jobData.frequently_used_parts.forEach((part, index) => {
-        const partInfo = `${index + 1}. ${part.part_name} - Stock Required: ${part.stock_required || "N/A"}`;
-        yPosition = addWrappedText(partInfo, 20, yPosition, pageWidth - 40);
-        yPosition += 2;
-      });
-      yPosition += 5;
-    }
-
-    // Image Section
-    if (jobData.image_section) {
-      checkNewPage(30);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Image Section", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const imageData = [
-        `Before Images: ${jobData.image_section.before_images?.length || 0} image(s)`,
-        `After Images: ${jobData.image_section.after_images?.length || 0} image(s)`,
-      ];
-
-      imageData.forEach((item) => {
-        yPosition = addWrappedText(item, 20, yPosition, pageWidth - 40);
-        yPosition += 2;
-      });
-      yPosition += 5;
-    }
-
-    // Customer Signature Section
-    if (jobData.customer_signature) {
-      checkNewPage(30);
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Customer Signature", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const signatureData = [
-        `Client Name: ${jobData.customer_signature.client_name || "N/A"}`,
-        `Signature Time: ${jobData.customer_signature.signature_time || "N/A"}`,
-        `Signature Status: ${jobData.customer_signature.signature_status || "N/A"}`,
-        `Signature Files: ${jobData.customer_signature.signature_files?.length || 0} file(s)`,
-      ];
-
-      signatureData.forEach((item) => {
-        yPosition = addWrappedText(item, 20, yPosition, pageWidth - 40);
-        yPosition += 2;
-      });
-    }
-
-    // Footer
-    const totalPages = pdf.internal.getNumberOfPages();
-    for (let i = 1; i <= totalPages; i++) {
-      pdf.setPage(i);
-      pdf.setFontSize(8);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(
-        `Generated on ${new Date().toLocaleDateString()}`,
-        20,
-        pageHeight - 10,
-      );
-      pdf.text(`Page ${i} of ${totalPages}`, pageWidth - 20, pageHeight - 10, {
-        align: "right",
-      });
-    }
-
-    // Save the PDF
-    pdf.save(`job-details-${jobId}.pdf`);
   };
 
   if (error) {
@@ -812,12 +546,19 @@ const JobDetailsPage = ({
               </Button>
             )}
             {showExportPDF && (
-              <Button
-                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white"
-                onClick={handleExportPDF}
+              <PDFDownloadLink
+                document={<JobDetailsPDF jobData={jobData} jobId={jobId} />}
+                fileName={`job-details-${jobId}.pdf`}
               >
-                Export PDF
-              </Button>
+                {({ blob, url, loading, error }) => (
+                  <Button
+                    className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-blue-600 hover:bg-blue-700 text-white"
+                    disabled={loading}
+                  >
+                    {loading ? "Generating PDF..." : "Export PDF"}
+                  </Button>
+                )}
+              </PDFDownloadLink>
             )}
           </div>
         ) : (
