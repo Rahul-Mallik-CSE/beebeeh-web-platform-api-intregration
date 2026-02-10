@@ -11,6 +11,8 @@ import {
   FrequentlyUsedPart,
   useAddInstallationChecklistMutation,
   useAddMaintenanceChecklistMutation,
+  useDeleteInstallationChecklistMutation,
+  useDeleteMaintenanceChecklistMutation,
 } from "@/redux/features/adminFeatures/productsAPI";
 import AddCheckListModal from "./AddCheckListModal";
 import { toast } from "react-toastify";
@@ -27,6 +29,8 @@ const ProductsDetailsTableSection: React.FC<
 
   const [addInstallationTask] = useAddInstallationChecklistMutation();
   const [addMaintenanceTask] = useAddMaintenanceChecklistMutation();
+  const [deleteInstallationTask] = useDeleteInstallationChecklistMutation();
+  const [deleteMaintenanceTask] = useDeleteMaintenanceChecklistMutation();
 
   const handleAddInstallationTask = async (task: string) => {
     try {
@@ -48,9 +52,32 @@ const ProductsDetailsTableSection: React.FC<
         task,
       }).unwrap();
       toast.success("Maintenance task added successfully");
-      setIsMaintenanceModalOpen(false);
     } catch (error) {
       toast.error("Failed to add maintenance task");
+    }
+  };
+
+  const handleDeleteInstallationTask = async (steps: number[]) => {
+    try {
+      await deleteInstallationTask({
+        productId: product.product_id,
+        steps,
+      }).unwrap();
+      toast.success("Installation task deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete installation task");
+    }
+  };
+
+  const handleDeleteMaintenanceTask = async (steps: number[]) => {
+    try {
+      await deleteMaintenanceTask({
+        productId: product.product_id,
+        steps,
+      }).unwrap();
+      toast.success("Maintenance task deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete maintenance task");
     }
   };
 
@@ -286,11 +313,17 @@ const ProductsDetailsTableSection: React.FC<
         isOpen={isInstallationModalOpen}
         onClose={() => setIsInstallationModalOpen(false)}
         onSave={handleAddInstallationTask}
+        onDelete={handleDeleteInstallationTask}
+        existingChecklists={product.installation_checklist}
+        title="Installation Checklist"
       />
       <AddCheckListModal
         isOpen={isMaintenanceModalOpen}
         onClose={() => setIsMaintenanceModalOpen(false)}
         onSave={handleAddMaintenanceTask}
+        onDelete={handleDeleteMaintenanceTask}
+        existingChecklists={product.maintenance_checklist}
+        title="Maintenance Checklist"
       />
     </div>
   );

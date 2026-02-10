@@ -6,10 +6,9 @@ import {
   useRestockProductMutation,
 } from "@/redux/features/adminFeatures/productsAPI";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Package } from "lucide-react";
+import {  Package } from "lucide-react";
 import { IoIosCard } from "react-icons/io";
 import { FaBox } from "react-icons/fa";
-import { GiAutoRepair } from "react-icons/gi";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
