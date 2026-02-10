@@ -54,8 +54,8 @@ const PartsPage = () => {
     ...(getColumnFilterValue("min_stock") && {
       min: Number(getColumnFilterValue("min_stock")),
     }),
-    ...(getColumnFilterValue("model_name") && {
-      model_name: getColumnFilterValue("model_name"),
+    ...(getColumnFilterValue("modelName") && {
+      model_name: getColumnFilterValue("modelName"),
     }),
   };
 
