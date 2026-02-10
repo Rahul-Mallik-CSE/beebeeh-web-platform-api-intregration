@@ -115,20 +115,33 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         job_id,
         scheduled_date,
         scheduled_time,
-        technician_id,
-        technician_name,
       }: {
         job_id: string;
         scheduled_date: string;
         scheduled_time: string;
-        technician_id: string;
-        technician_name: string;
       }) => ({
         url: `/api/admin/job-reschedule/?job_id=${job_id}`,
         method: "POST",
         body: {
           scheduled_date,
           scheduled_time,
+        },
+      }),
+      invalidatesTags: ["JobDetails"],
+    }),
+    reassignTechnician: builder.mutation({
+      query: ({
+        job_id,
+        technician_id,
+        technician_name,
+      }: {
+        job_id: string;
+        technician_id: string;
+        technician_name: string;
+      }) => ({
+        url: `/api/admin/job-reassign-technician/?job_id=${job_id}`,
+        method: "POST",
+        body: {
           technician_id,
           technician_name,
         },
@@ -142,4 +155,5 @@ export const {
   useGetJobDetailsQuery,
   useCancelJobMutation,
   useRescheduleJobMutation,
+  useReassignTechnicianMutation,
 } = jobDetailsAPI;
