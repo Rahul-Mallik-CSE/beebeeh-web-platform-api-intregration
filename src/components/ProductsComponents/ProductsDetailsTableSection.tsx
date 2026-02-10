@@ -230,7 +230,7 @@ const ProductsDetailsTableSection: React.FC<
               size="sm"
               className="text-xs sm:text-sm h-8 px-3 text-red-800 hover:text-red-700 hover:bg-red-50"
             >
-              Add Checklist
+              Edit Checklist
             </Button>
           </div>
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -255,7 +255,7 @@ const ProductsDetailsTableSection: React.FC<
               size="sm"
               className="text-xs sm:text-sm h-8 px-3 text-red-800 hover:text-red-700 hover:bg-red-50"
             >
-              Add Checklist
+              Edit Checklist
             </Button>
           </div>
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
