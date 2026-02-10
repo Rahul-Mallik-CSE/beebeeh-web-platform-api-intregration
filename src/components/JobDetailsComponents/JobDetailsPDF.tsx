@@ -123,14 +123,14 @@ const styles = StyleSheet.create({
   footer: {
     position: "absolute",
     bottom: 20,
-    left: 30,
-    right: 30,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    left: 0,
+    right: 0,
+    textAlign: "center",
     fontSize: 8,
     color: "#666",
     borderTop: "1 solid #ccc",
     paddingTop: 5,
+    marginHorizontal: 30,
   },
   statusBadge: {
     padding: "4 8",
@@ -180,10 +180,9 @@ const JobDetailsPDF: React.FC<JobDetailsPDFProps> = ({ jobData, jobId }) => {
 
   return (
     <Document>
-      {/* Page 1 - Job Summary, Client, Technician, Product */}
       <Page size="A4" style={styles.page}>
         {/* Header */}
-        <View style={styles.header}>
+        <View style={styles.header} fixed>
           <Text style={styles.title}>Job Details Report</Text>
           <View style={styles.jobIdRow}>
             <Text>Job ID: {jobId}</Text>
@@ -364,15 +363,6 @@ const JobDetailsPDF: React.FC<JobDetailsPDFProps> = ({ jobData, jobId }) => {
           </View>
         )}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>Generated on {currentDate}</Text>
-          <Text>Page 1</Text>
-        </View>
-      </Page>
-
-      {/* Page 2 - Checklist and Parts */}
-      <Page size="A4" style={styles.page}>
         {/* Frequently Used Parts Section */}
         {jobData?.frequently_used_parts &&
           jobData.frequently_used_parts.length > 0 && (
@@ -409,128 +399,113 @@ const JobDetailsPDF: React.FC<JobDetailsPDFProps> = ({ jobData, jobId }) => {
           </View>
         )}
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text>Generated on {currentDate}</Text>
-          <Text>Page 2</Text>
-        </View>
-      </Page>
-
-      {/* Page 3 - Images and Signature */}
-      {((jobData?.image_section?.before_images &&
-        jobData.image_section.before_images.length > 0) ||
-        (jobData?.image_section?.after_images &&
-          jobData.image_section.after_images.length > 0) ||
-        (jobData?.customer_signature?.signature_files &&
-          jobData.customer_signature.signature_files.length > 0)) && (
-        <Page size="A4" style={styles.page}>
-          {/* Image Section */}
-          {jobData?.image_section && (
-            <View style={styles.imageSection}>
-              <Text style={styles.sectionTitle}>Images</Text>
-              <View style={styles.imageRow}>
-                {/* Before Image */}
-                <View style={styles.imageContainer}>
-                  <Text style={styles.imageLabel}>Before Image</Text>
-                  {jobData.image_section.before_images &&
-                  jobData.image_section.before_images.length > 0 &&
-                  jobData.image_section.before_images[0] ? (
-                    <Image
-                      src={getImageFullUrl(
-                        jobData.image_section.before_images[0],
-                      )}
-                      style={styles.image}
-                    />
-                  ) : (
-                    <View
-                      style={{
-                        ...styles.image,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor: "#f3f4f6",
-                      }}
-                    >
-                      <Text style={{ color: "#9ca3af" }}>No image</Text>
-                    </View>
-                  )}
-                </View>
-
-                {/* After Image */}
-                <View style={styles.imageContainer}>
-                  <Text style={styles.imageLabel}>After Image</Text>
-                  {jobData.image_section.after_images &&
-                  jobData.image_section.after_images.length > 0 &&
-                  jobData.image_section.after_images[0] ? (
-                    <Image
-                      src={getImageFullUrl(
-                        jobData.image_section.after_images[0],
-                      )}
-                      style={styles.image}
-                    />
-                  ) : (
-                    <View
-                      style={{
-                        ...styles.image,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        backgroundColor: "#f3f4f6",
-                      }}
-                    >
-                      <Text style={{ color: "#9ca3af" }}>No image</Text>
-                    </View>
-                  )}
-                </View>
-              </View>
-            </View>
-          )}
-
-          {/* Customer Signature Section */}
-          {jobData?.customer_signature && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Customer Signature</Text>
-              <View style={styles.row}>
-                <Text style={styles.label}>Client Name:</Text>
-                <Text style={styles.value}>
-                  {jobData.customer_signature.client_name || "N/A"}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.label}>Signature Time:</Text>
-                <Text style={styles.value}>
-                  {jobData.customer_signature.signature_time || "N/A"}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.label}>Signature Status:</Text>
-                <Text style={styles.value}>
-                  {jobData.customer_signature.signature_status || "N/A"}
-                </Text>
-              </View>
-
-              {/* Signature Image */}
-              {jobData.customer_signature.signature_files &&
-                jobData.customer_signature.signature_files.length > 0 &&
-                jobData.customer_signature.signature_files[0] && (
-                  <View style={styles.signatureContainer}>
-                    <Text style={styles.imageLabel}>Signature:</Text>
-                    <Image
-                      src={getImageFullUrl(
-                        jobData.customer_signature.signature_files[0],
-                      )}
-                      style={styles.signatureImage}
-                    />
+        {/* Image Section */}
+        {jobData?.image_section && (
+          <View style={styles.imageSection}>
+            <Text style={styles.sectionTitle}>Images</Text>
+            <View style={styles.imageRow}>
+              {/* Before Image */}
+              <View style={styles.imageContainer}>
+                <Text style={styles.imageLabel}>Before Image</Text>
+                {jobData.image_section.before_images &&
+                jobData.image_section.before_images.length > 0 &&
+                jobData.image_section.before_images[0] ? (
+                  <Image
+                    src={getImageFullUrl(
+                      jobData.image_section.before_images[0],
+                    )}
+                    style={styles.image}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      ...styles.image,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      backgroundColor: "#f3f4f6",
+                    }}
+                  >
+                    <Text style={{ color: "#9ca3af" }}>No image</Text>
                   </View>
                 )}
-            </View>
-          )}
+              </View>
 
-          {/* Footer */}
-          <View style={styles.footer}>
-            <Text>Generated on {currentDate}</Text>
-            <Text>Page 3</Text>
+              {/* After Image */}
+              <View style={styles.imageContainer}>
+                <Text style={styles.imageLabel}>After Image</Text>
+                {jobData.image_section.after_images &&
+                jobData.image_section.after_images.length > 0 &&
+                jobData.image_section.after_images[0] ? (
+                  <Image
+                    src={getImageFullUrl(jobData.image_section.after_images[0])}
+                    style={styles.image}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      ...styles.image,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      backgroundColor: "#f3f4f6",
+                    }}
+                  >
+                    <Text style={{ color: "#9ca3af" }}>No image</Text>
+                  </View>
+                )}
+              </View>
+            </View>
           </View>
-        </Page>
-      )}
+        )}
+
+        {/* Customer Signature Section */}
+        {jobData?.customer_signature && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Customer Signature</Text>
+            <View style={styles.row}>
+              <Text style={styles.label}>Client Name:</Text>
+              <Text style={styles.value}>
+                {jobData.customer_signature.client_name || "N/A"}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Signature Time:</Text>
+              <Text style={styles.value}>
+                {jobData.customer_signature.signature_time || "N/A"}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Signature Status:</Text>
+              <Text style={styles.value}>
+                {jobData.customer_signature.signature_status || "N/A"}
+              </Text>
+            </View>
+
+            {/* Signature Image */}
+            {jobData.customer_signature.signature_files &&
+              jobData.customer_signature.signature_files.length > 0 &&
+              jobData.customer_signature.signature_files[0] && (
+                <View style={styles.signatureContainer}>
+                  <Text style={styles.imageLabel}>Signature:</Text>
+                  <Image
+                    src={getImageFullUrl(
+                      jobData.customer_signature.signature_files[0],
+                    )}
+                    style={styles.signatureImage}
+                  />
+                </View>
+              )}
+          </View>
+        )}
+
+        {/* Footer with dynamic page numbers */}
+        <Text
+          style={styles.footer}
+          render={({ pageNumber, totalPages }) =>
+            `Generated on ${currentDate} | Page ${pageNumber} of ${totalPages}`
+          }
+          fixed
+        />
+      </Page>
     </Document>
   );
 };
