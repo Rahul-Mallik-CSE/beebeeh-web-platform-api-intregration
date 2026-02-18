@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,14 +9,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X, Plus } from "lucide-react";
+import { X, Plus, GripVertical } from "lucide-react";
 import { ChecklistItem } from "@/redux/features/adminFeatures/productsAPI";
 
 interface AddCheckListModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (task: string) => void;
-  onDelete: (steps: number[]) => void;
+  onSave: (task: string) => Promise<void>;
+  onDelete: (steps: number[]) => Promise<void>;
+  onReorder: (orderedSteps: number[]) => Promise<void>;
   existingChecklists: ChecklistItem[];
   title: string;
 }
@@ -26,22 +27,29 @@ const AddCheckListModal: React.FC<AddCheckListModalProps> = ({
   onClose,
   onSave,
   onDelete,
+  onReorder,
   existingChecklists,
   title,
 }) => {
+  const [localChecklists, setLocalChecklists] = useState<ChecklistItem[]>([]);
   const [newTasks, setNewTasks] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const dragNode = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen) {
+      setLocalChecklists([...existingChecklists]);
       setNewTasks([]);
       setCurrentInput("");
     }
-  }, [isOpen]);
+  }, [isOpen, existingChecklists]);
 
   const handleAddInputField = () => {
     if (currentInput.trim()) {
-      setNewTasks([...newTasks, currentInput]);
+      setNewTasks([...newTasks, currentInput.trim()]);
       setCurrentInput("");
     }
   };
@@ -50,17 +58,65 @@ const AddCheckListModal: React.FC<AddCheckListModalProps> = ({
     setNewTasks(newTasks.filter((_, i) => i !== index));
   };
 
-  const handleDeleteExisting = (step: number) => {
-    onDelete([step]);
+  const handleDeleteExisting = async (step: number) => {
+    await onDelete([step]);
+    setLocalChecklists((prev) => prev.filter((item) => item.step !== step));
+  };
+
+  // Drag handlers
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
+    setDragIndex(index);
+    dragNode.current = e.currentTarget;
+    e.dataTransfer.effectAllowed = "move";
+    // Slight delay so the ghost image renders before style change
+    setTimeout(() => {
+      if (dragNode.current) dragNode.current.style.opacity = "0.4";
+    }, 0);
+  };
+
+  const handleDragEnter = (index: number) => {
+    if (dragIndex === null || dragIndex === index) return;
+    setDragOverIndex(index);
+    const newList = [...localChecklists];
+    const dragged = newList.splice(dragIndex, 1)[0];
+    newList.splice(index, 0, dragged);
+    setLocalChecklists(newList);
+    setDragIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    if (dragNode.current) dragNode.current.style.opacity = "1";
+    dragNode.current = null;
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const isOrderChanged = () => {
+    if (localChecklists.length !== existingChecklists.length) return false;
+    return localChecklists.some(
+      (item, i) => item.step !== existingChecklists[i].step,
+    );
   };
 
   const handleSaveAll = async () => {
-    for (const task of newTasks) {
-      await onSave(task);
+    setIsSaving(true);
+    try {
+      if (isOrderChanged()) {
+        const orderedSteps = localChecklists.map((item) => item.step);
+        await onReorder(orderedSteps);
+      }
+      for (const task of newTasks) {
+        await onSave(task);
+      }
+      setNewTasks([]);
+      setCurrentInput("");
+      onClose();
+    } finally {
+      setIsSaving(false);
     }
-    setNewTasks([]);
-    setCurrentInput("");
-    onClose();
   };
 
   const handleCancel = () => {
@@ -68,6 +124,8 @@ const AddCheckListModal: React.FC<AddCheckListModalProps> = ({
     setCurrentInput("");
     onClose();
   };
+
+  const hasPendingChanges = newTasks.length > 0 || isOrderChanged();
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -80,26 +138,39 @@ const AddCheckListModal: React.FC<AddCheckListModalProps> = ({
 
         <div className="px-3 xs:px-4 sm:px-5 md:px-6 pb-3 xs:pb-4 sm:pb-5 md:pb-6 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
           {/* Existing Checklists */}
-          {existingChecklists.length > 0 && (
+          {localChecklists.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-[11px] xs:text-xs sm:text-sm font-semibold text-gray-700">
                 Existing Checklists
               </h4>
+              <p className="text-[10px] xs:text-xs text-gray-500">
+                Drag items to reorder
+              </p>
               <div className="space-y-2">
-                {existingChecklists.map((item) => (
+                {localChecklists.map((item, index) => (
                   <div
                     key={item.step}
-                    className="flex items-center gap-2 p-2 sm:p-3 bg-gray-50 rounded-lg border border-gray-200"
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDragEnter={() => handleDragEnter(index)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(e) => e.preventDefault()}
+                    className={`flex items-center gap-2 p-2 sm:p-3 rounded-lg border transition-colors ${
+                      dragOverIndex === index && dragIndex !== index
+                        ? "border-red-400 bg-red-50"
+                        : "border-gray-200 bg-gray-50"
+                    }`}
                   >
-                    <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-500 min-w-[30px]">
-                      {item.step}.
+                    <GripVertical className="w-4 h-4 text-gray-400 cursor-grab active:cursor-grabbing shrink-0" />
+                    <span className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-400 min-w-[24px]">
+                      {index + 1}.
                     </span>
-                    <span className="flex-1 text-[11px] xs:text-xs sm:text-sm text-gray-700">
+                    <span className="flex-1 text-[11px] xs:text-xs sm:text-sm text-gray-700 select-none">
                       {item.task}
                     </span>
                     <button
                       onClick={() => handleDeleteExisting(item.step)}
-                      className="p-1 hover:bg-red-100 rounded-md transition-colors group"
+                      className="p-1 hover:bg-red-100 rounded-md transition-colors group shrink-0"
                       type="button"
                     >
                       <X className="w-4 h-4 text-gray-400 group-hover:text-red-600" />
@@ -140,14 +211,12 @@ const AddCheckListModal: React.FC<AddCheckListModalProps> = ({
 
           {/* Add New Task Input */}
           <div className="space-y-1.5 sm:space-y-2">
-            <div className="flex items-center justify-between">
-              <label
-                htmlFor="task"
-                className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-700"
-              >
-                Add New Task
-              </label>
-            </div>
+            <label
+              htmlFor="task"
+              className="text-[10px] xs:text-xs sm:text-sm font-medium text-gray-700"
+            >
+              Add New Task
+            </label>
             <div className="flex gap-2">
               <Input
                 id="task"
@@ -183,16 +252,19 @@ const AddCheckListModal: React.FC<AddCheckListModalProps> = ({
             <Button
               onClick={handleCancel}
               variant="outline"
+              disabled={isSaving}
               className="flex-1 h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm border-gray-300 hover:bg-gray-50"
             >
               Cancel
             </Button>
             <Button
               onClick={handleSaveAll}
-              disabled={newTasks.length === 0}
+              disabled={!hasPendingChanges || isSaving}
               className="flex-1 h-8 xs:h-9 sm:h-10 text-[11px] xs:text-xs sm:text-sm bg-red-800 hover:bg-red-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save {newTasks.length > 0 && `(${newTasks.length})`}
+              {isSaving
+                ? "Saving..."
+                : `Save${newTasks.length > 0 ? ` (${newTasks.length} new)` : ""}`}
             </Button>
           </div>
         </div>

@@ -13,6 +13,8 @@ import {
   useAddMaintenanceChecklistMutation,
   useDeleteInstallationChecklistMutation,
   useDeleteMaintenanceChecklistMutation,
+  useReorderInstallationChecklistMutation,
+  useReorderMaintenanceChecklistMutation,
 } from "@/redux/features/adminFeatures/productsAPI";
 import AddCheckListModal from "./AddCheckListModal";
 import { toast } from "react-toastify";
@@ -31,6 +33,8 @@ const ProductsDetailsTableSection: React.FC<
   const [addMaintenanceTask] = useAddMaintenanceChecklistMutation();
   const [deleteInstallationTask] = useDeleteInstallationChecklistMutation();
   const [deleteMaintenanceTask] = useDeleteMaintenanceChecklistMutation();
+  const [reorderInstallationTask] = useReorderInstallationChecklistMutation();
+  const [reorderMaintenanceTask] = useReorderMaintenanceChecklistMutation();
 
   const handleAddInstallationTask = async (task: string) => {
     try {
@@ -39,7 +43,6 @@ const ProductsDetailsTableSection: React.FC<
         task,
       }).unwrap();
       toast.success("Installation task added successfully");
-      setIsInstallationModalOpen(false);
     } catch (error) {
       toast.error("Failed to add installation task");
     }
@@ -78,6 +81,30 @@ const ProductsDetailsTableSection: React.FC<
       toast.success("Maintenance task deleted successfully");
     } catch (error) {
       toast.error("Failed to delete maintenance task");
+    }
+  };
+
+  const handleReorderInstallationTask = async (orderedSteps: number[]) => {
+    try {
+      await reorderInstallationTask({
+        productId: product.product_id,
+        ordered_steps: orderedSteps,
+      }).unwrap();
+      toast.success("Installation checklist reordered successfully");
+    } catch (error) {
+      toast.error("Failed to reorder installation checklist");
+    }
+  };
+
+  const handleReorderMaintenanceTask = async (orderedSteps: number[]) => {
+    try {
+      await reorderMaintenanceTask({
+        productId: product.product_id,
+        ordered_steps: orderedSteps,
+      }).unwrap();
+      toast.success("Maintenance checklist reordered successfully");
+    } catch (error) {
+      toast.error("Failed to reorder maintenance checklist");
     }
   };
 
@@ -314,6 +341,7 @@ const ProductsDetailsTableSection: React.FC<
         onClose={() => setIsInstallationModalOpen(false)}
         onSave={handleAddInstallationTask}
         onDelete={handleDeleteInstallationTask}
+        onReorder={handleReorderInstallationTask}
         existingChecklists={product.installation_checklist}
         title="Installation Checklist"
       />
@@ -322,6 +350,7 @@ const ProductsDetailsTableSection: React.FC<
         onClose={() => setIsMaintenanceModalOpen(false)}
         onSave={handleAddMaintenanceTask}
         onDelete={handleDeleteMaintenanceTask}
+        onReorder={handleReorderMaintenanceTask}
         existingChecklists={product.maintenance_checklist}
         title="Maintenance Checklist"
       />

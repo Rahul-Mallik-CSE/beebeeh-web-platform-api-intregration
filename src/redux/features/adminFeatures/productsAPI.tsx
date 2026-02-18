@@ -247,6 +247,36 @@ const productsAPI = baseApi.injectEndpoints({
       ],
     }),
 
+    // Reorder installation checklist tasks
+    reorderInstallationChecklist: builder.mutation<
+      GetProductDetailResponse,
+      { productId: string; ordered_steps: number[] }
+    >({
+      query: ({ productId, ordered_steps }) => ({
+        url: `/api/products/${productId}/checklists/installation/`,
+        method: "PATCH",
+        body: { ordered_steps },
+      }),
+      invalidatesTags: (result, error, { productId }) => [
+        { type: "Product", id: productId },
+      ],
+    }),
+
+    // Reorder maintenance checklist tasks
+    reorderMaintenanceChecklist: builder.mutation<
+      GetProductDetailResponse,
+      { productId: string; ordered_steps: number[] }
+    >({
+      query: ({ productId, ordered_steps }) => ({
+        url: `/api/products/${productId}/checklists/maintenance/`,
+        method: "PATCH",
+        body: { ordered_steps },
+      }),
+      invalidatesTags: (result, error, { productId }) => [
+        { type: "Product", id: productId },
+      ],
+    }),
+
     // Delete maintenance checklist tasks
     deleteMaintenanceChecklist: builder.mutation<
       GetProductDetailResponse,
@@ -274,6 +304,8 @@ export const {
   useAddMaintenanceChecklistMutation,
   useDeleteInstallationChecklistMutation,
   useDeleteMaintenanceChecklistMutation,
+  useReorderInstallationChecklistMutation,
+  useReorderMaintenanceChecklistMutation,
 } = productsAPI;
 
 export default productsAPI;
