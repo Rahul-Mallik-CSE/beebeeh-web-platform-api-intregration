@@ -6,7 +6,7 @@ import {
   useRestockProductMutation,
 } from "@/redux/features/adminFeatures/productsAPI";
 import { Button } from "@/components/ui/button";
-import {  Package } from "lucide-react";
+import { Package } from "lucide-react";
 import { IoIosCard } from "react-icons/io";
 import { FaBox } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
@@ -73,6 +73,9 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
             </h1>
             <p className="text-[10px] xs:text-xs sm:text-sm text-gray-600 mt-1">
               Product ID: {product.product_id}
+            </p>
+            <p className="text-[10px] xs:text-xs sm:text-sm text-gray-600 mt-1">
+              SKU: {product.sku}
             </p>
             <p className="text-[10px] xs:text-xs sm:text-sm text-gray-600 mt-0.5">
               Alias : {product.alias}

@@ -6,6 +6,7 @@ import baseApi from "../../api/baseAPI";
 
 export interface ProductListItem {
   product_id: string;
+  sku: string;
   model_name: string;
   alias: string;
   frequency_domestic_month: number;
@@ -49,6 +50,7 @@ export interface ProductDetailData {
   product_id: string;
   model_name: string;
   alias: string;
+  sku: string;
   frequency_domestic_month: number;
   frequency_commercial_month: number;
   parts_quantity: number;

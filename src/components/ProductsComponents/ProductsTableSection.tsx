@@ -78,6 +78,10 @@ const ProductsTableSection: React.FC<ProductsTableSectionProps> = ({
       accessor: "product_id" as keyof ProductListItem,
     },
     {
+      header: "SKU",
+      accessor: "sku" as keyof ProductListItem,
+    },
+    {
       header: "Model Name",
       accessor: "model_name" as keyof ProductListItem,
     },
@@ -168,7 +172,7 @@ const ProductsTableSection: React.FC<ProductsTableSectionProps> = ({
             totalPages={totalPages}
             onPageChange={onPageChange}
             onFilterChange={onFilterChange}
-            excludeFilterColumns={["Action", "Status"]}
+            excludeFilterColumns={["SKU", "Action", "Status"]}
           />
         )}
       </div>
