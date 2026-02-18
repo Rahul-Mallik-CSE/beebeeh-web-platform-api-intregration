@@ -51,6 +51,8 @@ export interface ProductDetailData {
   model_name: string;
   alias: string;
   sku: string;
+  unit_cost_display: string;
+  unit_cost_currency_symbol: string;
   frequency_domestic_month: number;
   frequency_commercial_month: number;
   parts_quantity: number;
@@ -134,6 +136,23 @@ export interface RestockProductResponse {
   success: boolean;
   message: string;
   data: any;
+  requestId: string;
+}
+
+export interface UpdateProductRequest {
+  model_name?: string;
+  alias?: string;
+  frequency_domestic_month?: number;
+  frequency_commercial_month?: number;
+  unit_cost?: number;
+  unit_cost_currency_symbol?: string;
+  sku?: string;
+}
+
+export interface UpdateProductResponse {
+  success: boolean;
+  message: string;
+  data: ProductDetailData;
   requestId: string;
 }
 
@@ -293,6 +312,22 @@ const productsAPI = baseApi.injectEndpoints({
         { type: "Product", id: productId },
       ],
     }),
+
+    // Update product by ID
+    updateProduct: builder.mutation<
+      UpdateProductResponse,
+      { productId: string; data: UpdateProductRequest }
+    >({
+      query: ({ productId, data }) => ({
+        url: `/api/products/${productId}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { productId }) => [
+        "Product",
+        { type: "Product", id: productId },
+      ],
+    }),
   }),
 });
 
@@ -308,6 +343,7 @@ export const {
   useDeleteMaintenanceChecklistMutation,
   useReorderInstallationChecklistMutation,
   useReorderMaintenanceChecklistMutation,
+  useUpdateProductMutation,
 } = productsAPI;
 
 export default productsAPI;

@@ -20,6 +20,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "react-toastify";
+import EditProductModal from "./EditProductModal";
 
 interface ProductsDetailsSectionProps {
   product: ProductDetailData;
@@ -33,6 +34,7 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
   onDelete,
 }) => {
   const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [restockQuantity, setRestockQuantity] = useState("");
 
   const [restockProduct, { isLoading: isRestocking }] =
@@ -92,6 +94,13 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-2">
             <Button
+              onClick={() => setIsEditModalOpen(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3 md:px-4 h-8 sm:h-9"
+            >
+              <IoIosCard className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
+              Edit
+            </Button>
+            <Button
               onClick={() => setIsRestockModalOpen(true)}
               className="bg-red-800 hover:bg-red-700 text-white flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm px-2 sm:px-3 md:px-4 h-8 sm:h-9"
             >
@@ -102,7 +111,7 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <StatCard
             icon={<IoIosCard className="w-5 h-5 sm:w-6 sm:h-6" />}
             title="Domestic Freq"
@@ -117,7 +126,6 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
             bgColor="bg-green-100"
             iconColor="text-green-600"
           />
-
           <StatCard
             icon={<Package className="w-5 h-5 sm:w-6 sm:h-6" />}
             title="Stock Qty"
@@ -125,8 +133,22 @@ const ProductsDetailsSection: React.FC<ProductsDetailsSectionProps> = ({
             bgColor="bg-blue-100"
             iconColor="text-blue-600"
           />
+          <StatCard
+            icon={<IoIosCard className="w-5 h-5 sm:w-6 sm:h-6" />}
+            title="Unit Cost"
+            value={product.unit_cost_display || "—"}
+            bgColor="bg-amber-100"
+            iconColor="text-amber-600"
+          />
         </div>
       </div>
+
+      {/* Edit Modal */}
+      <EditProductModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        product={product}
+      />
 
       {/* Restock Modal */}
       <Dialog open={isRestockModalOpen} onOpenChange={setIsRestockModalOpen}>
