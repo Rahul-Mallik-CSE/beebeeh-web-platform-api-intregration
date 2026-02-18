@@ -21,7 +21,19 @@ export interface JobHistoryItem {
   contact_number: string;
   type: string;
   order_by_date: string;
+  scheduled_date: string;
   complete_date: string;
+  object_id: string;
+}
+
+export interface AnotherJobHistoryItem {
+  job_id: string;
+  technician: string;
+  contact_number: string;
+  type: string;
+  order_by_date: string;
+  scheduled_date: string;
+  status: string;
   object_id: string;
 }
 
@@ -34,6 +46,7 @@ export interface ClientDetails {
   address: string;
   town: string;
   contact_number: string;
+  location: string;
   client_type: string;
   profile_image: string | null;
   is_active: boolean;
@@ -41,6 +54,7 @@ export interface ClientDetails {
   last_service: string | null;
   total_job: number;
   job_history: JobHistoryItem[];
+  another_job_history: AnotherJobHistoryItem[];
   created_at: string;
   updated_at: string;
   job_history_meta?: {

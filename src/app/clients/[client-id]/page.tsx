@@ -201,6 +201,7 @@ const ClientDetailsPage = ({ params }: PageProps) => {
           <ClientDetailsTableSection
             clientId={clientId}
             jobHistory={client.job_history}
+            anotherJobHistory={client.another_job_history}
             jobHistoryMeta={client.job_history_meta}
           />
           {/* Delete button in bottom section */}
