@@ -20,8 +20,10 @@ export interface Part {
 export interface PartDetails {
   id: string;
   partId: string;
+  sku: string;
   name: string;
   unit: string;
+  unit_price: string | null;
   status: "Stocks In" | "Stocks Out" | "Low Stock";
   maintenanceStock: number;
   models: string;

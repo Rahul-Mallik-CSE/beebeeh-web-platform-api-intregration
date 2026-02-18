@@ -3,7 +3,7 @@
 
 import PartsDetailsSection from "@/components/PartsComponents/PartsDetailsSection";
 import PartsDetailsTableSection from "@/components/PartsComponents/PartsDetailsTableSection";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Skull } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import React from "react";
 import {
@@ -36,8 +36,10 @@ const PartsDetailsPage = () => {
     ? {
         id: partResponse.data.part_id,
         partId: partResponse.data.part_id,
+        sku: partResponse.data.sku,
         name: partResponse.data.name,
         unit: partResponse.data.unit,
+        unit_price: partResponse.data.unit_price,
         status: (partResponse.data.status === "stock_in"
           ? "Stocks In"
           : partResponse.data.status === "stock_out"

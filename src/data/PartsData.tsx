@@ -82,8 +82,10 @@ export const partDetailsData: Record<string, PartDetails> = {
   "1": {
     id: "1",
     partId: "Pr-Pr-501",
+    sku: "MP-001",
     name: "Filter A22",
     unit: "pcs",
+    unit_price: null,
     status: "Stocks In",
     maintenanceStock: 50,
     models: "CoolMaster X300, CoolMaster X400",

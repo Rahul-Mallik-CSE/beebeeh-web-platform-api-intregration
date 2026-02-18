@@ -45,10 +45,14 @@ const PartsDetailsSection: React.FC<PartsDetailsSectionProps> = ({
           </h2>
           <div className="space-y-1">
             <p className="text-xs sm:text-sm text-gray-600">
-              ID: {part.partId}
+              Part ID: {part.partId}
             </p>
+            <p className="text-xs sm:text-sm text-gray-600">SKU: {part.sku}</p>
             <p className="text-xs sm:text-sm text-gray-600">
               Unit: {part.unit}
+            </p>
+            <p className="text-xs sm:text-sm text-gray-600">
+              Unit Price: {part.unit_price}$
             </p>
           </div>
           <div

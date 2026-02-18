@@ -31,6 +31,7 @@ interface AddPartsModalProps {
 
 export interface PartsFormData {
   selectedProducts: { product_id: string; model_name: string }[];
+  sku: string;
   partName: string;
   unit: string;
   unitPrice: string;
@@ -45,6 +46,7 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<PartsFormData>({
     selectedProducts: [],
+    sku: "",
     partName: "",
     unit: "",
     unitPrice: "",
@@ -140,6 +142,7 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
     // Validation: Check if all required fields are filled
     if (
       !formData.partName.trim() ||
+      !formData.sku.trim() ||
       !formData.unit.trim() ||
       !formData.unitPrice.trim() ||
       !formData.stockQuantity.trim() ||
@@ -172,6 +175,7 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
       // Prepare the payload
       const partData = {
         product_ids: formData.selectedProducts.map((p) => p.product_id),
+        sku: formData.sku,
         part_name: formData.partName,
         unit: formData.unit,
         unit_price: unitPrice,
@@ -203,6 +207,7 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
   const handleReset = () => {
     setFormData({
       selectedProducts: [],
+      sku: "",
       partName: "",
       unit: "",
       unitPrice: "",
@@ -308,6 +313,21 @@ const AddPartsModal: React.FC<AddPartsModalProps> = ({
                 value={formData.partName}
                 onChange={handleChange}
                 placeholder="Enter part name"
+                className="h-8 xs:h-9 sm:h-10 text-xs xs:text-sm"
+              />
+            </div>
+
+            {/* SKU */}
+            <div>
+              <label className="block text-[11px] xs:text-xs sm:text-sm md:text-base font-medium text-gray-700 mb-1 xs:mb-1.5 sm:mb-2">
+                SKU
+              </label>
+              <Input
+                type="text"
+                name="sku"
+                value={formData.sku}
+                onChange={handleChange}
+                placeholder="Enter SKU (e.g. MP-002)"
                 className="h-8 xs:h-9 sm:h-10 text-xs xs:text-sm"
               />
             </div>

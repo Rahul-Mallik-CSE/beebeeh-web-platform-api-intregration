@@ -21,6 +21,7 @@ export interface AutocompleteProductsResponse {
 
 export interface AddPartRequest {
   product_ids: string[];
+  sku: string;
   part_name: string;
   unit: string;
   unit_price: number;
@@ -90,6 +91,7 @@ export interface GetPartsResponse {
 export interface PartDetailsData {
   part_id: string;
   name: string;
+  sku: string;
   unit: string;
   unit_price: string;
   stock: number;
