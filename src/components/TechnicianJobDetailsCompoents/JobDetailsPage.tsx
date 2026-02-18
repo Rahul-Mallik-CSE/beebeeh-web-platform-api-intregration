@@ -11,12 +11,12 @@ import ImageUploadSection from "./ImageUploadSection";
 import ClientInfoSection from "./ClientInfoSection";
 import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
+import CompleteJobModal from "./CompleteJobModal";
 import { useGetJobDetailsQuery } from "@/redux/features/technicianFeatures/jobDetailsAPI";
 import { JobStatus } from "@/types/JobDetailsTypes";
 import {
   useStartJobMutation,
   useCancelJobMutation,
-  useCompleteJobMutation,
 } from "@/redux/features/technicianFeatures/jobDetailsAPI";
 import { toast } from "react-toastify";
 import jsPDF from "jspdf";
@@ -31,8 +31,9 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   const { data, isLoading, isError } = useGetJobDetailsQuery(jobId);
   const [startJob, { isLoading: isStartingJob }] = useStartJobMutation();
   const [cancelJob, { isLoading: isCancellingJob }] = useCancelJobMutation();
-  const [completeJob, { isLoading: isCompletingJob }] =
-    useCompleteJobMutation();
+
+  // Complete job modal state
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   // Validation error state
   const [showValidationError, setShowValidationError] = useState(false);
@@ -242,75 +243,9 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
     }
   };
 
-  // Handle complete job
-  const handleCompleteJob = async () => {
-    // Get validation functions
-    const getImageValidation = (window as any).getImageValidation;
-    const getSignatureValidation = (window as any).getSignatureValidation;
-
-    if (!getImageValidation || !getSignatureValidation) {
-      toast.error(
-        "Validation functions not available. Please refresh the page.",
-      );
-      return;
-    }
-
-    const { hasBefore, hasAfter } = getImageValidation();
-    const hasSig = getSignatureValidation();
-
-    // Validate all required media
-    if (!hasBefore || !hasAfter || !hasSig) {
-      setShowValidationError(true);
-      toast.error(
-        "Please upload signature, before image, and after image to complete the job.",
-      );
-      return;
-    }
-
-    setShowValidationError(false);
-
-    try {
-      // Get the uploaded images and signature from global functions
-      const getUploadedImages = (window as any).getUploadedImages;
-      const getSignatureBlob = (window as any).getSignatureBlob;
-
-      if (!getUploadedImages || !getSignatureBlob) {
-        toast.error("Failed to retrieve uploaded media. Please try again.");
-        return;
-      }
-
-      const { beforeFiles, afterFiles } = getUploadedImages();
-      const signatureBlob = getSignatureBlob();
-
-      if (!beforeFiles?.[0] || !afterFiles?.[0] || !signatureBlob) {
-        toast.error(
-          "Please ensure all images and signature are properly captured.",
-        );
-        return;
-      }
-
-      // Create FormData
-      const formData = new FormData();
-
-      // Add signature
-      formData.append("kind", "signature");
-      formData.append("file", signatureBlob, "signature.jpg");
-
-      // Add before image
-      formData.append("kind", "before");
-      formData.append("file", beforeFiles[0]);
-
-      // Add after image
-      formData.append("kind", "after");
-      formData.append("file", afterFiles[0]);
-
-      // Call the API
-      await completeJob({ jobId, formData }).unwrap();
-      toast.success("Job completed successfully!");
-    } catch (error) {
-      console.error("Failed to complete job:", error);
-      toast.error("Failed to complete job. Please try again.");
-    }
+  // Handle complete job - open modal
+  const handleCompleteJob = () => {
+    setShowCompleteModal(true);
   };
 
   // Get action buttons configuration based on job status
@@ -352,7 +287,26 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white",
             onClick: handleCompleteJob,
-            disabled: isCompletingJob,
+            disabled: false,
+          },
+        ];
+      case "invoice_required":
+        return [
+          {
+            text: "Cancel Job",
+            variant: "outline" as const,
+            className:
+              "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base text-red-800 border-red-800 hover:bg-red-50",
+            onClick: handleCancelJob,
+            disabled: isCancellingJob,
+          },
+          {
+            text: "Complete Job",
+            variant: "default" as const,
+            className:
+              "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-red-800 hover:bg-red-700 text-white",
+            onClick: handleCompleteJob,
+            disabled: false,
           },
         ];
       case "cancel":
@@ -399,6 +353,16 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
         return {
           text: "Rescheduled",
           className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
+        };
+      case "invoice_required":
+        return {
+          text: "In progress",
+          className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
+        };
+      default:
+        return {
+          text: status ?? "Unknown",
+          className: "bg-gray-400 hover:bg-gray-500 text-white",
         };
     }
   };
@@ -523,13 +487,19 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
                 ? "Starting..."
                 : button.text === "Cancel Job"
                   ? "Cancelling..."
-                  : button.text === "Complete Job"
-                    ? "Completing..."
-                    : button.text
+                  : button.text
               : button.text}
           </Button>
         ))}
       </div>
+
+      {/* Complete Job Modal */}
+      <CompleteJobModal
+        open={showCompleteModal}
+        onOpenChange={setShowCompleteModal}
+        jobId={jobId}
+        jobStatus={jobData.header_summary_card.status}
+      />
     </div>
   );
 };

@@ -90,7 +90,48 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         { type: "JobDetails", id: jobId },
       ],
     }),
-    completeJob: builder.mutation<void, { jobId: string; formData: FormData }>({
+    completeJob: builder.mutation<
+      void,
+      {
+        jobId: string;
+        body:
+          | {
+              technician_charge: string;
+              payment_type: "cash_sale";
+              cash_sale_method: string;
+            }
+          | { invoice_number: string };
+      }
+    >({
+      query: ({ jobId, body }) => ({
+        url: `/api/jobs/${jobId}/complete/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { jobId }) => [
+        { type: "JobDetails", id: jobId },
+      ],
+    }),
+    sendInvoice: builder.mutation<
+      void,
+      {
+        jobId: string;
+        body: {
+          technician_charge: string;
+          payment_type: "invoice";
+        };
+      }
+    >({
+      query: ({ jobId, body }) => ({
+        url: `/api/jobs/${jobId}/complete/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { jobId }) => [
+        { type: "JobDetails", id: jobId },
+      ],
+    }),
+    uploadMedia: builder.mutation<void, { jobId: string; formData: FormData }>({
       query: ({ jobId, formData }) => ({
         url: `/api/jobs/${jobId}/media/`,
         method: "POST",
@@ -129,6 +170,8 @@ export const {
   useStartJobMutation,
   useCancelJobMutation,
   useCompleteJobMutation,
+  useSendInvoiceMutation,
+  useUploadMediaMutation,
   useAutocompletePartsQuery,
   useUpdateChecklistItemMutation,
 } = jobDetailsAPI;

@@ -5,7 +5,8 @@ export type JobStatus =
   | "complete"
   | "cancel"
   | "in_progress"
-  | "rescheduled";
+  | "rescheduled"
+  | "invoice_required";
 export type JobPriority = "high" | "medium" | "low";
 export type ClientType = "commercial" | "residential";
 export type ChecklistStatus = "done" | "doing" | "cancel" | "pending";
