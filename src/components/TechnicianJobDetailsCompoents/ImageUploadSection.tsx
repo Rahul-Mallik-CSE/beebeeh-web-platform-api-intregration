@@ -148,9 +148,11 @@ const ImageUploadSection = ({
   const [beforeFiles, setBeforeFiles] = useState<File[]>([]);
   const [afterFiles, setAfterFiles] = useState<File[]>([]);
 
-  // Check if image upload should be enabled (only when job is in progress)
+  // Check if image upload should be enabled (when job is in progress or invoice required)
   const isImageUploadEnabled =
-    jobStatus === "in_progress" || jobStatus === "In Progress";
+    jobStatus === "in_progress" ||
+    jobStatus === "In Progress" ||
+    jobStatus === "invoice_required";
 
   // Expose function to get files
   useEffect(() => {

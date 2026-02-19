@@ -37,9 +37,11 @@ const CustomerSignatureSection = ({
   const [showCanvas, setShowCanvas] = useState(false);
   const sigCanvas = useRef<SignatureCanvas>(null);
 
-  // Check if signature collection should be enabled (only when job is in progress)
+  // Check if signature collection should be enabled (when job is in progress or invoice required)
   const isSignatureEnabled =
-    jobStatus === "in_progress" || jobStatus === "In Progress";
+    jobStatus === "in_progress" ||
+    jobStatus === "In Progress" ||
+    jobStatus === "invoice_required";
 
   // Expose signature canvas globally
   useEffect(() => {

@@ -243,8 +243,34 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
     }
   };
 
-  // Handle complete job - open modal
+  // Handle complete job - validate images/signature first for invoice_required, then open modal
   const handleCompleteJob = () => {
+    const status = data?.data?.header_summary_card?.status;
+    if (status === "invoice_required") {
+      const getImageValidation = (
+        window as unknown as {
+          getImageValidation?: () => { hasBefore: boolean; hasAfter: boolean };
+        }
+      ).getImageValidation;
+      const getSignatureValidation = (
+        window as unknown as { getSignatureValidation?: () => boolean }
+      ).getSignatureValidation;
+
+      const imageVal = getImageValidation?.() ?? {
+        hasBefore: false,
+        hasAfter: false,
+      };
+      const hasSig = getSignatureValidation?.() ?? false;
+
+      if (!imageVal.hasBefore || !imageVal.hasAfter || !hasSig) {
+        setShowValidationError(true);
+        toast.error(
+          "Please upload before image, after image, and customer signature before completing.",
+        );
+        return;
+      }
+      setShowValidationError(false);
+    }
     setShowCompleteModal(true);
   };
 
@@ -356,7 +382,7 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
         };
       case "invoice_required":
         return {
-          text: "In progress",
+          text: "Invoice Required",
           className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
         };
       default:
