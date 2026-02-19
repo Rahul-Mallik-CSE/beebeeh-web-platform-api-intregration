@@ -3,13 +3,16 @@
 "use client";
 import OverviewTableSection from "@/components/OverviewsComponents/OverviewTableSection";
 import StatsSection from "@/components/OverviewsComponents/StatsSection";
+import { Button } from "@/components/ui/button";
 import {
   useGetDashboardQuery,
   DashboardFilters,
 } from "@/redux/features/technicianFeatures/overViewAPI";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 const OverviewPage = () => {
+  const router = useRouter();
   const [filters, setFilters] = useState<DashboardFilters>({
     page: 1,
     page_size: 10,
@@ -30,6 +33,12 @@ const OverviewPage = () => {
     });
   };
 
+  const handleViewCalendar = () => {
+    const userRaw = localStorage.getItem("user");
+    const technicianId = userRaw ? JSON.parse(userRaw)?.id : "";
+    router.push(`/overviews/calendar?technicianId=${technicianId}`);
+  };
+
   return (
     <div className="w-full p-4">
       <div className="max-w-[2500px] rounded-2xl mx-auto space-y-4">
@@ -39,6 +48,15 @@ const OverviewPage = () => {
           cards={data?.data?.cards}
           cardTrends={data?.data?.card_trends}
         />
+
+        <div className="w-full flex justify-end">
+          <Button
+            onClick={handleViewCalendar}
+            className="bg-red-900 hover:bg-red-950 "
+          >
+            View Calender
+          </Button>
+        </div>
 
         {/* Table section */}
         <OverviewTableSection
