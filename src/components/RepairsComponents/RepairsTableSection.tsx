@@ -8,6 +8,7 @@ import type { RepairJob } from "@/types/AllTypes";
 import { useRouter } from "next/navigation";
 import AssignTechnicianModal from "../CommonComponents/AssignTechnicianModal";
 import { RepairItem } from "@/redux/features/adminFeatures/repairsAPI";
+import { getJobStatusLabel } from "@/lib/statusUtils";
 import { FilterState } from "../CommonComponents/FilterCard";
 
 interface RepairsTableSectionProps {
@@ -47,13 +48,7 @@ const RepairsTableSection: React.FC<RepairsTableSectionProps> = ({
       model: item.product.model_name,
       technician: item.technician.name,
       scheduled: item.scheduled_date,
-      status:
-        item.status === "assign"
-          ? "Pending"
-          : (item.status
-              .split("_")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(" ") as any),
+      status: getJobStatusLabel(item.status) as any,
     }));
   }, [data]);
 

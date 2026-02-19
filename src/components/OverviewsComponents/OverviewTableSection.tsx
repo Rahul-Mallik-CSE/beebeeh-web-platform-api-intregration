@@ -9,6 +9,11 @@ import TableLoadingView from "../LoadingComponents/TableLoadingView";
 import type { RecentJob, DashboardMeta } from "@/types/AllTypes";
 import { FilterState } from "../CommonComponents/FilterCard";
 import { DashboardFilters } from "@/redux/features/technicianFeatures/overViewAPI";
+import {
+  getJobStatusLabel,
+  mapStatusToAPI,
+  JOB_STATUS_FILTER_OPTIONS,
+} from "@/lib/statusUtils";
 
 interface OverviewTableSectionProps {
   isLoading?: boolean;
@@ -45,18 +50,8 @@ const OverviewTableSection = ({
     return jobTypeMap[jobType] || jobType;
   };
 
-  // Map status display to API value
-  const mapStatusToAPI = (status: string): string => {
-    const statusMap: Record<string, string> = {
-      Pending: "assign",
-      "In Progress": "in_progress",
-      Completed: "complete",
-      Cancelled: "cancel",
-      Rescheduled: "rescheduled",
-      "Invoice Required": "invoice_required",
-    };
-    return statusMap[status] || status.toLowerCase();
-  };
+  // Map status display to API value — uses shared utility
+  const handleMapStatusToAPI = mapStatusToAPI;
 
   const handleFilterChange = (filterState: FilterState) => {
     if (!onFilterChange) return;
@@ -71,7 +66,7 @@ const OverviewTableSection = ({
 
     // Map status filter - set undefined to clear when "All" is selected
     filters.status = filterState.statusFilter
-      ? mapStatusToAPI(filterState.statusFilter)
+      ? handleMapStatusToAPI(filterState.statusFilter)
       : undefined;
 
     // Map job type filter - set undefined to clear when "All" is selected
@@ -107,7 +102,7 @@ const OverviewTableSection = ({
       minute: "2-digit",
       hour12: true,
     }),
-    status: formatStatus(job.status),
+    status: getJobStatusLabel(job.status) as Job["status"],
   }));
 
   return (
@@ -124,32 +119,11 @@ const OverviewTableSection = ({
         onPageChange={onPageChange}
         onFilterChange={handleFilterChange}
         excludeFilterColumns={["Ordered by time"]}
-        predefinedStatusOptions={[
-          "Pending",
-          "In Progress",
-          "Completed",
-          "Cancelled",
-          "Rescheduled",
-          "Invoice Required",
-        ]}
+        predefinedStatusOptions={JOB_STATUS_FILTER_OPTIONS}
         predefinedJobTypeOptions={["Installation", "Repairing", "Maintenance"]}
       />
     </div>
   );
-};
-
-// Helper function to format status from API to UI format
-const formatStatus = (status: string): Job["status"] => {
-  const statusMap: Record<string, Job["status"]> = {
-    assign: "Pending",
-    rescheduled: "Rescheduled",
-    complete: "Completed",
-    in_progress: "In Progress",
-    cancel: "Cancelled",
-    invoice_required: "Invoice Required",
-  };
-
-  return statusMap[status.toLowerCase()] || "Pending";
 };
 
 export default OverviewTableSection;

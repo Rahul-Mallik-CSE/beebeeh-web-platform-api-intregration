@@ -1,6 +1,7 @@
 /** @format */
 import React from "react";
 import { HeaderSummary } from "@/redux/features/adminFeatures/jobDetailsAPI";
+import { getJobStatusBadgeColor } from "@/lib/statusUtils";
 
 interface HeaderSummaryCardProps {
   data?: HeaderSummary;
@@ -8,20 +9,7 @@ interface HeaderSummaryCardProps {
 
 const HeaderSummaryCard = ({ data }: HeaderSummaryCardProps) => {
   const getStatusColor = (status?: string) => {
-    switch (status?.toLowerCase()) {
-      case "complete":
-        return "bg-green-100 text-green-800";
-      case "in_progress":
-        return "bg-blue-100 text-blue-800";
-      case "assign":
-        return "bg-yellow-100 text-yellow-800";
-      case "cancel":
-        return "bg-red-100 text-red-800";
-      case "rescheduled":
-        return "bg-orange-100 text-orange-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
+    return getJobStatusBadgeColor(status || "");
   };
 
   const getPriorityColor = (priority?: string) => {

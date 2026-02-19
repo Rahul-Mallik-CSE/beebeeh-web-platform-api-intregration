@@ -8,6 +8,7 @@ import type { InstallationJob } from "@/types/AllTypes";
 import { useRouter } from "next/navigation";
 import AssignTechnicianModal from "../CommonComponents/AssignTechnicianModal";
 import { InstallationItem } from "@/redux/features/adminFeatures/installationAPI";
+import { getJobStatusLabel } from "@/lib/statusUtils";
 import { FilterState } from "../CommonComponents/FilterCard";
 
 interface InstallationTableSectionProps {
@@ -48,13 +49,7 @@ const InstallationTableSection: React.FC<InstallationTableSectionProps> = ({
       serial: "", // Assuming not provided
       technician: item.technician.name,
       scheduled: item.scheduled_date,
-      status:
-        item.status === "assign"
-          ? "Pending"
-          : (item.status
-              .split("_")
-              .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-              .join(" ") as any),
+      status: getJobStatusLabel(item.status) as any,
     }));
   }, [data]);
 

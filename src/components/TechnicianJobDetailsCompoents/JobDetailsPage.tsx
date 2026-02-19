@@ -13,6 +13,7 @@ import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
 import CompleteJobModal from "./CompleteJobModal";
 import { useGetJobDetailsQuery } from "@/redux/features/technicianFeatures/jobDetailsAPI";
+import { getJobStatusButtonColor, getJobStatusLabel } from "@/lib/statusUtils";
 import { JobStatus } from "@/types/JobDetailsTypes";
 import {
   useStartJobMutation,
@@ -354,43 +355,10 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
 
   // Get status badge configuration
   const getStatusBadge = (status: JobStatus) => {
-    switch (status) {
-      case "assign":
-        return {
-          text: "Pending",
-          className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
-        };
-      case "in_progress":
-        return {
-          text: "In Progress",
-          className: "bg-blue-500 hover:bg-blue-600 text-white",
-        };
-      case "complete":
-        return {
-          text: "Completed",
-          className: "bg-green-500 hover:bg-green-600 text-white",
-        };
-      case "cancel":
-        return {
-          text: "Cancelled",
-          className: "bg-red-500 hover:bg-red-600 text-white",
-        };
-      case "rescheduled":
-        return {
-          text: "Rescheduled",
-          className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
-        };
-      case "invoice_required":
-        return {
-          text: "Invoice Required",
-          className: "bg-yellow-400 hover:bg-yellow-500 text-gray-800",
-        };
-      default:
-        return {
-          text: status ?? "Unknown",
-          className: "bg-gray-400 hover:bg-gray-500 text-white",
-        };
-    }
+    return {
+      text: getJobStatusLabel(status),
+      className: getJobStatusButtonColor(status),
+    };
   };
 
   if (isLoading) {

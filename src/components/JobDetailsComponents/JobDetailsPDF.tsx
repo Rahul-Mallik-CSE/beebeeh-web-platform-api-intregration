@@ -10,6 +10,7 @@ import {
   Image,
 } from "@react-pdf/renderer";
 import { getImageFullUrl } from "@/lib/utils";
+import { getJobStatusHexColor } from "@/lib/statusUtils";
 
 // Define styles for the PDF
 const styles = StyleSheet.create({
@@ -156,25 +157,7 @@ interface JobDetailsPDFProps {
 }
 
 const JobDetailsPDF: React.FC<JobDetailsPDFProps> = ({ jobData, jobId }) => {
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case "complete":
-      case "completed":
-        return "#10b981";
-      case "in_progress":
-        return "#3b82f6";
-      case "assign":
-      case "pending":
-        return "#eab308";
-      case "cancel":
-      case "cancelled":
-        return "#ef4444";
-      case "rescheduled":
-        return "#f97316";
-      default:
-        return "#6b7280";
-    }
-  };
+  const getStatusColor = getJobStatusHexColor;
 
   const currentDate = new Date().toLocaleDateString();
 

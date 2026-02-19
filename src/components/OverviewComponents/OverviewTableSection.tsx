@@ -5,6 +5,10 @@ import CustomTable from "../CommonComponents/CustomTable";
 import type { OverviewJob } from "@/types/AllTypes";
 import { useRouter } from "next/navigation";
 import { OverviewJobItem } from "@/redux/features/adminFeatures/overViewAPI";
+import {
+  getJobStatusLabel,
+  JOB_STATUS_FILTER_OPTIONS,
+} from "@/lib/statusUtils";
 import { FilterState } from "../CommonComponents/FilterCard";
 
 interface OverviewTableSectionProps {
@@ -67,8 +71,7 @@ const OverviewTableSection: React.FC<OverviewTableSectionProps> = ({
       technician: item.technician,
       type: (item.type.charAt(0).toUpperCase() + item.type.slice(1)) as any,
       orderByDate: item.order_by_date,
-      status: (item.status.charAt(0).toUpperCase() +
-        item.status.slice(1)) as any,
+      status: getJobStatusLabel(item.status) as any,
     }));
   }, [data]);
 
@@ -104,13 +107,7 @@ const OverviewTableSection: React.FC<OverviewTableSectionProps> = ({
         onPageChange={onPageChange}
         onFilterChange={onFilterChange}
         excludeFilterColumns={["Order by Date", "Type"]}
-        predefinedStatusOptions={[
-          "Pending",
-          "In Progress",
-          "Completed",
-          "Cancelled",
-          "Rescheduled",
-        ]}
+        predefinedStatusOptions={JOB_STATUS_FILTER_OPTIONS}
         predefinedJobTypeOptions={["Installation", "Repair", "Maintenance"]}
       />
     </div>

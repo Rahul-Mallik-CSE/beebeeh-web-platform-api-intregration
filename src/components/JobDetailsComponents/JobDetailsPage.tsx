@@ -28,6 +28,7 @@ import {
   useRescheduleJobMutation,
 } from "@/redux/features/adminFeatures/jobDetailsAPI";
 import { getImageFullUrl } from "@/lib/utils";
+import { getJobStatusButtonColor, getJobStatusLabel } from "@/lib/statusUtils";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import JobDetailsPDF from "./JobDetailsPDF";
 
@@ -247,41 +248,9 @@ const JobDetailsPage = ({
           </div>
 
           <Button
-            className={`px-3 sm:px-4 md:px-6 text-sm sm:text-base ${
-              jobStatus === "complete"
-                ? "bg-green-600 hover:bg-green-700"
-                : jobStatus === "in_progress"
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : jobStatus === "assign"
-                    ? "bg-yellow-600 hover:bg-yellow-700"
-                    : jobStatus === "pending"
-                      ? "bg-yellow-600 hover:bg-yellow-700"
-                      : jobStatus === "cancel"
-                        ? "bg-red-600 hover:bg-red-700"
-                        : jobStatus === "rescheduled"
-                          ? "bg-orange-600 hover:bg-orange-700"
-                          : jobStatus === "invoice_required"
-                            ? "bg-purple-600 hover:bg-purple-700"
-                            : "bg-gray-600 hover:bg-gray-700"
-            }`}
+            className={`px-3 sm:px-4 md:px-6 text-sm sm:text-base ${getJobStatusButtonColor(jobStatus || "")}`}
           >
-            {jobStatus === "complete"
-              ? "Complete"
-              : jobStatus === "in_progress"
-                ? "In Progress"
-                : jobStatus === "pending"
-                  ? "Pending"
-                  : jobStatus === "cancel"
-                    ? "Cancel"
-                    : jobStatus === "overdue"
-                      ? "Overdue"
-                      : jobStatus === "upcoming"
-                        ? "Upcoming"
-                        : jobStatus === "rescheduled"
-                          ? "Rescheduled"
-                          : jobStatus === "invoice_required"
-                            ? "Invoice Required"
-                            : "Unknown"}
+            {getJobStatusLabel(jobStatus || "")}
           </Button>
         </div>
 

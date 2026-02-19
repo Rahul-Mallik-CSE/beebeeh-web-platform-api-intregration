@@ -2,6 +2,7 @@
 "use client";
 import React, { useState } from "react";
 import CustomTable from "@/components/CommonComponents/CustomTable";
+import { getJobStatusBadgeColor, getJobStatusLabel } from "@/lib/statusUtils";
 import { Button } from "@/components/ui/button";
 import {
   ProductDetailData,
@@ -212,29 +213,11 @@ const ProductsDetailsTableSection: React.FC<
       header: "Status",
       className: "text-right",
       accessor: (row: RelatedJob) => {
-        const getStatusColor = (status: string) => {
-          switch (status.toLowerCase()) {
-            case "complete":
-            case "completed":
-              return "bg-green-100 text-green-700";
-            case "assign":
-            case "in progress":
-            case "in_progress":
-              return "bg-blue-100 text-blue-700";
-            case "rescheduled":
-              return "bg-amber-100 text-amber-700";
-            case "cancel":
-            case "cancelled":
-              return "bg-red-100 text-red-700";
-            default:
-              return "bg-gray-100 text-gray-700";
-          }
-        };
         return (
           <span
-            className={`px-2 py-1 rounded-md text-xs font-medium capitalize ${getStatusColor(row.status)}`}
+            className={`px-2 py-1 rounded-md text-xs font-medium ${getJobStatusBadgeColor(row.status)}`}
           >
-            {row.status}
+            {getJobStatusLabel(row.status)}
           </span>
         );
       },
