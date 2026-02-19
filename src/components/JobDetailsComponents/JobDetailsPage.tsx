@@ -225,7 +225,8 @@ const JobDetailsPage = ({
     "overdue",
     "upcoming",
   ].includes(jobStatus || "");
-  const showCancelOnly = jobStatus === "in_progress";
+  const showCancelOnly =
+    jobStatus === "in_progress" || jobStatus === "invoice_required";
   const showExportPDF = jobStatus === "complete";
 
   return (
@@ -259,7 +260,9 @@ const JobDetailsPage = ({
                         ? "bg-red-600 hover:bg-red-700"
                         : jobStatus === "rescheduled"
                           ? "bg-orange-600 hover:bg-orange-700"
-                          : "bg-gray-600 hover:bg-gray-700"
+                          : jobStatus === "invoice_required"
+                            ? "bg-purple-600 hover:bg-purple-700"
+                            : "bg-gray-600 hover:bg-gray-700"
             }`}
           >
             {jobStatus === "complete"
@@ -276,7 +279,9 @@ const JobDetailsPage = ({
                         ? "Upcoming"
                         : jobStatus === "rescheduled"
                           ? "Rescheduled"
-                          : "Unknown"}
+                          : jobStatus === "invoice_required"
+                            ? "Invoice Required"
+                            : "Unknown"}
           </Button>
         </div>
 
