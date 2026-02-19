@@ -21,6 +21,7 @@ interface AddProductModalProps {
 interface ProductFormData {
   modelName: string;
   alias: string;
+  sku: string;
   frequencyDomestic: string;
   frequencyCommercial: string;
   stockQuantity: string;
@@ -34,6 +35,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
   const [formData, setFormData] = useState<ProductFormData>({
     modelName: "",
     alias: "",
+    sku: "",
     frequencyDomestic: "",
     frequencyCommercial: "",
     stockQuantity: "",
@@ -49,6 +51,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     if (
       !formData.modelName.trim() ||
       !formData.alias.trim() ||
+      !formData.sku.trim() ||
       !formData.frequencyDomestic.trim() ||
       !formData.frequencyCommercial.trim() ||
       !formData.stockQuantity.trim()
@@ -80,6 +83,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
       const productData = {
         model_name: formData.modelName,
         alias: formData.alias,
+        sku: formData.sku,
         frequency_domestic_month: freqDom,
         frequency_commercial_month: freqCom,
         stock_quantity: stockQty,
@@ -110,6 +114,7 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
     setFormData({
       modelName: "",
       alias: "",
+      sku: "",
       frequencyDomestic: "",
       frequencyCommercial: "",
       stockQuantity: "",
@@ -159,6 +164,24 @@ const AddProductModal: React.FC<AddProductModalProps> = ({
               placeholder="Enter alias"
               value={formData.alias}
               onChange={(e) => handleChange("alias", e.target.value)}
+              className="w-full text-[11px] xs:text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
+            />
+          </div>
+
+          {/* SKU */}
+          <div className="space-y-1.5">
+            <label
+              htmlFor="sku"
+              className="text-[11px] xs:text-xs sm:text-lg font-medium text-gray-700"
+            >
+              SKU
+            </label>
+            <Input
+              id="sku"
+              type="text"
+              placeholder="Enter SKU (e.g. WP-0029)"
+              value={formData.sku}
+              onChange={(e) => handleChange("sku", e.target.value)}
               className="w-full text-[11px] xs:text-xs sm:text-sm h-8 xs:h-9 sm:h-10"
             />
           </div>
