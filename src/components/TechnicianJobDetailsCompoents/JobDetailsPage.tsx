@@ -13,7 +13,7 @@ import ProductDetailsSection from "./ProductDetailsSection";
 import CustomerSignatureSection from "./CustomerSignatureSection";
 import CompleteJobModal from "./CompleteJobModal";
 import { useGetJobDetailsQuery } from "@/redux/features/technicianFeatures/jobDetailsAPI";
-import { getJobStatusButtonColor, getJobStatusLabel } from "@/lib/statusUtils";
+import { getJobStatusBadgeColor, getJobStatusLabel } from "@/lib/statusUtils";
 import { JobStatus } from "@/types/JobDetailsTypes";
 import {
   useStartJobMutation,
@@ -357,7 +357,7 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   const getStatusBadge = (status: JobStatus) => {
     return {
       text: getJobStatusLabel(status),
-      className: getJobStatusButtonColor(status),
+      className: getJobStatusBadgeColor(status),
     };
   };
 

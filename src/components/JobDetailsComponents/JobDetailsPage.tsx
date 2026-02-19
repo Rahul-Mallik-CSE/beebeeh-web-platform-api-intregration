@@ -28,7 +28,7 @@ import {
   useRescheduleJobMutation,
 } from "@/redux/features/adminFeatures/jobDetailsAPI";
 import { getImageFullUrl } from "@/lib/utils";
-import { getJobStatusButtonColor, getJobStatusLabel } from "@/lib/statusUtils";
+import { getJobStatusBadgeColor, getJobStatusLabel } from "@/lib/statusUtils";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import JobDetailsPDF from "./JobDetailsPDF";
 
@@ -248,7 +248,7 @@ const JobDetailsPage = ({
           </div>
 
           <Button
-            className={`px-3 sm:px-4 md:px-6 text-sm sm:text-base ${getJobStatusButtonColor(jobStatus || "")}`}
+            className={`px-3 sm:px-4 md:px-6 text-sm sm:text-base ${getJobStatusBadgeColor(jobStatus || "")}`}
           >
             {getJobStatusLabel(jobStatus || "")}
           </Button>
