@@ -5,7 +5,8 @@ export type JobStatus =
   | "In Progress"
   | "Completed"
   | "Cancelled"
-  | "Rescheduled";
+  | "Rescheduled"
+  | "Invoice Required";
 
 export type JobType =
   | "Maintenance"

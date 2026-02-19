@@ -226,6 +226,8 @@ const CustomTable = <T extends Record<string, any>>({
         return "bg-red-100 text-red-800 border border-red-200";
       case "rescheduled":
         return "bg-purple-100 text-purple-800 border border-purple-200";
+      case "invoice required":
+        return "bg-orange-100 text-orange-800 border border-orange-200";
       default:
         return "bg-gray-100 text-gray-700 border border-gray-200";
     }
@@ -243,7 +245,7 @@ const CustomTable = <T extends Record<string, any>>({
       return (
         <div
           className={cn(
-            "w-24 px-2  py-1 flex justify-center items-center rounded-md text-sm font-medium",
+            "w-28 px-2  py-1 flex justify-center items-center rounded-md text-sm font-medium",
             getStatusColor(value),
           )}
         >

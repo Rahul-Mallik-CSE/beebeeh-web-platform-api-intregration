@@ -53,6 +53,7 @@ const OverviewTableSection = ({
       Completed: "complete",
       Cancelled: "cancel",
       Rescheduled: "rescheduled",
+      "Invoice Required": "invoice_required",
     };
     return statusMap[status] || status.toLowerCase();
   };
@@ -129,6 +130,7 @@ const OverviewTableSection = ({
           "Completed",
           "Cancelled",
           "Rescheduled",
+          "Invoice Required",
         ]}
         predefinedJobTypeOptions={["Installation", "Repairing", "Maintenance"]}
       />
@@ -144,6 +146,7 @@ const formatStatus = (status: string): Job["status"] => {
     complete: "Completed",
     in_progress: "In Progress",
     cancel: "Cancelled",
+    invoice_required: "Invoice Required",
   };
 
   return statusMap[status.toLowerCase()] || "Pending";
