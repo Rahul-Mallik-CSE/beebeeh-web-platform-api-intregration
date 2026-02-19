@@ -175,7 +175,7 @@ const CompleteJobModal = ({
 
   // Handle "Complete" button
   const handleComplete = async () => {
-    // Invoice required flow: validate invoice → complete job (server validates invoice) → upload media
+    // Invoice required flow: validate invoice number → upload media → complete job
     if (jobStatus === "invoice_required") {
       // Step 1: Validate invoice number
       if (!invoiceNumber) {
@@ -183,7 +183,11 @@ const CompleteJobModal = ({
         return;
       }
 
-      // Step 2: Complete job — server validates the invoice number
+      // Step 2: Upload media first (same as cash_sale flow)
+      const mediaUploaded = await handleUploadMedia();
+      if (!mediaUploaded) return;
+
+      // Step 3: Complete job — server validates the invoice number
       try {
         await completeJob({
           jobId,
@@ -191,6 +195,8 @@ const CompleteJobModal = ({
             invoice_number: invoiceNumber,
           },
         }).unwrap();
+        toast.success("Job completed successfully!");
+        handleOpenChange(false);
       } catch (error) {
         console.error("Failed to complete job:", error);
         const apiMessage = (error as { data?: { message?: string } })?.data
@@ -204,45 +210,7 @@ const CompleteJobModal = ({
             "Invalid invoice number. Please take the invoice number from admin.",
           );
         }
-        return;
       }
-
-      // Step 3: Upload images + signature after invoice is validated
-      const getUploadedImages = (
-        window as unknown as {
-          getUploadedImages?: () => { beforeFiles: File[]; afterFiles: File[] };
-        }
-      ).getUploadedImages;
-      const getSignatureBlob = (
-        window as unknown as { getSignatureBlob?: () => Blob | null }
-      ).getSignatureBlob;
-
-      if (getUploadedImages && getSignatureBlob) {
-        const { beforeFiles, afterFiles } = getUploadedImages();
-        const signatureBlob = getSignatureBlob();
-
-        if (beforeFiles?.[0] && afterFiles?.[0] && signatureBlob) {
-          const formData = new FormData();
-          formData.append("kind", "signature");
-          formData.append("file", signatureBlob, "signature.jpg");
-          formData.append("kind", "before");
-          formData.append("file", beforeFiles[0]);
-          formData.append("kind", "after");
-          formData.append("file", afterFiles[0]);
-
-          try {
-            await uploadMedia({ jobId, formData }).unwrap();
-          } catch (error) {
-            console.error("Failed to upload media:", error);
-            toast.warning(
-              "Job completed but failed to upload images/signature. Please contact support.",
-            );
-          }
-        }
-      }
-
-      toast.success("Job completed successfully!");
-      handleOpenChange(false);
       return;
     }
 
