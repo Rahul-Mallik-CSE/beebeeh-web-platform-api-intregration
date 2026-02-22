@@ -1,6 +1,8 @@
 /** @format */
+"use client";
 
 import React, { useMemo } from "react";
+import { useRouter } from "next/navigation";
 import CustomTable from "@/components/CommonComponents/CustomTable";
 import {
   JobHistoryItem,
@@ -25,6 +27,7 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
   anotherJobHistory,
   jobHistoryMeta,
 }) => {
+  const router = useRouter();
   // Filter data based on service status (if needed in future)
   const filteredData = useMemo(() => {
     return jobHistory || [];
@@ -109,7 +112,10 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
           columns={completedColumns}
           itemsPerPage={10}
           showFilter={false}
-          showActions={false}
+          showActions={true}
+          onAction={(row: JobHistoryItem) =>
+            router.push(`/clients/${clientId}/${row.job_id}`)
+          }
         />
       </div>
       <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 border border-gray-200">
@@ -123,7 +129,10 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
           columns={allJobsColumns}
           itemsPerPage={10}
           showFilter={false}
-          showActions={false}
+          showActions={true}
+          onAction={(row: AnotherJobHistoryItem) =>
+            router.push(`/clients/${clientId}/${row.job_id}`)
+          }
         />
       </div>
     </div>
