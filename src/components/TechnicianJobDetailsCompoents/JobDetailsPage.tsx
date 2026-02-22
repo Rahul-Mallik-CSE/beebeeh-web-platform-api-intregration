@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -20,12 +20,28 @@ import {
   useCancelJobMutation,
 } from "@/redux/features/technicianFeatures/jobDetailsAPI";
 import { toast } from "react-toastify";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import TechnicianJobDetailsPDF from "./TechnicianJobDetailsPDF";
+import { getImageFullUrl } from "@/lib/utils";
 
 interface JobDetailsPageProps {
   jobId: string;
 }
+
+const fetchImageAsBase64 = async (url: string): Promise<string> => {
+  if (!url) return "";
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return "";
+  }
+};
 
 const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   const router = useRouter();
@@ -38,6 +54,38 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
 
   // Validation error state
   const [showValidationError, setShowValidationError] = useState(false);
+
+  // Pre-fetched base64 images for PDF export
+  const [prefetchedImages, setPrefetchedImages] = useState<{
+    beforeImage?: string;
+    afterImage?: string;
+    signatureImage?: string;
+  }>({});
+
+  useEffect(() => {
+    if (!data?.data) return;
+    const jobData = data.data;
+    const imageUpload = jobData?.image_upload_section;
+    const signature = jobData?.customer_signature_section;
+
+    const beforeUrl = imageUpload?.before_images?.[0]?.file
+      ? getImageFullUrl(imageUpload.before_images[0].file)
+      : "";
+    const afterUrl = imageUpload?.after_images?.[0]?.file
+      ? getImageFullUrl(imageUpload.after_images[0].file)
+      : "";
+    const sigUrl = signature?.signature_media?.file
+      ? getImageFullUrl(signature.signature_media.file)
+      : "";
+
+    Promise.all([
+      fetchImageAsBase64(beforeUrl),
+      fetchImageAsBase64(afterUrl),
+      fetchImageAsBase64(sigUrl),
+    ]).then(([beforeImage, afterImage, signatureImage]) => {
+      setPrefetchedImages({ beforeImage, afterImage, signatureImage });
+    });
+  }, [data?.data]);
 
   // Debug logging
   console.log("Job Details API Response:", data);
@@ -64,183 +112,6 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
     } catch (error) {
       console.error("Failed to cancel job:", error);
       toast.error("Failed to cancel job. Please try again.");
-    }
-  };
-
-  // Handle export to PDF
-  const handleExportPDF = async () => {
-    try {
-      const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      let yPosition = 20;
-
-      // Add title
-      pdf.setFontSize(20);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Job Details Report", pageWidth / 2, yPosition, {
-        align: "center",
-      });
-      yPosition += 20;
-
-      // Add job ID and status
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "normal");
-      pdf.text(`Job ID: ${jobData.header_summary_card.job_id}`, 20, yPosition);
-      yPosition += 10;
-      pdf.text(`Status: ${statusBadge.text}`, 20, yPosition);
-      yPosition += 10;
-      pdf.text(`Date: ${new Date().toLocaleDateString()}`, 20, yPosition);
-      yPosition += 20;
-
-      // Client Information
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Client Information", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const clientInfo = jobData.client_information_section;
-      pdf.text(`Name: ${clientInfo.name}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Phone: ${clientInfo.contact_number}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Address: ${clientInfo.address}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Town: ${clientInfo.town}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Client Type: ${clientInfo.client_type}`, 20, yPosition);
-      yPosition += 20;
-
-      // Product Details
-      if (yPosition > pageHeight - 60) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Product Details", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const productInfo = jobData.product_details_section;
-      pdf.text(`Model: ${productInfo.model_name}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Alias: ${productInfo.alias}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(
-        `Installed Date: ${productInfo.installed_date || "N/A"}`,
-        20,
-        yPosition,
-      );
-      yPosition += 8;
-      pdf.text(
-        `Last Service Date: ${productInfo.last_service_date || "N/A"}`,
-        20,
-        yPosition,
-      );
-      yPosition += 20;
-
-      // Job Details
-      if (yPosition > pageHeight - 60) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Job Information", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      const jobInfo = jobData.header_summary_card;
-      pdf.text(`Priority: ${jobInfo.priority}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Type: ${jobInfo.job_type}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Product Model: ${jobInfo.product_model}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(
-        `Serial Number: ${jobInfo.serial_number || "N/A"}`,
-        20,
-        yPosition,
-      );
-      yPosition += 8;
-      pdf.text(`Client: ${jobInfo.client_name}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Location: ${jobInfo.client_location}`, 20, yPosition);
-      yPosition += 8;
-      pdf.text(`Scheduled Date: ${jobInfo.scheduled_datetime}`, 20, yPosition);
-      yPosition += 20;
-
-      // Checklist
-      if (yPosition > pageHeight - 60) {
-        pdf.addPage();
-        yPosition = 20;
-      }
-
-      pdf.setFontSize(14);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Checklist", 20, yPosition);
-      yPosition += 10;
-
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "normal");
-      jobData.checklist_section.forEach((item, index) => {
-        if (yPosition > pageHeight - 20) {
-          pdf.addPage();
-          yPosition = 20;
-        }
-        const status =
-          item.status === "done" ? "✓" : item.status === "doing" ? "○" : "✗";
-        pdf.text(`${status} ${item.task}`, 20, yPosition);
-        yPosition += 8;
-      });
-
-      // Frequently Used Parts
-      if (
-        jobData.frequently_used_parts &&
-        jobData.frequently_used_parts.length > 0
-      ) {
-        if (yPosition > pageHeight - 60) {
-          pdf.addPage();
-          yPosition = 20;
-        }
-
-        yPosition += 10;
-        pdf.setFontSize(14);
-        pdf.setFont("helvetica", "bold");
-        pdf.text("Frequently Used Parts", 20, yPosition);
-        yPosition += 10;
-
-        pdf.setFontSize(10);
-        pdf.setFont("helvetica", "normal");
-        jobData.frequently_used_parts.forEach((part, index) => {
-          if (yPosition > pageHeight - 20) {
-            pdf.addPage();
-            yPosition = 20;
-          }
-          pdf.text(
-            `${part.part_name} (${part.quantity_used} ${part.unit})`,
-            20,
-            yPosition,
-          );
-          yPosition += 8;
-        });
-      }
-
-      // Save the PDF
-      const fileName = `Job_${jobData.header_summary_card.job_id}_${new Date().toISOString().split("T")[0]}.pdf`;
-      pdf.save(fileName);
-
-      toast.success("PDF exported successfully!");
-    } catch (error) {
-      console.error("Failed to export PDF:", error);
-      toast.error("Failed to export PDF. Please try again.");
     }
   };
 
@@ -344,8 +215,9 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
             variant: "default" as const,
             className:
               "px-6 py-3 sm:px-8 sm:py-4 text-sm sm:text-base bg-green-600 hover:bg-green-700 text-white",
-            onClick: handleExportPDF,
+            onClick: () => {},
             disabled: false,
+            isPDF: true,
           },
         ];
       default:
@@ -468,23 +340,47 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
 
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 pt-4 sm:pt-6">
-        {actionButtons.map((button, index) => (
-          <Button
-            key={index}
-            variant={button.variant}
-            className={button.className}
-            onClick={button.onClick}
-            disabled={button.disabled}
-          >
-            {button.disabled
-              ? button.text === "Start Job"
-                ? "Starting..."
-                : button.text === "Cancel Job"
-                  ? "Cancelling..."
-                  : button.text
-              : button.text}
-          </Button>
-        ))}
+        {actionButtons.map((button, index) =>
+          "isPDF" in button && button.isPDF ? (
+            <PDFDownloadLink
+              key={index}
+              document={
+                <TechnicianJobDetailsPDF
+                  jobData={jobData}
+                  jobId={jobId}
+                  prefetchedImages={prefetchedImages}
+                />
+              }
+              fileName={`Job_${jobData.header_summary_card.job_id}_${new Date().toISOString().split("T")[0]}.pdf`}
+            >
+              {({ loading }) => (
+                <Button
+                  variant={button.variant}
+                  className={button.className}
+                  disabled={loading}
+                >
+                  {loading ? "Generating PDF..." : button.text}
+                </Button>
+              )}
+            </PDFDownloadLink>
+          ) : (
+            <Button
+              key={index}
+              variant={button.variant}
+              className={button.className}
+              onClick={button.onClick}
+              disabled={button.disabled}
+            >
+              {button.disabled
+                ? button.text === "Start Job"
+                  ? "Starting..."
+                  : button.text === "Cancel Job"
+                    ? "Cancelling..."
+                    : button.text
+                : button.text}
+            </Button>
+          ),
+        )}
       </div>
 
       {/* Complete Job Modal */}
