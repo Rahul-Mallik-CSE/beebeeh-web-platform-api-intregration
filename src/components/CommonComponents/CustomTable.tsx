@@ -360,7 +360,7 @@ const CustomTable = <T extends Record<string, any>>({
                       <TableCell className="text-right py-3 sm:py-5">
                         <button
                           onClick={() => onAction(row)}
-                          className="p-1.5 sm:p-2 hover:bg-gray-100 rounded-full transition-colors inline-flex items-center justify-center"
+                          className="p-1.5 cursor-pointer sm:p-2 hover:bg-gray-100 rounded-full transition-colors inline-flex items-center justify-center"
                         >
                           <View className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
                         </button>
