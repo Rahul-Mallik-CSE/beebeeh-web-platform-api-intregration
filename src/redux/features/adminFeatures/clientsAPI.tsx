@@ -37,6 +37,28 @@ export interface AnotherJobHistoryItem {
   object_id: string;
 }
 
+export interface LastCompletedJob {
+  job_id: string;
+  technician: string;
+  contact_number: string;
+  type: string;
+  order_by_date: string;
+  scheduled_date: string;
+  complete_date: string;
+  object_id: string;
+}
+
+export interface UpcomingJob {
+  job_id: string;
+  technician: string;
+  contact_number: string;
+  type: string;
+  order_by_date: string;
+  scheduled_date: string;
+  status: string;
+  object_id: string;
+}
+
 export interface ClientDetails {
   client_id: string;
   first_name: string;
@@ -52,6 +74,8 @@ export interface ClientDetails {
   is_active: boolean;
   installations: number;
   last_service: string | null;
+  last_completed_job: LastCompletedJob | null;
+  Upcoming_job: UpcomingJob | null;
   total_job: number;
   job_history: JobHistoryItem[];
   another_job_history: AnotherJobHistoryItem[];

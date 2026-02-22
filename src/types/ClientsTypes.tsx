@@ -11,12 +11,24 @@ export interface Client {
   created: string;
 }
 
+export interface LastCompletedJobInfo {
+  jobId: string;
+  completeDate: string;
+}
+
+export interface UpcomingJobInfo {
+  jobId: string;
+  scheduledDate: string;
+}
+
 export interface ClientDetails extends Client {
   profileImage?: string;
   email: string;
   address: string;
   status: "Available" | "Inactive" | "Busy";
   totalJobs: number;
+  lastCompletedJob?: LastCompletedJobInfo | null;
+  upcomingJob?: UpcomingJobInfo | null;
 }
 
 export interface ClientColumn {

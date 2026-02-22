@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { MdBlockFlipped, MdEmail, MdLocalPhone } from "react-icons/md";
 import { ClientDetails } from "@/types/ClientsTypes";
+import { BriefcaseBusiness, CalendarCheck } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { TbSquareRoundedCheck } from "react-icons/tb";
 import { getImageFullUrl } from "@/lib/utils";
@@ -124,7 +125,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
       </div>
 
       {/* Info Cards Grid */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 sm:gap-4">
         {[
           {
             id: "phone",
@@ -163,7 +164,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
           return (
             <div
               key={card.id}
-              className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2"
+              className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2 overflow-hidden"
             >
               <div className="flex items-center gap-2">
                 <div
@@ -189,6 +190,58 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
             </div>
           );
         })}
+
+        {/* Last Completed Job Box */}
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-orange-100 rounded-lg flex items-center justify-center shrink-0">
+              <CalendarCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-medium text-gray-600">
+              Last Job
+            </span>
+          </div>
+          {client.lastCompletedJob ? (
+            <div className="space-y-0.5">
+              <p className="text-sm sm:text-base font-semibold text-gray-800">
+                {client.lastCompletedJob.jobId}
+              </p>
+              <p className="text-xs text-gray-500">
+                Completed Date: {client.lastCompletedJob.completeDate}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm sm:text-base font-semibold text-gray-400">
+              N/A
+            </p>
+          )}
+        </div>
+
+        {/* Upcoming Job Box */}
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0">
+              <BriefcaseBusiness className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600" />
+            </div>
+            <span className="text-xs sm:text-sm font-medium text-gray-600">
+              Next Job
+            </span>
+          </div>
+          {client.upcomingJob ? (
+            <div className="space-y-0.5">
+              <p className="text-sm sm:text-base font-semibold text-gray-800">
+                {client.upcomingJob.jobId}
+              </p>
+              <p className="text-xs text-gray-500">
+                Scheduled Date: {client.upcomingJob.scheduledDate}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm sm:text-base font-semibold text-gray-400">
+              N/A
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

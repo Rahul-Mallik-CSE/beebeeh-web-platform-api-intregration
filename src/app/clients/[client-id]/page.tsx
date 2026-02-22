@@ -190,6 +190,18 @@ const ClientDetailsPage = ({ params }: PageProps) => {
               address: client.address,
               status: client.is_active ? "Available" : "Inactive",
               totalJobs: client.total_job,
+              lastCompletedJob: client.last_completed_job
+                ? {
+                    jobId: client.last_completed_job.job_id,
+                    completeDate: client.last_completed_job.complete_date,
+                  }
+                : null,
+              upcomingJob: client.Upcoming_job
+                ? {
+                    jobId: client.Upcoming_job.job_id,
+                    scheduledDate: client.Upcoming_job.scheduled_date,
+                  }
+                : null,
             }}
             onEdit={handleEdit}
             onDisable={handleToggleStatus}
