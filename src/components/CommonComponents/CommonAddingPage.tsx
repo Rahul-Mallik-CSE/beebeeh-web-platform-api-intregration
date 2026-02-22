@@ -30,12 +30,19 @@ interface CommonAddingPageProps {
   title: string;
   onSubmit?: (data: any) => void;
   onCancel?: () => void;
+  initialData?: {
+    clientId?: string;
+    clientName?: string;
+    productId?: string;
+    productModel?: string;
+  };
 }
 
 const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
   title,
   onSubmit,
   onCancel,
+  initialData,
 }) => {
   const router = useRouter();
 
@@ -63,6 +70,22 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
     problemDescription: "",
     notes: "",
   });
+
+  // Pre-fill form from initialData (e.g. from URL query params)
+  useEffect(() => {
+    if (initialData) {
+      setFormData((prev) => ({
+        ...prev,
+        clientId: initialData.clientId || "",
+        clientName: initialData.clientName || "",
+        searchClient: initialData.clientId || "",
+        productId: initialData.productId || "",
+        productModel: initialData.productModel || "",
+        searchProduct: initialData.productId || "",
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Autocomplete states
   const [showClientDropdown, setShowClientDropdown] = useState(false);

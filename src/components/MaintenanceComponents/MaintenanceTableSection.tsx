@@ -1,15 +1,22 @@
 /** @format */
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CustomTable from "../CommonComponents/CustomTable";
 import type { MaintenanceJob } from "@/types/AllTypes";
 import { useRouter } from "next/navigation";
-import AssignTechnicianModal from "../CommonComponents/AssignTechnicianModal";
 import { MaintenanceItem } from "@/redux/features/adminFeatures/maintenanceAPI";
 import { getJobStatusLabel } from "@/lib/statusUtils";
 import { FilterState } from "../CommonComponents/FilterCard";
+
+type ExtendedMaintenanceJob = MaintenanceJob & {
+  rawStatus: string;
+  rawClientId: string;
+  rawClientName: string;
+  rawProductId: string;
+  rawProductModel: string;
+};
 
 interface MaintenanceTableSectionProps {
   data?: MaintenanceItem[];
@@ -29,15 +36,13 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
   onFilterChange,
 }) => {
   const router = useRouter();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedJobId, setSelectedJobId] = useState<string>("");
 
   const handleAddMaintenance = () => {
     router.push(`/maintenance/add-maintenance`);
   };
 
   // Transform API data to match MaintenanceJob interface
-  const transformedData: MaintenanceJob[] = useMemo(() => {
+  const transformedData: ExtendedMaintenanceJob[] = useMemo(() => {
     if (!data || !Array.isArray(data)) {
       return [];
     }
@@ -48,7 +53,12 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
       model: item.product.model_name,
       technician: item.technician?.name || "N/A",
       scheduled: item.scheduled_date || "N/A",
-      status: getJobStatusLabel(item.status) as any,
+      status: getJobStatusLabel(item.status) as MaintenanceJob["status"],
+      rawStatus: item.status,
+      rawClientId: item.client.id,
+      rawClientName: item.client.name,
+      rawProductId: item.product.id,
+      rawProductModel: item.product.model_name,
     }));
   }, [data]);
 
@@ -79,16 +89,38 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
     },
     {
       header: "Action",
-      accessor: (row: MaintenanceJob) => (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => router.push(`/maintenance/${row.jobId}`)}
-            className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <Eye className="w-4 h-4 text-gray-600" />
-          </button>
-        </div>
-      ),
+      accessor: (row: MaintenanceJob) => {
+        const r = row as ExtendedMaintenanceJob;
+        const canAdd = r.rawStatus === "upcoming" || r.rawStatus === "overdue";
+        return (
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => router.push(`/maintenance/${row.jobId}`)}
+              className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <Eye className="w-4 h-4 text-gray-600" />
+            </button>
+            {canAdd && (
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams({
+                    clientId: r.rawClientId,
+                    clientName: r.rawClientName,
+                    productId: r.rawProductId,
+                    productModel: r.rawProductModel,
+                  });
+                  router.push(
+                    `/maintenance/add-maintenance?${params.toString()}`,
+                  );
+                }}
+                className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <Plus className="w-4 h-4 text-gray-600" />
+              </button>
+            )}
+          </div>
+        );
+      },
       className: "text-center",
     },
   ];
@@ -148,12 +180,7 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
         />
       </div>
 
-      {/* Assign Technician Modal */}
-      <AssignTechnicianModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        jobId={selectedJobId}
-      />
+      {/* removed AssignTechnicianModal - Plus button now navigates to add-maintenance */}
     </div>
   );
 };

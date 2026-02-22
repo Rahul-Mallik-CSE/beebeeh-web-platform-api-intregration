@@ -2,10 +2,18 @@
 "use client";
 import React from "react";
 import CommonAddingPage from "@/components/CommonComponents/CommonAddingPage";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const AddMaintenancePage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const initialData = {
+    clientId: searchParams.get("clientId") || "",
+    clientName: searchParams.get("clientName") || "",
+    productId: searchParams.get("productId") || "",
+    productModel: searchParams.get("productModel") || "",
+  };
 
   const handleSubmit = (data: any) => {
     console.log("Maintenance data:", data);
@@ -24,6 +32,7 @@ const AddMaintenancePage = () => {
           title="Add Maintenance"
           onSubmit={handleSubmit}
           onCancel={handleCancel}
+          initialData={initialData}
         />
       </div>
     </div>
