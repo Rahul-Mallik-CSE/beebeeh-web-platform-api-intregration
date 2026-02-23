@@ -69,6 +69,16 @@ export interface MaintenanceQueryParams {
   order?: "asc" | "desc";
 }
 
+export interface CancelMaintenanceRequest {
+  installation_id: string;
+  reason: string;
+}
+
+export interface CancelMaintenanceResponse {
+  installation_id: string;
+  reason: string;
+}
+
 const maintenanceAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     addMaintenance: builder.mutation<
@@ -92,8 +102,24 @@ const maintenanceAPI = baseApi.injectEndpoints({
       }),
       providesTags: ["Maintenance"],
     }),
+
+    // Cancel maintenance
+    cancelMaintenance: builder.mutation<
+      CancelMaintenanceResponse,
+      CancelMaintenanceRequest
+    >({
+      query: (body) => ({
+        url: `/api/admin/maintenance-reminder/cancel/`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Maintenance"],
+    }),
   }),
 });
 
-export const { useAddMaintenanceMutation, useGetMaintenanceQuery } =
-  maintenanceAPI;
+export const {
+  useAddMaintenanceMutation,
+  useGetMaintenanceQuery,
+  useCancelMaintenanceMutation,
+} = maintenanceAPI;

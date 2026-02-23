@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Plus, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CustomTable from "../CommonComponents/CustomTable";
@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { MaintenanceItem } from "@/redux/features/adminFeatures/maintenanceAPI";
 import { getJobStatusLabel } from "@/lib/statusUtils";
 import { FilterState } from "../CommonComponents/FilterCard";
+import { RxCross2 } from "react-icons/rx";
+import CancelMaintenanceModal from "./CancelMaintenanceModal";
 
 type ExtendedMaintenanceJob = MaintenanceJob & {
   rawStatus: string;
@@ -36,6 +38,13 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
   onFilterChange,
 }) => {
   const router = useRouter();
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [selectedMaintenanceId, setSelectedMaintenanceId] = useState("");
+
+  const handleOpenCancelModal = (id: string) => {
+    setSelectedMaintenanceId(id);
+    setCancelModalOpen(true);
+  };
 
   const handleAddMaintenance = () => {
     router.push(`/maintenance/add-maintenance`);
@@ -118,6 +127,15 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
                 <Plus className="w-4 h-4 text-gray-600" />
               </button>
             )}
+
+            {canAdd && (
+              <button
+                onClick={() => handleOpenCancelModal(row.jobId)}
+                className="p-1.5 cursor-pointer hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <RxCross2 className="w-4 h-4 text-red-600" />
+              </button>
+            )}
           </div>
         );
       },
@@ -180,7 +198,11 @@ const MaintenanceTableSection: React.FC<MaintenanceTableSectionProps> = ({
         />
       </div>
 
-      {/* removed AssignTechnicianModal - Plus button now navigates to add-maintenance */}
+      <CancelMaintenanceModal
+        isOpen={cancelModalOpen}
+        maintenanceId={selectedMaintenanceId}
+        onClose={() => setCancelModalOpen(false)}
+      />
     </div>
   );
 };
