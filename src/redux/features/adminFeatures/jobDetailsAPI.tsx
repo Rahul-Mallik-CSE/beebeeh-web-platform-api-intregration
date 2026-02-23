@@ -157,7 +157,7 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         job_id,
         invoice_number,
       }: {
-        job_id: string;
+        job_id: string; 
         invoice_number: string;
       }) => ({
         url: `/api/admin/job-complete/?job_id=${job_id}`,
