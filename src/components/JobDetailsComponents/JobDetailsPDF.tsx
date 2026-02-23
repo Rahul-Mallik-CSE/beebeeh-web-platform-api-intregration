@@ -289,6 +289,12 @@ const JobDetailsPDF: React.FC<JobDetailsPDFProps> = ({ jobData, jobId }) => {
               </Text>
             </View>
             <View style={styles.row}>
+              <Text style={styles.label}>Contact Number:</Text>
+              <Text style={styles.value}>
+                {jobData.technician_details.contact_number || "N/A"}
+              </Text>
+            </View>
+            <View style={styles.row}>
               <Text style={styles.label}>Town:</Text>
               <Text style={styles.value}>
                 {jobData.technician_details.town || "N/A"}
@@ -304,6 +310,32 @@ const JobDetailsPDF: React.FC<JobDetailsPDFProps> = ({ jobData, jobId }) => {
               <Text style={styles.label}>Last Service Date:</Text>
               <Text style={styles.value}>
                 {jobData.technician_details.last_service_date || "N/A"}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Technician Charge:</Text>
+              <Text style={styles.value}>
+                {jobData.technician_details.technician_charge
+                  ? `€${jobData.technician_details.technician_charge}`
+                  : "N/A"}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Payment Type:</Text>
+              <Text style={styles.value}>
+                {jobData.technician_details.payment_type || "N/A"}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Cash Sale Method:</Text>
+              <Text style={styles.value}>
+                {jobData.technician_details.cash_sale_method || "N/A"}
+              </Text>
+            </View>
+            <View style={styles.row}>
+              <Text style={styles.label}>Invoice Number:</Text>
+              <Text style={styles.value}>
+                {jobData.technician_details.invoice_number || "N/A"}
               </Text>
             </View>
           </View>

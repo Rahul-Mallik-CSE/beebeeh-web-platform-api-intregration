@@ -142,8 +142,8 @@ const TechnicianDetailsSection = ({
             </Button>
           )}
         </div>
-        <div className="space-y-2 sm:space-y-3 border border-gray-200 p-3 sm:p-4 rounded-2xl">
-          <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="space-y-1 sm:space-y-2 border border-gray-200 p-3 sm:p-4 rounded-2xl">
+          <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
             <p className="text-gray-800 font-medium text-sm sm:text-base">
               Technician ID :
             </p>
@@ -151,7 +151,7 @@ const TechnicianDetailsSection = ({
               {data?.technician_id || "N/A"}
             </p>
           </div>
-          <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+          <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
             <p className="text-gray-800 font-medium text-sm sm:text-base">
               Technician Name :
             </p>
@@ -159,12 +159,45 @@ const TechnicianDetailsSection = ({
               {data?.technician_name || "N/A"}
             </p>
           </div>
-          <div className="flex items-center justify-between py-1.5 sm:py-2">
+          <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
             <p className="text-gray-800 font-medium text-sm sm:text-base">
               Contact Number :
             </p>
             <p className="text-gray-500 text-xs sm:text-sm">
               {data?.contact_number || "N/A"}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
+            <p className="text-gray-800 font-medium text-sm sm:text-base">
+              Technician Charge :
+            </p>
+            <p className="text-gray-500 text-xs sm:text-sm">
+              {data?.technician_charge ? `€${data.technician_charge}` : "N/A"}
+            </p>
+          </div>
+          <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
+            <p className="text-gray-800 font-medium text-sm sm:text-base">
+              Payment Type :
+            </p>
+            <p className="text-gray-500 text-xs sm:text-sm capitalize">
+              {data?.payment_type || "N/A"}
+            </p>
+          </div>
+          <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
+            <p className="text-gray-800 font-medium text-sm sm:text-base">
+              Cash Sale Method :
+            </p>
+            <p className="text-gray-500 text-xs sm:text-sm">
+              {data?.cash_sale_method || "N/A"}
+            </p>
+          </div>
+          <div className="flex items-center justify-between py-1 sm:py-1.5">
+            <p className="text-gray-800 font-medium text-sm sm:text-base">
+              Invoice Number :
+            </p>
+            <p className="text-gray-500 text-xs sm:text-sm">
+              {data?.invoice_number || "N/A"}
             </p>
           </div>
         </div>

@@ -20,8 +20,8 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
         Client Information Section:
       </h3>
-      <div className="space-y-1 sm:space-y-3 border border-gray-200 p-3 sm:p-4 rounded-2xl">
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+      <div className="space-y-1 sm:space-y-2 border border-gray-200 p-3 sm:p-4 rounded-2xl">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Client ID :
           </p>
@@ -29,7 +29,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             {data?.client_id || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Client Name :
           </p>
@@ -37,7 +37,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             {data?.client_name || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Contact Number :
           </p>
@@ -45,7 +45,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             {data?.contact_number || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Address :
           </p>
@@ -53,7 +53,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             {data?.address || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Locality :
           </p>
@@ -61,7 +61,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             {data?.locality || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Notes :
           </p>
@@ -70,7 +70,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
           </p>
         </div>
         {data?.problem_type && (
-          <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+          <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
             <p className="text-gray-800 font-medium text-sm sm:text-base">
               Problem Type :
             </p>
@@ -79,7 +79,7 @@ const ClientInfoSection = ({ data }: ClientInfoSectionProps) => {
             </p>
           </div>
         )}
-        <div className="flex items-center justify-between py-1.5 sm:py-2">
+        <div className="flex items-center justify-between py-1 sm:py-1.5">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Pin Location :
           </p>

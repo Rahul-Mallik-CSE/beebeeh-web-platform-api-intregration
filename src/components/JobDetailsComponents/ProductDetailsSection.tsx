@@ -26,8 +26,8 @@ const ProductDetailsSection = ({ data }: ProductDetailsSectionProps) => {
       <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-3">
         Product Details Section:
       </h3>
-      <div className="space-y-2 sm:space-y-3 border border-gray-200 p-3 sm:p-4 rounded-2xl">
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+      <div className="space-y-1 sm:space-y-2 border border-gray-200 p-3 sm:p-4 rounded-2xl">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Product ID :
           </p>
@@ -35,7 +35,7 @@ const ProductDetailsSection = ({ data }: ProductDetailsSectionProps) => {
             {data?.product_id || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Product Model Name :
           </p>
@@ -43,7 +43,7 @@ const ProductDetailsSection = ({ data }: ProductDetailsSectionProps) => {
             {data?.product_model_name || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Alias :
           </p>
@@ -51,7 +51,7 @@ const ProductDetailsSection = ({ data }: ProductDetailsSectionProps) => {
             {data?.alias || "N/A"}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2 border-b border-gray-100">
+        <div className="flex items-center justify-between py-1 sm:py-1.5 border-b border-gray-100">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Installed Date :
           </p>
@@ -59,7 +59,7 @@ const ProductDetailsSection = ({ data }: ProductDetailsSectionProps) => {
             {formatDate(data?.installed_date)}
           </p>
         </div>
-        <div className="flex items-center justify-between py-1.5 sm:py-2">
+        <div className="flex items-center justify-between py-1 sm:py-1.5">
           <p className="text-gray-800 font-medium text-sm sm:text-base">
             Last Service Date :
           </p>

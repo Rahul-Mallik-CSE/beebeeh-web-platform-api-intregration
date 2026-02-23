@@ -35,6 +35,10 @@ export interface TechnicianDetails {
   installed_date: string;
   contact_number: string;
   last_service_date: string;
+  technician_charge: string;
+  payment_type: string;
+  cash_sale_method: string | null;
+  invoice_number: string;
 }
 
 export interface ProductDetails {
