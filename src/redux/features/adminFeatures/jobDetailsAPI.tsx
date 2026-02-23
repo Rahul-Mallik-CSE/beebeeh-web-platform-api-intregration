@@ -152,6 +152,20 @@ const jobDetailsAPI = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["JobDetails"],
     }),
+    submitInvoice: builder.mutation({
+      query: ({
+        job_id,
+        invoice_number,
+      }: {
+        job_id: string;
+        invoice_number: string;
+      }) => ({
+        url: `/api/admin/job-complete/?job_id=${job_id}`,
+        method: "POST",
+        body: { invoice_number },
+      }),
+      invalidatesTags: ["JobDetails"],
+    }),
   }),
 });
 
@@ -160,4 +174,5 @@ export const {
   useCancelJobMutation,
   useRescheduleJobMutation,
   useReassignTechnicianMutation,
+  useSubmitInvoiceMutation,
 } = jobDetailsAPI;

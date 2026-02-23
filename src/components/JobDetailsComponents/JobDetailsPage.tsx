@@ -26,11 +26,13 @@ import {
   useGetJobDetailsQuery,
   useCancelJobMutation,
   useRescheduleJobMutation,
+  useSubmitInvoiceMutation,
 } from "@/redux/features/adminFeatures/jobDetailsAPI";
 import { getImageFullUrl } from "@/lib/utils";
 import { getJobStatusBadgeColor, getJobStatusLabel } from "@/lib/statusUtils";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import JobDetailsPDF from "./JobDetailsPDF";
+import { toast } from "react-toastify";
 
 interface JobDetailsPageProps {
   jobId: string;
@@ -55,11 +57,15 @@ const JobDetailsPage = ({
   const [isRescheduleModalOpen, setIsRescheduleModalOpen] = useState(false);
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [invoiceNumber, setInvoiceNumber] = useState("");
 
   const { data, isLoading, error } = useGetJobDetailsQuery({ job_id: jobId });
   const [cancelJob, { isLoading: isCanceling }] = useCancelJobMutation();
   const [rescheduleJob, { isLoading: isRescheduling }] =
     useRescheduleJobMutation();
+  const [submitInvoice, { isLoading: isSubmittingInvoice }] =
+    useSubmitInvoiceMutation();
 
   const handleCancel = async () => {
     try {
@@ -91,6 +97,34 @@ const JobDetailsPage = ({
     } catch (error) {
       console.error("Failed to reschedule job:", error);
       // Handle error
+    }
+  };
+
+  const handleSubmitInvoice = async () => {
+    if (!invoiceNumber.trim()) {
+      toast.error("Please enter an invoice number.");
+      return;
+    }
+    try {
+      await submitInvoice({
+        job_id: jobId,
+        invoice_number: invoiceNumber.trim(),
+      }).unwrap();
+      toast.success("Invoice submitted successfully.");
+      setIsInvoiceModalOpen(false);
+      setInvoiceNumber("");
+      router.back();
+    } catch (error: any) {
+      const errorSources = error?.data?.errorSources;
+      if (errorSources && errorSources.length > 0) {
+        errorSources.forEach((e: { path: string; message: string }) =>
+          toast.error(e.message),
+        );
+      } else {
+        const message =
+          error?.data?.message || "Failed to submit invoice. Please try again.";
+        toast.error(message);
+      }
     }
   };
 
@@ -461,6 +495,14 @@ const JobDetailsPage = ({
                 Cancel Job
               </Button>
             )}
+            {jobStatus === "invoice_required" && (
+              <Button
+                className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 text-sm sm:text-base bg-green-600 hover:bg-green-700 text-white"
+                onClick={() => setIsInvoiceModalOpen(true)}
+              >
+                Submit Invoice
+              </Button>
+            )}
             {showExportPDF && (
               <PDFDownloadLink
                 document={<JobDetailsPDF jobData={jobData} jobId={jobId} />}
@@ -536,6 +578,55 @@ const JobDetailsPage = ({
               </Button>
               <Button onClick={handleReschedule} disabled={isRescheduling}>
                 {isRescheduling ? "Rescheduling..." : "Reschedule"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submit Invoice Modal */}
+      <Dialog
+        open={isInvoiceModalOpen}
+        onOpenChange={(open) => {
+          setIsInvoiceModalOpen(open);
+          if (!open) setInvoiceNumber("");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Submit Invoice</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-500">
+              Job ID: <span className="font-medium text-gray-800">{jobId}</span>
+            </p>
+            <div>
+              <Label htmlFor="invoiceNumber">Invoice Number</Label>
+              <Input
+                id="invoiceNumber"
+                type="text"
+                placeholder="e.g. 1040"
+                value={invoiceNumber}
+                onChange={(e) => setInvoiceNumber(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsInvoiceModalOpen(false);
+                  setInvoiceNumber("");
+                }}
+                disabled={isSubmittingInvoice}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSubmitInvoice}
+                disabled={isSubmittingInvoice || !invoiceNumber.trim()}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                {isSubmittingInvoice ? "Submitting..." : "Submit"}
               </Button>
             </div>
           </div>
