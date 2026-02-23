@@ -59,6 +59,13 @@ export interface UpcomingJob {
   object_id: string;
 }
 
+export interface MaintenanceReminderCancellation {
+  installation_id: string;
+  reason: string;
+  cancelled_at: string;
+  cancelled_by: string;
+}
+
 export interface ClientDetails {
   client_id: string;
   first_name: string;
@@ -74,6 +81,7 @@ export interface ClientDetails {
   is_active: boolean;
   installations: number;
   last_service: string | null;
+  maintenance_reminder_cancellations: MaintenanceReminderCancellation[];
   last_completed_job: LastCompletedJob | null;
   Upcoming_job: UpcomingJob | null;
   total_job: number;

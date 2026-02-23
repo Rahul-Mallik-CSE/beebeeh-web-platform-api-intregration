@@ -207,6 +207,14 @@ const ClientDetailsPage = ({ params }: PageProps) => {
             onDisable={handleToggleStatus}
             isTogglingStatus={isEnabling || isDisabling}
             isActive={client.is_active}
+            maintenanceReminderCancellations={(
+              client.maintenance_reminder_cancellations || []
+            ).map((c) => ({
+              installationId: c.installation_id,
+              reason: c.reason,
+              cancelledAt: c.cancelled_at,
+              cancelledBy: c.cancelled_by,
+            }))}
           />
 
           {/* Client related tables section */}

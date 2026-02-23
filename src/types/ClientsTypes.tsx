@@ -21,6 +21,13 @@ export interface UpcomingJobInfo {
   scheduledDate: string;
 }
 
+export interface MaintenanceReminderCancellation {
+  installationId: string;
+  reason: string;
+  cancelledAt: string;
+  cancelledBy: string;
+}
+
 export interface ClientDetails extends Client {
   profileImage?: string;
   email: string;
@@ -29,6 +36,7 @@ export interface ClientDetails extends Client {
   totalJobs: number;
   lastCompletedJob?: LastCompletedJobInfo | null;
   upcomingJob?: UpcomingJobInfo | null;
+  maintenanceReminderCancellations?: MaintenanceReminderCancellation[];
 }
 
 export interface ClientColumn {

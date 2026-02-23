@@ -5,7 +5,10 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Edit } from "lucide-react";
 import { MdBlockFlipped, MdEmail, MdLocalPhone } from "react-icons/md";
-import { ClientDetails } from "@/types/ClientsTypes";
+import {
+  ClientDetails,
+  MaintenanceReminderCancellation,
+} from "@/types/ClientsTypes";
 import { BriefcaseBusiness, CalendarCheck } from "lucide-react";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import { TbSquareRoundedCheck } from "react-icons/tb";
@@ -17,6 +20,7 @@ interface ClientDetailsSectionProps {
   onDisable?: () => void;
   isTogglingStatus?: boolean;
   isActive?: boolean;
+  maintenanceReminderCancellations?: MaintenanceReminderCancellation[];
 }
 
 const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
@@ -25,6 +29,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
   onDisable,
   isTogglingStatus = false,
   isActive = true,
+  maintenanceReminderCancellations = [],
 }) => {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -243,6 +248,67 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
           )}
         </div>
       </div>
+
+      {/* Maintenance Reminder Cancellations */}
+      {maintenanceReminderCancellations.length > 0 && (
+        <div className="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
+              <svg
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"
+                />
+              </svg>
+            </div>
+            <span className="text-sm font-semibold text-gray-700">
+              Maintenance Reminder Cancellations
+              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                {maintenanceReminderCancellations.length}
+              </span>
+            </span>
+          </div>
+
+          <div className="divide-y divide-gray-200">
+            {maintenanceReminderCancellations.map((item, index) => (
+              <div
+                key={index}
+                className="py-3 first:pt-0 last:pb-0 space-y-1 border-b border-gray-200"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-gray-800 bg-gray-200 px-2 py-0.5 rounded">
+                    {item.installationId}
+                  </span>
+
+                  <span className="text-xs text-gray-500">
+                    {new Date(item.cancelledAt).toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  <p className="text-xs text-gray-500">
+                    Cancelled by:{" "}
+                    <span className="font-medium text-gray-700">
+                      {item.cancelledBy}
+                    </span>
+                  </p>
+                </div>
+                <p className="text-sm text-gray-700">Reason: {item.reason}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
