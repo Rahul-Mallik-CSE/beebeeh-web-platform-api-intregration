@@ -66,6 +66,13 @@ const PartsDetailsSection: React.FC<PartsDetailsSectionProps> = ({
 
         {/* Buttons */}
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          <Button
+            onClick={onEdit}
+            className="bg-blue-800 hover:bg-blue-700 text-white flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-1 sm:flex-none px-3 sm:px-4"
+          >
+            <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
+            Edit
+          </Button>
           {/* Restock Button */}
           <Button
             onClick={onRestock}

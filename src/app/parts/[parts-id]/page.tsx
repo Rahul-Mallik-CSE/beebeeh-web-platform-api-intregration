@@ -14,12 +14,14 @@ import TableSkeleton from "@/components/CommonComponents/TableSkeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import RestockModal from "@/components/PartsComponents/RestockModal";
+import EditPartsModal from "@/components/PartsComponents/EditPartsModal";
 
 const PartsDetailsPage = () => {
   const router = useRouter();
   const params = useParams();
   const partsId = params["parts-id"] as string;
   const [isRestockModalOpen, setIsRestockModalOpen] = React.useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = React.useState(false);
 
   // Fetch part details from API
   const {
@@ -61,7 +63,7 @@ const PartsDetailsPage = () => {
     : null;
 
   const handleEdit = () => {
-    console.log("Edit part:", partsId);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = () => {
@@ -171,6 +173,23 @@ const PartsDetailsPage = () => {
         isLoading={isRestocking}
         currentStock={transformedPart?.stock || 0}
       />
+
+      {/* Edit Modal */}
+      {partResponse?.data && (
+        <EditPartsModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          partId={partsId}
+          initialData={{
+            sku: partResponse.data.sku,
+            name: partResponse.data.name,
+            unit: partResponse.data.unit,
+            unit_price: partResponse.data.unit_price,
+            stock: partResponse.data.stock,
+            min_stock: partResponse.data.min_stock,
+          }}
+        />
+      )}
 
       {/* delete button here */}
     </div>

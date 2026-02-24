@@ -124,6 +124,22 @@ export interface RestockPartResponse {
   requestId: string;
 }
 
+export interface UpdatePartRequest {
+  sku?: string;
+  part_name?: string;
+  unit?: string;
+  unit_price?: number;
+  stock_quantity?: number;
+  low_stock_warning?: number;
+}
+
+export interface UpdatePartResponse {
+  success: boolean;
+  message: string;
+  data: unknown;
+  requestId: string;
+}
+
 const partsAPI = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     autocompleteProducts: builder.query<AutocompleteProductsResponse, string>({
@@ -182,6 +198,17 @@ const partsAPI = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Part"],
     }),
+    updatePart: builder.mutation<
+      UpdatePartResponse,
+      { partId: string; data: UpdatePartRequest }
+    >({
+      query: ({ partId, data }) => ({
+        url: `/api/parts/${partId}/`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Part"],
+    }),
   }),
 });
 
@@ -192,4 +219,5 @@ export const {
   useGetPartDetailsQuery,
   useDeletePartMutation,
   useRestockPartMutation,
+  useUpdatePartMutation,
 } = partsAPI;
