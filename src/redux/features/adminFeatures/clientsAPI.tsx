@@ -66,6 +66,22 @@ export interface MaintenanceReminderCancellation {
   cancelled_by: string;
 }
 
+export interface ProductJobsSummary {
+  installations: number;
+  repairs: number;
+  maintenances: number;
+}
+
+export interface ProductDetail {
+  product_id: string;
+  model_name: string;
+  alias: string;
+  sku: string | null;
+  maintenance_frequency_month: number;
+  is_active: boolean;
+  jobs_summary: ProductJobsSummary;
+}
+
 export interface ClientDetails {
   client_id: string;
   first_name: string;
@@ -81,6 +97,7 @@ export interface ClientDetails {
   is_active: boolean;
   installations: number;
   last_service: string | null;
+  product_details: ProductDetail[];
   maintenance_reminder_cancellations: MaintenanceReminderCancellation[];
   last_completed_job: LastCompletedJob | null;
   Upcoming_job: UpcomingJob | null;

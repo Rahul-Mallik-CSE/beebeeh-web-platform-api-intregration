@@ -16,6 +16,7 @@ import {
 } from "@/redux/features/adminFeatures/clientsAPI";
 import { toast } from "react-toastify";
 import EditClientModal from "@/components/ClientsComponents/EditClientModal";
+import ClientProductsTable from "@/components/ClientsComponents/ClientProductsTable";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
@@ -218,6 +219,12 @@ const ClientDetailsPage = ({ params }: PageProps) => {
           />
 
           {/* Client related tables section */}
+          {/* Product Details Table */}
+          {client.product_details && client.product_details.length > 0 && (
+            <ClientProductsTable products={client.product_details} />
+          )}
+
+          {/* Client job history tables section */}
           <ClientDetailsTableSection
             clientId={clientId}
             jobHistory={client.job_history}
