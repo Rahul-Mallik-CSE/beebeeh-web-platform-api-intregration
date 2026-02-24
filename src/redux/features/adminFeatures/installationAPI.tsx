@@ -123,7 +123,7 @@ const installationAPI = baseApi.injectEndpoints({
 
     autocompleteProducts: builder.query<
       AutocompleteResponse<ProductAutocompleteItem>,
-      { q: string }
+      { q: string; client_id?: string }
     >({
       query: (params) => ({
         url: `/api/autocomplete/products/`,

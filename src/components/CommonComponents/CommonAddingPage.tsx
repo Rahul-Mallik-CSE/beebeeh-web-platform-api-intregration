@@ -111,7 +111,12 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
     isFetching: productFetching,
     error: productError,
   } = useAutocompleteProductsQuery(
-    { q: formData.searchProduct },
+    {
+      q: formData.searchProduct,
+      ...((isRepairs || isMaintenance) && formData.clientId
+        ? { client_id: formData.clientId }
+        : {}),
+    },
     { skip: formData.searchProduct.length < 2 },
   );
   const {
@@ -185,6 +190,10 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
       clientId: client.client_id,
       clientName: client.name,
       searchClient: client.client_id,
+      // Reset product selection when client changes for repairs/maintenance
+      ...(isRepairs || isMaintenance
+        ? { productId: "", productModel: "", searchProduct: "" }
+        : {}),
     }));
     setShowClientDropdown(false);
   };
@@ -549,10 +558,19 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Start with P- to search product id or model name"
+                placeholder={
+                  (isRepairs || isMaintenance) && !formData.clientId
+                    ? "Select a client first"
+                    : "Start with P- to search product id or model name"
+                }
                 value={formData.searchProduct}
                 onChange={(e) => handleChange("searchProduct", e.target.value)}
-                className="w-full pr-10"
+                disabled={(isRepairs || isMaintenance) && !formData.clientId}
+                className={`w-full pr-10 ${
+                  (isRepairs || isMaintenance) && !formData.clientId
+                    ? "border-red-400 focus:border-red-500 focus:ring-red-500 bg-red-50 cursor-not-allowed"
+                    : ""
+                }`}
               />
               <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             </div>
