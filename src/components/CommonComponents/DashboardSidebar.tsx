@@ -115,6 +115,16 @@ export default function DashboardSidebar() {
       icon: Settings,
       label: "Settings",
     },
+    {
+      href: "/terms",
+      icon: MdMiscellaneousServices,
+      label: "Terms",
+    },
+    {
+      href: "/privacy",
+      icon: MdOutlinePrivacyTip,
+      label: "Privacy",
+    },
   ];
 
   // Technician navigation items
