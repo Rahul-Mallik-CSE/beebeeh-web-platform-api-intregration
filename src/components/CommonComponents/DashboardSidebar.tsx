@@ -38,6 +38,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
 import { logout as logoutAction } from "@/redux/features/authSlice";
 import { logout } from "@/services/authService";
+import { MdMiscellaneousServices, MdOutlinePrivacyTip } from "react-icons/md";
 
 export default function DashboardSidebar() {
   const { state } = useSidebar();
@@ -142,6 +143,16 @@ export default function DashboardSidebar() {
       href: "/settings",
       icon: Settings,
       label: "Settings",
+    },
+    {
+      href: "/terms",
+      icon: MdMiscellaneousServices,
+      label: "Terms",
+    },
+    {
+      href: "/privacy",
+      icon: MdOutlinePrivacyTip,
+      label: "Privacy",
     },
   ];
 
