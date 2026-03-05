@@ -25,8 +25,11 @@ export const partsColumns = [
   },
   {
     header: "Model Name",
-    accessor: (row: Part) =>
-      row.models?.map((m) => m.model_name).join(", ") || "N/A",
+    accessor: (row: Part) => {
+      if (!row.models || row.models.length === 0) return "N/A";
+      if (row.models.length === 1) return row.models[0].model_name;
+      return `${row.models[0].model_name} .....`;
+    },
   },
   {
     header: "Status",
