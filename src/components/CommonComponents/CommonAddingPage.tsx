@@ -265,10 +265,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         toast.error("Please select a priority.");
         return false;
       }
-      if (!formData.notes.trim()) {
-        toast.error("Notes are required.");
-        return false;
-      }
+      // Notes are optional
     } else if (isRepairs) {
       if (!formData.clientId.trim()) {
         toast.error("Please select a client.");
@@ -310,10 +307,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         toast.error("Please select a problem type.");
         return false;
       }
-      if (!formData.problemDescription.trim()) {
-        toast.error("Problem description is required.");
-        return false;
-      }
+      // Problem description is optional
     } else if (isMaintenance) {
       if (!formData.clientId.trim()) {
         toast.error("Please select a client.");
@@ -351,10 +345,7 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
         toast.error("Please select a priority.");
         return false;
       }
-      if (!formData.problemDescription.trim()) {
-        toast.error("Problem description is required.");
-        return false;
-      }
+      // Problem description is optional
     }
     return true;
   };
@@ -785,7 +776,8 @@ const CommonAddingPage: React.FC<CommonAddingPageProps> = ({
           {/* Problem Description / Notes */}
           <div className="space-y-2">
             <label className="text-sm sm:text-base md:text-lg font-medium text-gray-700">
-              {isRepairs || isMaintenance ? "Problem Description" : "Notes"}
+              {isRepairs || isMaintenance ? "Problem Description" : "Notes"}{" "}
+              (optional)
             </label>
             <Textarea
               placeholder={
