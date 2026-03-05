@@ -1,6 +1,6 @@
 /** @format */
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,9 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Edit } from "lucide-react";
+import { Edit, X } from "lucide-react";
 import { useUpdatePartMutation } from "@/redux/features/adminFeatures/partsAPI";
 import { toast } from "react-toastify";
+import { useAutocompleteProductsQuery } from "@/redux/features/adminFeatures/partsAPI";
 
 interface EditPartsModalProps {
   isOpen: boolean;
@@ -31,10 +32,12 @@ interface EditPartsModalProps {
     unit_price: string | null;
     stock: number;
     min_stock: number;
+    selectedProducts: { product_id: string; model_name: string }[];
   };
 }
 
 interface EditFormData {
+  selectedProducts: { product_id: string; model_name: string }[];
   sku: string;
   partName: string;
   unit: string;
@@ -50,6 +53,7 @@ const EditPartsModal: React.FC<EditPartsModalProps> = ({
   initialData,
 }) => {
   const [formData, setFormData] = useState<EditFormData>({
+    selectedProducts: [],
     sku: "",
     partName: "",
     unit: "",
@@ -60,10 +64,39 @@ const EditPartsModal: React.FC<EditPartsModalProps> = ({
 
   const [updatePart, { isLoading }] = useUpdatePartMutation();
 
+  // Product search states
+  const [productSearchQuery, setProductSearchQuery] = useState("");
+  const [showProductDropdown, setShowProductDropdown] = useState(false);
+  const productSearchRef = useRef<HTMLDivElement>(null);
+
+  // Autocomplete query
+  const { data: productSuggestions, isFetching: isFetchingProducts } =
+    useAutocompleteProductsQuery(productSearchQuery, {
+      skip: productSearchQuery.length < 2,
+    });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        productSearchRef.current &&
+        !productSearchRef.current.contains(event.target as Node)
+      ) {
+        setShowProductDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   // Populate form when modal opens or initialData changes
   useEffect(() => {
     if (isOpen && initialData) {
       setFormData({
+        selectedProducts: initialData.selectedProducts || [],
         sku: initialData.sku ?? "",
         partName: initialData.name ?? "",
         unit: initialData.unit ?? "",
@@ -77,6 +110,51 @@ const EditPartsModal: React.FC<EditPartsModalProps> = ({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleProductSearchChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const value = e.target.value;
+    setProductSearchQuery(value);
+    setShowProductDropdown(value.length >= 2);
+  };
+
+  const handleProductSelect = (product: {
+    product_id: string;
+    model_name: string;
+  }) => {
+    // Check if product is already selected
+    const isAlreadySelected = formData.selectedProducts.some(
+      (p) => p.product_id === product.product_id,
+    );
+
+    if (isAlreadySelected) {
+      toast.info("Product already selected");
+      return;
+    }
+
+    // Add product to selected list
+    setFormData((prev) => ({
+      ...prev,
+      selectedProducts: [
+        ...prev.selectedProducts,
+        { product_id: product.product_id, model_name: product.model_name },
+      ],
+    }));
+
+    // Clear search
+    setProductSearchQuery("");
+    setShowProductDropdown(false);
+  };
+
+  const handleRemoveProduct = (productId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      selectedProducts: prev.selectedProducts.filter(
+        (p) => p.product_id !== productId,
+      ),
+    }));
   };
 
   const handleSubmit = async () => {
@@ -120,6 +198,7 @@ const EditPartsModal: React.FC<EditPartsModalProps> = ({
           unit_price: unitPrice,
           stock_quantity: stockQty,
           low_stock_warning: lowStockWarn,
+          product_ids: formData.selectedProducts.map((p) => p.product_id),
         },
       }).unwrap();
 
@@ -138,6 +217,20 @@ const EditPartsModal: React.FC<EditPartsModalProps> = ({
     onClose();
   };
 
+  const handleReset = () => {
+    setFormData({
+      selectedProducts: [],
+      sku: "",
+      partName: "",
+      unit: "",
+      unitPrice: "",
+      stockQuantity: "",
+      lowStockWarning: "",
+    });
+    setProductSearchQuery("");
+    setShowProductDropdown(false);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-[95vw] xs:max-w-[90vw] sm:max-w-md md:max-w-lg p-0 gap-0 rounded-2xl">
@@ -151,6 +244,73 @@ const EditPartsModal: React.FC<EditPartsModalProps> = ({
 
           {/* Form Fields */}
           <div className="space-y-2.5 xs:space-y-3 sm:space-y-4">
+            {/* Product Search - Multi-select */}
+            <div>
+              <label className="block text-[11px] xs:text-xs sm:text-sm md:text-base font-medium text-gray-700 mb-1 xs:mb-1.5 sm:mb-2">
+                Products
+              </label>
+              <div className="relative" ref={productSearchRef}>
+                <Input
+                  type="text"
+                  value={productSearchQuery}
+                  onChange={handleProductSearchChange}
+                  placeholder="Search products by ID or name..."
+                  className="h-8 xs:h-9 sm:h-10 text-xs xs:text-sm"
+                />
+                {showProductDropdown && productSuggestions?.data && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {isFetchingProducts ? (
+                      <div className="px-4 py-3 text-sm text-gray-500">
+                        Loading...
+                      </div>
+                    ) : productSuggestions.data.length > 0 ? (
+                      productSuggestions.data.map((product) => (
+                        <button
+                          key={product.product_id}
+                          type="button"
+                          onClick={() => handleProductSelect(product)}
+                          className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
+                        >
+                          <div className="font-medium">
+                            {product.product_id} - {product.model_name}
+                          </div>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-sm text-gray-500">
+                        No products found
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Selected Products Display */}
+              {formData.selectedProducts.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {formData.selectedProducts.map((product) => (
+                    <div
+                      key={product.product_id}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-red-50 border border-red-200 rounded-md text-xs sm:text-sm"
+                    >
+                      <span className="font-medium text-red-800">
+                        {product.product_id}
+                      </span>
+                      <span className="text-red-600">-</span>
+                      <span className="text-red-700">{product.model_name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProduct(product.product_id)}
+                        className="ml-1 text-red-600 hover:text-red-800 focus:outline-none"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* Part Name */}
             <div>
               <label className="block text-[11px] xs:text-xs sm:text-sm md:text-base font-medium text-gray-700 mb-1 xs:mb-1.5 sm:mb-2">

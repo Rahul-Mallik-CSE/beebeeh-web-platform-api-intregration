@@ -187,6 +187,10 @@ const PartsDetailsPage = () => {
             unit_price: partResponse.data.unit_price,
             stock: partResponse.data.stock,
             min_stock: partResponse.data.min_stock,
+            selectedProducts: partResponse.data.models.map((m) => ({
+              product_id: m.product_id,
+              model_name: m.model_name,
+            })),
           }}
         />
       )}

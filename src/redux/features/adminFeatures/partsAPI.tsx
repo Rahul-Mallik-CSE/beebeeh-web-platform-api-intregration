@@ -131,6 +131,7 @@ export interface UpdatePartRequest {
   unit_price?: number;
   stock_quantity?: number;
   low_stock_warning?: number;
+  product_ids?: string[];
 }
 
 export interface UpdatePartResponse {
