@@ -12,6 +12,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "../ui/button";
 import { FrequentlyUsedPart } from "@/types/JobDetailsTypes";
 import AddPartsModal from "./AddPartsModal";
+import EditPartsModal from "./EditPartsModal";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import { Edit, Trash2 } from "lucide-react";
 
 interface FrequentlyUsedPartsProps {
   parts: FrequentlyUsedPart[];
@@ -19,14 +22,39 @@ interface FrequentlyUsedPartsProps {
 }
 
 const FrequentlyUsedParts = ({ parts, jobId }: FrequentlyUsedPartsProps) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedPart, setSelectedPart] = useState<FrequentlyUsedPart | null>(
+    null,
+  );
 
   const handleAddPartsClick = () => {
-    setIsModalOpen(true);
+    setIsAddModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleEditClick = (part: FrequentlyUsedPart) => {
+    setSelectedPart(part);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setSelectedPart(null);
+  };
+
+  const handleDeleteClick = (part: FrequentlyUsedPart) => {
+    setSelectedPart(part);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setIsDeleteModalOpen(false);
+    setSelectedPart(null);
   };
   return (
     <div className="bg-white">
@@ -58,6 +86,9 @@ const FrequentlyUsedParts = ({ parts, jobId }: FrequentlyUsedPartsProps) => {
                 <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
                   Quantity Used
                 </TableHead>
+                <TableHead className="font-semibold text-gray-700 text-xs sm:text-sm whitespace-nowrap">
+                  Actions
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -73,6 +104,26 @@ const FrequentlyUsedParts = ({ parts, jobId }: FrequentlyUsedPartsProps) => {
 
                     <TableCell className="text-gray-700 text-xs sm:text-sm whitespace-nowrap">
                       {part.quantity_used}
+                    </TableCell>
+                    <TableCell className="text-gray-700 text-xs sm:text-sm whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditClick(part)}
+                          className="p-1 h-8 w-8"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(part)}
+                          className="p-1 h-8 w-8 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -91,9 +142,22 @@ const FrequentlyUsedParts = ({ parts, jobId }: FrequentlyUsedPartsProps) => {
         </ScrollArea>
       </div>
       <AddPartsModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isAddModalOpen}
+        onClose={handleCloseAddModal}
         jobId={jobId}
+      />
+      <EditPartsModal
+        isOpen={isEditModalOpen}
+        onClose={handleCloseEditModal}
+        jobId={jobId}
+        part={selectedPart}
+      />
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseDeleteModal}
+        jobId={jobId}
+        partId={selectedPart?.part_id || ""}
+        partName={selectedPart?.part_name || ""}
       />
     </div>
   );

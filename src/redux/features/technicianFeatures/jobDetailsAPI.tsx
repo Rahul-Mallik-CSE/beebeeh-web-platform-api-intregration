@@ -161,6 +161,29 @@ const jobDetailsAPI = baseApi.injectEndpoints({
         { type: "JobDetails", id: jobId },
       ],
     }),
+    editPart: builder.mutation<
+      void,
+      { jobId: string; part_id: string; quantity_used: number }
+    >({
+      query: ({ jobId, part_id, quantity_used }) => ({
+        url: `/api/jobs/${jobId}/parts/`,
+        method: "PATCH",
+        body: { part_id, quantity_used },
+      }),
+      invalidatesTags: (result, error, { jobId }) => [
+        { type: "JobDetails", id: jobId },
+      ],
+    }),
+    deletePart: builder.mutation<void, { jobId: string; part_id: string }>({
+      query: ({ jobId, part_id }) => ({
+        url: `/api/jobs/${jobId}/parts/`,
+        method: "DELETE",
+        body: { part_id },
+      }),
+      invalidatesTags: (result, error, { jobId }) => [
+        { type: "JobDetails", id: jobId },
+      ],
+    }),
   }),
 });
 
@@ -174,4 +197,6 @@ export const {
   useUploadMediaMutation,
   useAutocompletePartsQuery,
   useUpdateChecklistItemMutation,
+  useEditPartMutation,
+  useDeletePartMutation,
 } = jobDetailsAPI;
