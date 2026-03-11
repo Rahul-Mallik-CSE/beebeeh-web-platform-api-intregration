@@ -46,6 +46,12 @@ const ClientProductsTable: React.FC<ClientProductsTableProps> = ({
                 Maintenance (months)
               </th>
               <th className="px-3 sm:px-4 py-2.5 font-semibold text-gray-600 whitespace-nowrap border-b border-gray-200 text-center">
+                Installation Date
+              </th>
+              <th className="px-3 sm:px-4 py-2.5 font-semibold text-gray-600 whitespace-nowrap border-b border-gray-200 text-center">
+                Last Maintenance Date
+              </th>
+              <th className="px-3 sm:px-4 py-2.5 font-semibold text-gray-600 whitespace-nowrap border-b border-gray-200 text-center">
                 Status
               </th>
               <th className="px-3 sm:px-4 py-2.5 font-semibold text-gray-600 whitespace-nowrap border-b border-gray-200 text-center">
@@ -63,7 +69,7 @@ const ClientProductsTable: React.FC<ClientProductsTableProps> = ({
             {products.length === 0 ? (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={11}
                   className="px-4 py-8 text-center text-gray-400 text-sm"
                 >
                   No products found
@@ -93,6 +99,16 @@ const ClientProductsTable: React.FC<ClientProductsTableProps> = ({
                   </td>
                   <td className="px-3 sm:px-4 py-2.5 text-center text-gray-700 whitespace-nowrap">
                     {product.maintenance_frequency_month}
+                  </td>
+                  <td className="px-3 sm:px-4 py-2.5 text-center text-gray-700 whitespace-nowrap">
+                    {product.installation_date ?? (
+                      <span className="text-gray-400 italic">—</span>
+                    )}
+                  </td>
+                  <td className="px-3 sm:px-4 py-2.5 text-center text-gray-700 whitespace-nowrap">
+                    {product.last_maintenance_date ?? (
+                      <span className="text-gray-400 italic">—</span>
+                    )}
                   </td>
                   <td className="px-3 sm:px-4 py-2.5 text-center whitespace-nowrap">
                     {product.is_active ? (

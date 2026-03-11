@@ -78,6 +78,8 @@ export interface ProductDetail {
   alias: string;
   sku: string | null;
   maintenance_frequency_month: number;
+  installation_date: string | null;
+  last_maintenance_date: string | null;
   is_active: boolean;
   jobs_summary: ProductJobsSummary;
 }

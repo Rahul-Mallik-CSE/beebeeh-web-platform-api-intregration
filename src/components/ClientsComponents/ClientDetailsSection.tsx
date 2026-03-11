@@ -77,6 +77,9 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
             <p className="text-xs sm:text-sm text-gray-600">
               ID: {client.clientId}
             </p>
+            <p className="text-xs sm:text-sm text-gray-600">
+              Client Type: {client.type}
+            </p>
             <div
               className={`inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-sm text-xs font-medium ${getStatusColor(
                 client.status,
@@ -203,7 +206,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
               <CalendarCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-orange-600" />
             </div>
             <span className="text-xs sm:text-sm font-medium text-gray-600">
-              Last Job
+              Last Maintenance/ Installation Date
             </span>
           </div>
           {client.lastCompletedJob ? (
@@ -229,7 +232,7 @@ const ClientDetailsSection: React.FC<ClientDetailsSectionProps> = ({
               <BriefcaseBusiness className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-600" />
             </div>
             <span className="text-xs sm:text-sm font-medium text-gray-600">
-              Next Job
+              Next Maintenance date
             </span>
           </div>
           {client.upcomingJob ? (
