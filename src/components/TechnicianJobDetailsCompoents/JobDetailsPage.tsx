@@ -118,6 +118,18 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
   // Handle complete job - validate images/signature first for invoice_required, then open modal
   const handleCompleteJob = () => {
     const status = data?.data?.header_summary_card?.status;
+
+    // Block if any checklist item is still pending
+    const hasPendingChecklist = (data?.data?.checklist_section ?? []).some(
+      (item) => item.status === "pending",
+    );
+    if (hasPendingChecklist) {
+      toast.error(
+        "Please complete the checklist first before completing the job.",
+      );
+      return;
+    }
+
     if (status === "invoice_required") {
       const getImageValidation = (
         window as unknown as {
@@ -320,6 +332,7 @@ const JobDetailsPage = ({ jobId }: JobDetailsPageProps) => {
           <ChecklistSection
             checklist={jobData.checklist_section}
             jobId={jobId}
+            jobStatus={jobData.header_summary_card.status}
           />
           <ImageUploadSection
             imageData={jobData.image_upload_section}

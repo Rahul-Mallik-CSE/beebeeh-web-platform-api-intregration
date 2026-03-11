@@ -18,9 +18,15 @@ import { toast } from "react-toastify";
 interface ChecklistSectionProps {
   checklist: ChecklistItem[];
   jobId: string;
+  jobStatus?: string;
 }
 
-const ChecklistSection = ({ checklist, jobId }: ChecklistSectionProps) => {
+const ChecklistSection = ({
+  checklist,
+  jobId,
+  jobStatus,
+}: ChecklistSectionProps) => {
+  const isReadOnly = jobStatus === "complete" || jobStatus === "cancel";
   const [updateChecklistItem] = useUpdateChecklistItemMutation();
 
   const handleUpdateStatus = async (checklistId: number, status: string) => {
@@ -93,7 +99,8 @@ const ChecklistSection = ({ checklist, jobId }: ChecklistSectionProps) => {
                       {item.status}
                     </TableCell>
                     <TableCell>
-                      {item.status.toLowerCase() === "pending" ? (
+                      {!isReadOnly &&
+                      item.status.toLowerCase() === "pending" ? (
                         <div className="flex justify-center gap-1 sm:gap-2">
                           <button
                             onClick={() =>
