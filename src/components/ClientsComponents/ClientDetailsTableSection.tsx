@@ -104,7 +104,7 @@ const ClientDetailsTableSection: React.FC<ClientDetailsTableSectionProps> = ({
       <div className="bg-white rounded-lg p-3 sm:p-4 md:p-6 border border-gray-200">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 mb-3 sm:mb-4">
           <h3 className="text-lg sm:text-xl font-semibold text-gray-800">
-            All Jobs History ({anotherJobHistory.length})
+            Current jobs ({anotherJobHistory.length})
           </h3>
         </div>
         <CustomTable
